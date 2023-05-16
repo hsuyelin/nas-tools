@@ -1,5 +1,5 @@
 git
-python3-dev==3.10.11-r0
+python3-dev
 py3-pip
 tzdata
 zip
