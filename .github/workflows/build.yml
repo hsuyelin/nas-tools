@@ -1,6 +1,15 @@
 name: NAStool Docker
 on:
   workflow_dispatch:
+    inputs:
+      DOCKER_USERNAME:
+        description: 'docker user name'
+        required: true
+        default: ''
+      DOCKER_PASSWORD:
+        description: 'docker user password'
+        required: true
+        default: ''
   push:
     branches:
       - master
