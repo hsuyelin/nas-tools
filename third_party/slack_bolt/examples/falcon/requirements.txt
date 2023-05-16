@@ -1,0 +1,3 @@
+falcon>=2,<3
+gunicorn>=20,<21
+uvicorn

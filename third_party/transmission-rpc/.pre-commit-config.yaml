@@ -1,0 +1,65 @@
+default_stages: [commit]
+
+repos:
+  - repo: https://github.com/python-poetry/poetry
+    rev: "1.3.0"
+    hooks:
+      - id: poetry-check
+      - id: poetry-lock
+        name: poetry-lock-check
+        args: ["--check"]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-case-conflict
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-byte-order-marker
+      - id: check-toml
+      - id: check-yaml
+      - id: check-json
+      - id: check-docstring-first
+      - id: check-merge-conflict
+      - id: check-added-large-files # check for file bigger than 500kb
+      - id: debug-statements
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: end-of-file-fixer
+      - id: fix-encoding-pragma
+        args: [--remove]
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.3.1
+    hooks:
+      - id: pyupgrade
+        args: [--py37-plus]
+
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v2.0.1
+    hooks:
+      - id: autoflake
+        args:
+          - --in-place
+          - --remove-unused-variables
+          - --remove-all-unused-imports
+          - --expand-star-imports
+
+  - repo: https://github.com/PyCQA/doc8.git
+    rev: v1.1.1
+    hooks:
+      - id: doc8
+        name: Check rst file
+        args: [--max-line-length=120]
+        files: \.rst$
+
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+      - id: black

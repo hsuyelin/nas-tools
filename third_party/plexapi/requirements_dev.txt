@@ -1,0 +1,19 @@
+#---------------------------------------------------------
+# PlexAPI requirements to run py.test.
+# pip install -r requirements_dev.txt
+#---------------------------------------------------------
+backports.cached-property==1.0.2; python_version<="3.7"
+coveralls==3.3.1
+flake8==5.0.4
+pillow==9.4.0
+pytest==7.2.2
+pytest-cache==1.0
+pytest-cov==4.0.0
+pytest-mock<3.10.1
+recommonmark==0.7.1
+requests==2.28.2
+requests-mock==1.10.0
+sphinx==4.3.2
+sphinx-rtd-theme==1.2.0
+tqdm==4.65.0
+websocket-client==1.5.1

@@ -1,0 +1,108 @@
+<div class="sidebar-content">
+  <div class="logo">
+    <span class="icon">
+      <img src="{{ site.url | append: site.baseurl }}/assets/bolt-py-logo.svg" />
+    </span>
+
+    <span class="name">
+      Bolt
+    </span>
+
+    <!-- Liquid has no ternary operator, so this is just meant to disclude 
+      english sections since they are at the root URL -->
+    {% assign localized_base_url = page.lang | prepend: "/" | remove_first: "/en" %}
+
+    <span class="version">
+      <!-- TODO: Fix this to skip pre-releases after v1.0 release -->
+      {% assign release = site.github.releases[0] %}
+      <a href="{{ release.html_url }}">{{ release.tag_name }}</a>
+    </span>
+  </div>
+
+  <ul class="sidebar-section">
+    <a href="{{ site.url | append: site.baseurl | append: localized_base_url  }}/tutorial/getting-started">
+      <li class="title">{{ site.t[page.lang].start }}</li>
+    </a>
+    <a href="{{ site.url | append: site.baseurl }}/api-docs/slack_bolt/" target="_blank">
+      <li class="title">API Documents</li>
+    </a>
+  </ul>
+
+  <ul class="sidebar-section">
+    <a href="{{ site.url | append: site.baseurl | append: localized_base_url }}/concepts#basic">
+      <li class="title">{{ site.t[page.lang].basic }}</li>
+    </a>
+    {% assign basic_sections = site.basic | sort: "order" | where: "lang", page.lang %}
+
+    {% for section in basic_sections %}
+    <a href="{{ site.url | append: site.baseurl | append: localized_base_url }}/concepts#{{ section.slug }}">
+      <li>{{section.title}}</li>
+    </a>
+    {% endfor %}
+  </ul>
+
+  <ul class="sidebar-section">
+    {% assign future_sections = site.future | sort: "order" | where: "lang", page.lang %}
+    {% for section in future_sections %}
+    {% if section.layout == "tutorial" %}
+    <a href="{{ site.url | append: site.baseurl | append: localized_base_url }}/tutorial/{{ section.slug }}">
+      <li>{{section.title}}</li>
+    </a>
+    {% else %}
+    {% if section.order == 0 %}
+    <a href="{{ site.url | append: site.baseurl | append: localized_base_url }}/future/concepts">
+      <li class="title">
+        {{section.title}}
+        <span class="label-beta">{{ site.t[page.lang].beta }}</span>
+      </li>
+    </a>
+    {% else %}
+    <a href="{{ site.url | append: site.baseurl | append: localized_base_url }}/future/concepts#{{ section.slug }}">
+      <li>{{section.title}}</li>
+    </a>
+    {% endif %}
+    {% endif %}
+    {% endfor %}
+  </ul>
+
+  <ul class="sidebar-section">
+    <a href="{{ site.url | append: site.baseurl | append: localized_base_url }}/concepts#advanced">
+      <li class="title">{{ site.t[page.lang].advanced }}</li>
+    </a>
+    {% assign advanced_sections = site.advanced | sort: "order" | where: "lang", page.lang %}
+    {% for section in advanced_sections %}
+    <a href="{{ site.url | append: site.baseurl | append: localized_base_url }}/concepts#{{ section.slug }}">
+      <li>{{section.title}}</li>
+    </a>
+    {% endfor %}
+  </ul>
+
+  <ul class="sidebar-section">
+    <a href="{{ site.url | append: site.baseurl | append: localized_base_url }}/concepts#steps">
+      <li class="title">
+        {{ site.t[page.lang].steps }} 
+        <!-- UNCOMMENT AFTER GA <span class="label-legacy">{{ site.t[page.lang].legacy }}</span> -->
+      </li>
+    </a>
+    {% assign workflow_steps = site.steps | sort: "order" | where: "lang", page.lang %}
+    {% for step in workflow_steps %}
+    {% if step.slug != "steps-overview" %}
+    <a href="{{ site.url | append: site.baseurl | append: localized_base_url }}/concepts#{{ step.slug }}">
+      <li>{{step.title}}</li>
+    </a>
+    {% endif %}
+    {% endfor %}
+  </ul>
+
+  <ul class="sidebar-section">
+    {% assign tutorials = site.tutorials | where: "lang", page.lang | where_exp: "tutorial", "tutorial.order > 0" %}
+    {% for tutorial in tutorials %}
+    <a href="{{ site.url | append: site.baseurl | append: localized_base_url }}/tutorial/{{ tutorial.slug }}">
+      <li class="title">{{tutorial.title}}</li>
+    </a>
+    {% endfor %}
+    <a href="https://github.com/SlackAPI/bolt-python/blob/main/.github/contributing.md">
+      <li class="title">{{ site.t[page.lang].contribute }}</li>
+    </a>
+  </ul>
+</div>

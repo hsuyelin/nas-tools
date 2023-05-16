@@ -1,0 +1,2 @@
+slack_bolt
+Flask>=1.1,<2

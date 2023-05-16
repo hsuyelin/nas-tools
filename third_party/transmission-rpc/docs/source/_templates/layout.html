@@ -1,0 +1,21 @@
+{% extends "!layout.html" %}
+{% block extrahead %}
+<style>
+    .wy-nav-content {
+        max-width: none;
+    }
+
+    .wy-nav-content dd > dl.property {
+        display: block !important;
+    }
+</style>
+{% endblock %}
+{%- block footer %}
+{{ super() }}
+<script>
+    $(document).ready(function () {
+        $("a[href^='https://']").attr('target', '_blank');
+        $("a[href^='http://']").attr('target', '_blank');
+    });
+</script>
+{% endblock %}

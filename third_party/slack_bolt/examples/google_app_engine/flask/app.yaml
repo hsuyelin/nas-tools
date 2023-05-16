@@ -1,0 +1,16 @@
+runtime: python38
+
+inbound_services:
+  - warmup
+
+automatic_scaling:
+  min_idle_instances: 1
+
+
+handlers:
+  - url: /slack/events
+    secure: always
+    script: auto
+
+includes:
+  - env_variables.yaml

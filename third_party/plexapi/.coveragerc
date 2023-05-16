@@ -1,0 +1,19 @@
+[run]
+omit = */site-packages/plexapi/*
+
+
+
+[report]
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError
+    raise Unsupported
+    raise Exception
+    except ImportError
+    except BadRequest
+    def __repr__
+    def __bool__
+    def __iter__
+    def __hash__
+    def __len__
+    if __name__ == .__main__.:

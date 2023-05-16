@@ -1,0 +1,16 @@
+version: '3.9'
+services:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: slackapp
+      MYSQL_USER: app
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    #command:
+    #  - '--wait_timeout=3'
+    volumes:
+      - './db:/var/lib/mysql'
+    ports:
+      - 33306:3306
+

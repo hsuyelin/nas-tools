@@ -1,0 +1,19 @@
+{
+  "version": "2.0",
+  "app_name": "bolt-python-chalice",
+  "stages": {
+    "dev": {
+      "api_gateway_stage": "api",
+      "environment_variables": {
+        "SLACK_SIGNING_SECRET": "xxx",
+        "SLACK_CLIENT_ID": "111.111",
+        "SLACK_CLIENT_SECRET": "xxx",
+        "SLACK_SCOPES": "app_mentions:read,channels:history,im:history,chat:write",
+        "SLACK_INSTALLATION_S3_BUCKET_NAME": "",
+        "SLACK_STATE_S3_BUCKET_NAME": ""
+      },
+      "manage_iam_role": false,
+      "iam_role_arn": "arn:aws:iam::1111111111111:role/bolt_python_s3_storage"
+    }
+  }
+}

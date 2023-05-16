@@ -1,0 +1,3 @@
+slack_bolt
+Flask>1
+uWSGI>=2,<3

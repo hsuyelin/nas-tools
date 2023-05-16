@@ -1,0 +1,60 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - uses: Trim21/setup-poetry@dist/v1
+
+      - uses: Trim21/install-poetry-project@dist/v1
+
+      - name: setup test env
+        run: docker-compose -f tests/docker-compose.yaml up -d
+
+      - name: test
+        run: coverage run -m pytest
+        env:
+          TR_PORT: 8080
+          TR_USER: admin
+          TR_PASSWORD: mysecretpassword
+
+      - run: bash <(curl -s https://codecov.io/bash) -F ${{ matrix.python }}
+
+  dist-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - uses: Trim21/setup-poetry@dist/v1
+
+      - run: poetry build
+
+      - name: Install twine
+        run: pip install twine
+
+      - name: Check Files
+        run: twine check dist/*

@@ -1,0 +1,47 @@
+---
+sidebar_style: main
+---
+<!DOCTYPE html>
+<html>
+
+{% include head.html %}
+
+<body>
+  {% include tag_manager.html %}
+  <div class="wrapper">
+    <div class="panel">
+      {% include sidebar.html %}
+    </div>
+
+
+    <div class="content">
+      <div class="mainheader">
+        {% include header.html %}
+      </div>
+
+      <div id="future">
+        {% assign future_sections = site.future | sort: "order" | where: "lang", page.lang %}
+        {% for section in future_sections %}
+        {% if section.layout != "tutorial" %}
+        {% if section.order == 0 %}
+        <div class="section-wrapper">
+          {{ section.content | markdownify }}
+          <hr />
+        </div>
+        {% else %}
+        <div class="section-wrapper">
+          <h3 id="{{section.slug}}">{{ section.title }}</h3>
+          {{ section.content | markdownify }}
+          <hr />
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <script src="{{ site.url | append: site.baseurl }}/scripts/future_search_hash.js"></script>
+  {% include analytics.html %}
+</body>
+
+</html>

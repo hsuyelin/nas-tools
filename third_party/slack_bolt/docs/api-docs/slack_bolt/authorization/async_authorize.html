@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>slack_bolt.authorization.async_authorize API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>slack_bolt.authorization.async_authorize</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from logging import Logger
+from typing import Optional, Callable, Awaitable, Dict, Any, List
+
+from slack_sdk.errors import SlackApiError, SlackTokenRotationError
+from slack_sdk.oauth.installation_store import Bot, Installation
+from slack_sdk.oauth.installation_store.async_installation_store import (
+    AsyncInstallationStore,
+)
+from slack_sdk.oauth.token_rotation.async_rotator import AsyncTokenRotator
+from slack_sdk.web.async_client import AsyncWebClient
+
+from slack_bolt.authorization.async_authorize_args import AsyncAuthorizeArgs
+from slack_bolt.authorization import AuthorizeResult
+from slack_bolt.context.async_context import AsyncBoltContext
+from slack_bolt.error import BoltError
+from slack_bolt.util.utils import get_arg_names_of_callable
+
+
+class AsyncAuthorize:
+    &#34;&#34;&#34;This provides authorize function that returns AuthorizeResult
+    for an incoming request from Slack.&#34;&#34;&#34;
+
+    def __init__(self):
+        pass
+
+    async def __call__(
+        self,
+        *,
+        context: AsyncBoltContext,
+        enterprise_id: Optional[str],
+        team_id: Optional[str],  # can be None for org-wide installed apps
+        user_id: Optional[str],
+        # actor_* can be used only when user_token_resolution: &#34;actor&#34; is set
+        actor_enterprise_id: Optional[str] = None,
+        actor_team_id: Optional[str] = None,
+        actor_user_id: Optional[str] = None,
+    ) -&gt; Optional[AuthorizeResult]:
+        raise NotImplementedError()
+
+
+class AsyncCallableAuthorize(AsyncAuthorize):
+    &#34;&#34;&#34;When you pass the authorize argument in AsyncApp constructor,
+    This authorize implementation will be used.
+    &#34;&#34;&#34;
+
+    def __init__(self, *, logger: Logger, func: Callable[..., Awaitable[AuthorizeResult]]):
+        self.logger = logger
+        self.func = func
+        self.arg_names = get_arg_names_of_callable(func)
+
+    async def __call__(
+        self,
+        *,
+        context: AsyncBoltContext,
+        enterprise_id: Optional[str],
+        team_id: Optional[str],  # can be None for org-wide installed apps
+        user_id: Optional[str],
+        # actor_* can be used only when user_token_resolution: &#34;actor&#34; is set
+        actor_enterprise_id: Optional[str] = None,
+        actor_team_id: Optional[str] = None,
+        actor_user_id: Optional[str] = None,
+    ) -&gt; Optional[AuthorizeResult]:
+        try:
+            all_available_args = {
+                &#34;args&#34;: AsyncAuthorizeArgs(
+                    context=context,
+                    enterprise_id=enterprise_id,
+                    team_id=team_id,
+                    user_id=user_id,
+                ),
+                &#34;logger&#34;: context.logger,
+                &#34;client&#34;: context.client,
+                &#34;context&#34;: context,
+                &#34;enterprise_id&#34;: enterprise_id,
+                &#34;team_id&#34;: team_id,
+                &#34;user_id&#34;: user_id,
+                &#34;actor_enterprise_id&#34;: actor_enterprise_id,
+                &#34;actor_team_id&#34;: actor_team_id,
+                &#34;actor_user_id&#34;: actor_user_id,
+            }
+            for k, v in context.items():
+                if k not in all_available_args:
+                    all_available_args[k] = v
+
+            kwargs: Dict[str, Any] = {  # type: ignore
+                k: v for k, v in all_available_args.items() if k in self.arg_names  # type: ignore
+            }
+            found_arg_names = kwargs.keys()
+            for name in self.arg_names:
+                if name not in found_arg_names:
+                    self.logger.warning(f&#34;{name} is not a valid argument&#34;)
+                    kwargs[name] = None
+
+            auth_result: Optional[AuthorizeResult] = await self.func(**kwargs)
+            if auth_result is None:
+                return auth_result
+
+            if isinstance(auth_result, AuthorizeResult):
+                return auth_result
+            else:
+                raise ValueError(f&#34;Unexpected returned value from authorize function (type: {type(auth_result)})&#34;)
+        except SlackApiError as err:
+            self.logger.debug(
+                f&#34;The stored bot token for enterprise_id: {enterprise_id} team_id: {team_id} &#34;
+                f&#34;is no longer valid. (response: {err.response})&#34;
+            )
+            return None
+
+
+class AsyncInstallationStoreAuthorize(AsyncAuthorize):
+    &#34;&#34;&#34;If you use the OAuth flow settings, this authorize implementation will be used.
+    As long as your own InstallationStore (or the built-in ones) works as you expect,
+    you can expect that the authorize layer should work for you without any customization.
+    &#34;&#34;&#34;
+
+    authorize_result_cache: Dict[str, AuthorizeResult]
+    bot_only: bool
+    user_token_resolution: str
+    find_installation_available: Optional[bool]
+    find_bot_available: Optional[bool]
+    token_rotator: Optional[AsyncTokenRotator]
+
+    _config_error_message: str = &#34;AsyncInstallationStore with client_id/client_secret are required for token rotation&#34;
+
+    def __init__(
+        self,
+        *,
+        logger: Logger,
+        installation_store: AsyncInstallationStore,
+        client_id: Optional[str] = None,
+        client_secret: Optional[str] = None,
+        token_rotation_expiration_minutes: Optional[int] = None,
+        # For v1.0.x compatibility and people who still want its simplicity
+        # use only InstallationStore#find_bot(enterprise_id, team_id)
+        bot_only: bool = False,
+        cache_enabled: bool = False,
+        client: Optional[AsyncWebClient] = None,
+        # Since v1.27, user token resolution can be actor ID based when the mode is enabled
+        user_token_resolution: str = &#34;authed_user&#34;,
+    ):
+        self.logger = logger
+        self.installation_store = installation_store
+        self.bot_only = bot_only
+        self.user_token_resolution = user_token_resolution
+        self.cache_enabled = cache_enabled
+        self.authorize_result_cache = {}
+        self.find_installation_available = None
+        self.find_bot_available = None
+        if client_id is not None and client_secret is not None:
+            self.token_rotator = AsyncTokenRotator(
+                client_id=client_id,
+                client_secret=client_secret,
+                client=client,
+            )
+        else:
+            self.token_rotator = None
+        self.token_rotation_expiration_minutes = token_rotation_expiration_minutes or 120
+
+    async def __call__(
+        self,
+        *,
+        context: AsyncBoltContext,
+        enterprise_id: Optional[str],
+        team_id: Optional[str],  # can be None for org-wide installed apps
+        user_id: Optional[str],
+        # actor_* can be used only when user_token_resolution: &#34;actor&#34; is set
+        actor_enterprise_id: Optional[str] = None,
+        actor_team_id: Optional[str] = None,
+        actor_user_id: Optional[str] = None,
+    ) -&gt; Optional[AuthorizeResult]:
+
+        if self.find_installation_available is None:
+            self.find_installation_available = hasattr(self.installation_store, &#34;async_find_installation&#34;)
+        if self.find_bot_available is None:
+            self.find_bot_available = hasattr(self.installation_store, &#34;async_find_bot&#34;)
+
+        bot_token: Optional[str] = None
+        user_token: Optional[str] = None
+        bot_scopes: Optional[List[str]] = None
+        user_scopes: Optional[List[str]] = None
+        latest_bot_installation: Optional[Installation] = None
+        this_user_installation: Optional[Installation] = None
+
+        if not self.bot_only and self.find_installation_available:
+            # Since v1.1, this is the default way.
+            # If you want to use find_bot / delete_bot only, you can set bot_only as True.
+            try:
+                # Note that this is the latest information for the org/workspace.
+                # The installer may not be the user associated with this incoming request.
+                latest_bot_installation = await self.installation_store.async_find_installation(
+                    enterprise_id=enterprise_id,
+                    team_id=team_id,
+                    is_enterprise_install=context.is_enterprise_install,
+                )
+                # If the user_token in the latest_installation is not for the user associated with this request,
+                # we&#39;ll fetch a different installation for the user below
+                # The example use cases are:
+                # - The app&#39;s installation requires both bot and user tokens
+                # - The app has two installation paths 1) bot installation 2) individual user authorization
+                if latest_bot_installation is not None:
+                    # Save the latest bot token
+                    bot_token = latest_bot_installation.bot_token  # this still can be None
+                    user_token = latest_bot_installation.user_token  # this still can be None
+                    bot_scopes = latest_bot_installation.bot_scopes  # this still can be None
+                    user_scopes = latest_bot_installation.user_scopes  # this still can be None
+
+                    if latest_bot_installation.user_id != user_id:
+                        # First off, remove the user token as the installer is a different user
+                        user_token = None
+                        user_scopes = None
+                        latest_bot_installation.user_token = None
+                        latest_bot_installation.user_refresh_token = None
+                        latest_bot_installation.user_token_expires_at = None
+                        latest_bot_installation.user_scopes = None
+
+                        # try to fetch the request user&#39;s installation
+                        # to reflect the user&#39;s access token if exists
+                        # try to fetch the request user&#39;s installation
+                        # to reflect the user&#39;s access token if exists
+                        if self.user_token_resolution == &#34;actor&#34;:
+                            if actor_enterprise_id is not None or actor_team_id is not None:
+                                # Note that actor_team_id can be absent for app_mention events
+                                this_user_installation = await self.installation_store.async_find_installation(
+                                    enterprise_id=actor_enterprise_id,
+                                    team_id=actor_team_id,
+                                    user_id=actor_user_id,
+                                    is_enterprise_install=None,
+                                )
+                        else:
+                            this_user_installation = await self.installation_store.async_find_installation(
+                                enterprise_id=enterprise_id,
+                                team_id=team_id,
+                                user_id=user_id,
+                                is_enterprise_install=context.is_enterprise_install,
+                            )
+                        if this_user_installation is not None:
+                            user_token = this_user_installation.user_token
+                            user_scopes = this_user_installation.user_scopes
+                            if (
+                                latest_bot_installation.bot_token is None
+                                # enterprise_id/team_id can be different for Slack Connect channel events
+                                # when enabling user_token_resolution: &#34;actor&#34;
+                                and latest_bot_installation.enterprise_id == this_user_installation.enterprise_id
+                                and latest_bot_installation.team_id == this_user_installation.team_id
+                            ):
+                                # If latest_installation has a bot token, we never overwrite the value
+                                bot_token = this_user_installation.bot_token
+                                bot_scopes = this_user_installation.bot_scopes
+
+                            # If token rotation is enabled, running rotation may be needed here
+                            refreshed = await self._rotate_and_save_tokens_if_necessary(this_user_installation)
+                            if refreshed is not None:
+                                user_token = refreshed.user_token
+                                user_scopes = refreshed.user_scopes
+                                if (
+                                    latest_bot_installation.bot_token is None
+                                    # enterprise_id/team_id can be different for Slack Connect channel events
+                                    # when enabling user_token_resolution: &#34;actor&#34;
+                                    and latest_bot_installation.enterprise_id == this_user_installation.enterprise_id
+                                    and latest_bot_installation.team_id == this_user_installation.team_id
+                                ):
+                                    # If latest_installation has a bot token, we never overwrite the value
+                                    bot_token = refreshed.bot_token
+                                    bot_scopes = refreshed.bot_scopes
+
+                    # If token rotation is enabled, running rotation may be needed here
+                    refreshed = await self._rotate_and_save_tokens_if_necessary(latest_bot_installation)
+                    if refreshed is not None:
+                        bot_token = refreshed.bot_token
+                        bot_scopes = refreshed.bot_scopes
+                        if this_user_installation is None:
+                            # Only when we don&#39;t have `this_user_installation` here,
+                            # the `user_token` is for the user associated with this request
+                            user_token = refreshed.user_token
+                            user_scopes = refreshed.user_scopes
+
+            except SlackTokenRotationError as rotation_error:
+                # When token rotation fails, it is usually unrecoverable
+                # So, this built-in middleware gives up continuing with the following middleware and listeners
+                self.logger.error(f&#34;Failed to rotate tokens due to {rotation_error}&#34;)
+                return None
+            except NotImplementedError as _:
+                self.find_installation_available = False
+
+        if (
+            # If you intentionally use only `find_bot` / `delete_bot`,
+            self.bot_only
+            # If the `find_installation` method is not available,
+            or not self.find_installation_available
+            # If the `find_installation` method did not return data and find_bot method is available,
+            or (self.find_bot_available is True and bot_token is None and user_token is None)
+        ):
+            try:
+                bot: Optional[Bot] = await self.installation_store.async_find_bot(
+                    enterprise_id=enterprise_id,
+                    team_id=team_id,
+                    is_enterprise_install=context.is_enterprise_install,
+                )
+                if bot is not None:
+                    bot_token = bot.bot_token
+                    bot_scopes = bot.bot_scopes
+                    if bot.bot_refresh_token is not None:
+                        # Token rotation
+                        if self.token_rotator is None:
+                            raise BoltError(self._config_error_message)
+                        refreshed = await self.token_rotator.perform_bot_token_rotation(
+                            bot=bot,
+                            minutes_before_expiration=self.token_rotation_expiration_minutes,
+                        )
+                        if refreshed is not None:
+                            await self.installation_store.async_save_bot(refreshed)
+                            bot_token = refreshed.bot_token
+                            bot_scopes = refreshed.bot_scopes
+
+            except SlackTokenRotationError as rotation_error:
+                # When token rotation fails, it is usually unrecoverable
+                # So, this built-in middleware gives up continuing with the following middleware and listeners
+                self.logger.error(f&#34;Failed to rotate tokens due to {rotation_error}&#34;)
+                return None
+            except NotImplementedError as _:
+                self.find_bot_available = False
+            except Exception as e:
+                self.logger.info(f&#34;Failed to call find_bot method: {e}&#34;)
+
+        token: Optional[str] = bot_token or user_token
+        if token is None:
+            # No valid token was found
+            self._debug_log_for_not_found(enterprise_id, team_id)
+            return None
+
+        # Check cache to see if the bot object already exists
+        if self.cache_enabled and token in self.authorize_result_cache:
+            return self.authorize_result_cache[token]
+
+        try:
+            auth_test_api_response = await context.client.auth_test(token=token)
+            user_auth_test_response = None
+            if user_token is not None and token != user_token:
+                user_auth_test_response = await context.client.auth_test(token=user_token)
+            authorize_result = AuthorizeResult.from_auth_test_response(
+                auth_test_response=auth_test_api_response,
+                user_auth_test_response=user_auth_test_response,
+                bot_token=bot_token,
+                user_token=user_token,
+                bot_scopes=bot_scopes,
+                user_scopes=user_scopes,
+            )
+            if self.cache_enabled:
+                self.authorize_result_cache[token] = authorize_result
+            return authorize_result
+        except SlackApiError as err:
+            self.logger.debug(
+                f&#34;The stored bot token for enterprise_id: {enterprise_id} team_id: {team_id} &#34;
+                f&#34;is no longer valid. (response: {err.response})&#34;
+            )
+            return None
+
+    # ------------------------------------------------
+
+    def _debug_log_for_not_found(self, enterprise_id: Optional[str], team_id: Optional[str]):
+        self.logger.debug(&#34;No installation data found &#34; f&#34;for enterprise_id: {enterprise_id} team_id: {team_id}&#34;)
+
+    async def _rotate_and_save_tokens_if_necessary(self, installation: Optional[Installation]) -&gt; Optional[Installation]:
+        if installation is None or (installation.user_refresh_token is None and installation.bot_refresh_token is None):
+            # No need to rotate tokens
+            return None
+
+        if self.token_rotator is None:
+            # Token rotation is required but this Bolt app is not properly configured
+            raise BoltError(self._config_error_message)
+
+        refreshed: Optional[Installation] = await self.token_rotator.perform_token_rotation(
+            installation=installation,
+            minutes_before_expiration=self.token_rotation_expiration_minutes,
+        )
+        if refreshed is not None:
+            # Save the refreshed data in database for following requests
+            await self.installation_store.async_save(refreshed)
+        return refreshed</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="slack_bolt.authorization.async_authorize.AsyncAuthorize"><code class="flex name class">
+<span>class <span class="ident">AsyncAuthorize</span></span>
+</code></dt>
+<dd>
+<div class="desc"><p>This provides authorize function that returns AuthorizeResult
+for an incoming request from Slack.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncAuthorize:
+    &#34;&#34;&#34;This provides authorize function that returns AuthorizeResult
+    for an incoming request from Slack.&#34;&#34;&#34;
+
+    def __init__(self):
+        pass
+
+    async def __call__(
+        self,
+        *,
+        context: AsyncBoltContext,
+        enterprise_id: Optional[str],
+        team_id: Optional[str],  # can be None for org-wide installed apps
+        user_id: Optional[str],
+        # actor_* can be used only when user_token_resolution: &#34;actor&#34; is set
+        actor_enterprise_id: Optional[str] = None,
+        actor_team_id: Optional[str] = None,
+        actor_user_id: Optional[str] = None,
+    ) -&gt; Optional[AuthorizeResult]:
+        raise NotImplementedError()</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="slack_bolt.authorization.async_authorize.AsyncCallableAuthorize" href="#slack_bolt.authorization.async_authorize.AsyncCallableAuthorize">AsyncCallableAuthorize</a></li>
+<li><a title="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize" href="#slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize">AsyncInstallationStoreAuthorize</a></li>
+</ul>
+</dd>
+<dt id="slack_bolt.authorization.async_authorize.AsyncCallableAuthorize"><code class="flex name class">
+<span>class <span class="ident">AsyncCallableAuthorize</span></span>
+<span>(</span><span>*, logger: logging.Logger, func: Callable[..., Awaitable[<a title="slack_bolt.authorization.authorize_result.AuthorizeResult" href="authorize_result.html#slack_bolt.authorization.authorize_result.AuthorizeResult">AuthorizeResult</a>]])</span>
+</code></dt>
+<dd>
+<div class="desc"><p>When you pass the authorize argument in AsyncApp constructor,
+This authorize implementation will be used.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncCallableAuthorize(AsyncAuthorize):
+    &#34;&#34;&#34;When you pass the authorize argument in AsyncApp constructor,
+    This authorize implementation will be used.
+    &#34;&#34;&#34;
+
+    def __init__(self, *, logger: Logger, func: Callable[..., Awaitable[AuthorizeResult]]):
+        self.logger = logger
+        self.func = func
+        self.arg_names = get_arg_names_of_callable(func)
+
+    async def __call__(
+        self,
+        *,
+        context: AsyncBoltContext,
+        enterprise_id: Optional[str],
+        team_id: Optional[str],  # can be None for org-wide installed apps
+        user_id: Optional[str],
+        # actor_* can be used only when user_token_resolution: &#34;actor&#34; is set
+        actor_enterprise_id: Optional[str] = None,
+        actor_team_id: Optional[str] = None,
+        actor_user_id: Optional[str] = None,
+    ) -&gt; Optional[AuthorizeResult]:
+        try:
+            all_available_args = {
+                &#34;args&#34;: AsyncAuthorizeArgs(
+                    context=context,
+                    enterprise_id=enterprise_id,
+                    team_id=team_id,
+                    user_id=user_id,
+                ),
+                &#34;logger&#34;: context.logger,
+                &#34;client&#34;: context.client,
+                &#34;context&#34;: context,
+                &#34;enterprise_id&#34;: enterprise_id,
+                &#34;team_id&#34;: team_id,
+                &#34;user_id&#34;: user_id,
+                &#34;actor_enterprise_id&#34;: actor_enterprise_id,
+                &#34;actor_team_id&#34;: actor_team_id,
+                &#34;actor_user_id&#34;: actor_user_id,
+            }
+            for k, v in context.items():
+                if k not in all_available_args:
+                    all_available_args[k] = v
+
+            kwargs: Dict[str, Any] = {  # type: ignore
+                k: v for k, v in all_available_args.items() if k in self.arg_names  # type: ignore
+            }
+            found_arg_names = kwargs.keys()
+            for name in self.arg_names:
+                if name not in found_arg_names:
+                    self.logger.warning(f&#34;{name} is not a valid argument&#34;)
+                    kwargs[name] = None
+
+            auth_result: Optional[AuthorizeResult] = await self.func(**kwargs)
+            if auth_result is None:
+                return auth_result
+
+            if isinstance(auth_result, AuthorizeResult):
+                return auth_result
+            else:
+                raise ValueError(f&#34;Unexpected returned value from authorize function (type: {type(auth_result)})&#34;)
+        except SlackApiError as err:
+            self.logger.debug(
+                f&#34;The stored bot token for enterprise_id: {enterprise_id} team_id: {team_id} &#34;
+                f&#34;is no longer valid. (response: {err.response})&#34;
+            )
+            return None</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="slack_bolt.authorization.async_authorize.AsyncAuthorize" href="#slack_bolt.authorization.async_authorize.AsyncAuthorize">AsyncAuthorize</a></li>
+</ul>
+</dd>
+<dt id="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize"><code class="flex name class">
+<span>class <span class="ident">AsyncInstallationStoreAuthorize</span></span>
+<span>(</span><span>*, logger: logging.Logger, installation_store: slack_sdk.oauth.installation_store.async_installation_store.AsyncInstallationStore, client_id: Optional[str] = None, client_secret: Optional[str] = None, token_rotation_expiration_minutes: Optional[int] = None, bot_only: bool = False, cache_enabled: bool = False, client: Optional[slack_sdk.web.async_client.AsyncWebClient] = None, user_token_resolution: str = 'authed_user')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>If you use the OAuth flow settings, this authorize implementation will be used.
+As long as your own InstallationStore (or the built-in ones) works as you expect,
+you can expect that the authorize layer should work for you without any customization.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncInstallationStoreAuthorize(AsyncAuthorize):
+    &#34;&#34;&#34;If you use the OAuth flow settings, this authorize implementation will be used.
+    As long as your own InstallationStore (or the built-in ones) works as you expect,
+    you can expect that the authorize layer should work for you without any customization.
+    &#34;&#34;&#34;
+
+    authorize_result_cache: Dict[str, AuthorizeResult]
+    bot_only: bool
+    user_token_resolution: str
+    find_installation_available: Optional[bool]
+    find_bot_available: Optional[bool]
+    token_rotator: Optional[AsyncTokenRotator]
+
+    _config_error_message: str = &#34;AsyncInstallationStore with client_id/client_secret are required for token rotation&#34;
+
+    def __init__(
+        self,
+        *,
+        logger: Logger,
+        installation_store: AsyncInstallationStore,
+        client_id: Optional[str] = None,
+        client_secret: Optional[str] = None,
+        token_rotation_expiration_minutes: Optional[int] = None,
+        # For v1.0.x compatibility and people who still want its simplicity
+        # use only InstallationStore#find_bot(enterprise_id, team_id)
+        bot_only: bool = False,
+        cache_enabled: bool = False,
+        client: Optional[AsyncWebClient] = None,
+        # Since v1.27, user token resolution can be actor ID based when the mode is enabled
+        user_token_resolution: str = &#34;authed_user&#34;,
+    ):
+        self.logger = logger
+        self.installation_store = installation_store
+        self.bot_only = bot_only
+        self.user_token_resolution = user_token_resolution
+        self.cache_enabled = cache_enabled
+        self.authorize_result_cache = {}
+        self.find_installation_available = None
+        self.find_bot_available = None
+        if client_id is not None and client_secret is not None:
+            self.token_rotator = AsyncTokenRotator(
+                client_id=client_id,
+                client_secret=client_secret,
+                client=client,
+            )
+        else:
+            self.token_rotator = None
+        self.token_rotation_expiration_minutes = token_rotation_expiration_minutes or 120
+
+    async def __call__(
+        self,
+        *,
+        context: AsyncBoltContext,
+        enterprise_id: Optional[str],
+        team_id: Optional[str],  # can be None for org-wide installed apps
+        user_id: Optional[str],
+        # actor_* can be used only when user_token_resolution: &#34;actor&#34; is set
+        actor_enterprise_id: Optional[str] = None,
+        actor_team_id: Optional[str] = None,
+        actor_user_id: Optional[str] = None,
+    ) -&gt; Optional[AuthorizeResult]:
+
+        if self.find_installation_available is None:
+            self.find_installation_available = hasattr(self.installation_store, &#34;async_find_installation&#34;)
+        if self.find_bot_available is None:
+            self.find_bot_available = hasattr(self.installation_store, &#34;async_find_bot&#34;)
+
+        bot_token: Optional[str] = None
+        user_token: Optional[str] = None
+        bot_scopes: Optional[List[str]] = None
+        user_scopes: Optional[List[str]] = None
+        latest_bot_installation: Optional[Installation] = None
+        this_user_installation: Optional[Installation] = None
+
+        if not self.bot_only and self.find_installation_available:
+            # Since v1.1, this is the default way.
+            # If you want to use find_bot / delete_bot only, you can set bot_only as True.
+            try:
+                # Note that this is the latest information for the org/workspace.
+                # The installer may not be the user associated with this incoming request.
+                latest_bot_installation = await self.installation_store.async_find_installation(
+                    enterprise_id=enterprise_id,
+                    team_id=team_id,
+                    is_enterprise_install=context.is_enterprise_install,
+                )
+                # If the user_token in the latest_installation is not for the user associated with this request,
+                # we&#39;ll fetch a different installation for the user below
+                # The example use cases are:
+                # - The app&#39;s installation requires both bot and user tokens
+                # - The app has two installation paths 1) bot installation 2) individual user authorization
+                if latest_bot_installation is not None:
+                    # Save the latest bot token
+                    bot_token = latest_bot_installation.bot_token  # this still can be None
+                    user_token = latest_bot_installation.user_token  # this still can be None
+                    bot_scopes = latest_bot_installation.bot_scopes  # this still can be None
+                    user_scopes = latest_bot_installation.user_scopes  # this still can be None
+
+                    if latest_bot_installation.user_id != user_id:
+                        # First off, remove the user token as the installer is a different user
+                        user_token = None
+                        user_scopes = None
+                        latest_bot_installation.user_token = None
+                        latest_bot_installation.user_refresh_token = None
+                        latest_bot_installation.user_token_expires_at = None
+                        latest_bot_installation.user_scopes = None
+
+                        # try to fetch the request user&#39;s installation
+                        # to reflect the user&#39;s access token if exists
+                        # try to fetch the request user&#39;s installation
+                        # to reflect the user&#39;s access token if exists
+                        if self.user_token_resolution == &#34;actor&#34;:
+                            if actor_enterprise_id is not None or actor_team_id is not None:
+                                # Note that actor_team_id can be absent for app_mention events
+                                this_user_installation = await self.installation_store.async_find_installation(
+                                    enterprise_id=actor_enterprise_id,
+                                    team_id=actor_team_id,
+                                    user_id=actor_user_id,
+                                    is_enterprise_install=None,
+                                )
+                        else:
+                            this_user_installation = await self.installation_store.async_find_installation(
+                                enterprise_id=enterprise_id,
+                                team_id=team_id,
+                                user_id=user_id,
+                                is_enterprise_install=context.is_enterprise_install,
+                            )
+                        if this_user_installation is not None:
+                            user_token = this_user_installation.user_token
+                            user_scopes = this_user_installation.user_scopes
+                            if (
+                                latest_bot_installation.bot_token is None
+                                # enterprise_id/team_id can be different for Slack Connect channel events
+                                # when enabling user_token_resolution: &#34;actor&#34;
+                                and latest_bot_installation.enterprise_id == this_user_installation.enterprise_id
+                                and latest_bot_installation.team_id == this_user_installation.team_id
+                            ):
+                                # If latest_installation has a bot token, we never overwrite the value
+                                bot_token = this_user_installation.bot_token
+                                bot_scopes = this_user_installation.bot_scopes
+
+                            # If token rotation is enabled, running rotation may be needed here
+                            refreshed = await self._rotate_and_save_tokens_if_necessary(this_user_installation)
+                            if refreshed is not None:
+                                user_token = refreshed.user_token
+                                user_scopes = refreshed.user_scopes
+                                if (
+                                    latest_bot_installation.bot_token is None
+                                    # enterprise_id/team_id can be different for Slack Connect channel events
+                                    # when enabling user_token_resolution: &#34;actor&#34;
+                                    and latest_bot_installation.enterprise_id == this_user_installation.enterprise_id
+                                    and latest_bot_installation.team_id == this_user_installation.team_id
+                                ):
+                                    # If latest_installation has a bot token, we never overwrite the value
+                                    bot_token = refreshed.bot_token
+                                    bot_scopes = refreshed.bot_scopes
+
+                    # If token rotation is enabled, running rotation may be needed here
+                    refreshed = await self._rotate_and_save_tokens_if_necessary(latest_bot_installation)
+                    if refreshed is not None:
+                        bot_token = refreshed.bot_token
+                        bot_scopes = refreshed.bot_scopes
+                        if this_user_installation is None:
+                            # Only when we don&#39;t have `this_user_installation` here,
+                            # the `user_token` is for the user associated with this request
+                            user_token = refreshed.user_token
+                            user_scopes = refreshed.user_scopes
+
+            except SlackTokenRotationError as rotation_error:
+                # When token rotation fails, it is usually unrecoverable
+                # So, this built-in middleware gives up continuing with the following middleware and listeners
+                self.logger.error(f&#34;Failed to rotate tokens due to {rotation_error}&#34;)
+                return None
+            except NotImplementedError as _:
+                self.find_installation_available = False
+
+        if (
+            # If you intentionally use only `find_bot` / `delete_bot`,
+            self.bot_only
+            # If the `find_installation` method is not available,
+            or not self.find_installation_available
+            # If the `find_installation` method did not return data and find_bot method is available,
+            or (self.find_bot_available is True and bot_token is None and user_token is None)
+        ):
+            try:
+                bot: Optional[Bot] = await self.installation_store.async_find_bot(
+                    enterprise_id=enterprise_id,
+                    team_id=team_id,
+                    is_enterprise_install=context.is_enterprise_install,
+                )
+                if bot is not None:
+                    bot_token = bot.bot_token
+                    bot_scopes = bot.bot_scopes
+                    if bot.bot_refresh_token is not None:
+                        # Token rotation
+                        if self.token_rotator is None:
+                            raise BoltError(self._config_error_message)
+                        refreshed = await self.token_rotator.perform_bot_token_rotation(
+                            bot=bot,
+                            minutes_before_expiration=self.token_rotation_expiration_minutes,
+                        )
+                        if refreshed is not None:
+                            await self.installation_store.async_save_bot(refreshed)
+                            bot_token = refreshed.bot_token
+                            bot_scopes = refreshed.bot_scopes
+
+            except SlackTokenRotationError as rotation_error:
+                # When token rotation fails, it is usually unrecoverable
+                # So, this built-in middleware gives up continuing with the following middleware and listeners
+                self.logger.error(f&#34;Failed to rotate tokens due to {rotation_error}&#34;)
+                return None
+            except NotImplementedError as _:
+                self.find_bot_available = False
+            except Exception as e:
+                self.logger.info(f&#34;Failed to call find_bot method: {e}&#34;)
+
+        token: Optional[str] = bot_token or user_token
+        if token is None:
+            # No valid token was found
+            self._debug_log_for_not_found(enterprise_id, team_id)
+            return None
+
+        # Check cache to see if the bot object already exists
+        if self.cache_enabled and token in self.authorize_result_cache:
+            return self.authorize_result_cache[token]
+
+        try:
+            auth_test_api_response = await context.client.auth_test(token=token)
+            user_auth_test_response = None
+            if user_token is not None and token != user_token:
+                user_auth_test_response = await context.client.auth_test(token=user_token)
+            authorize_result = AuthorizeResult.from_auth_test_response(
+                auth_test_response=auth_test_api_response,
+                user_auth_test_response=user_auth_test_response,
+                bot_token=bot_token,
+                user_token=user_token,
+                bot_scopes=bot_scopes,
+                user_scopes=user_scopes,
+            )
+            if self.cache_enabled:
+                self.authorize_result_cache[token] = authorize_result
+            return authorize_result
+        except SlackApiError as err:
+            self.logger.debug(
+                f&#34;The stored bot token for enterprise_id: {enterprise_id} team_id: {team_id} &#34;
+                f&#34;is no longer valid. (response: {err.response})&#34;
+            )
+            return None
+
+    # ------------------------------------------------
+
+    def _debug_log_for_not_found(self, enterprise_id: Optional[str], team_id: Optional[str]):
+        self.logger.debug(&#34;No installation data found &#34; f&#34;for enterprise_id: {enterprise_id} team_id: {team_id}&#34;)
+
+    async def _rotate_and_save_tokens_if_necessary(self, installation: Optional[Installation]) -&gt; Optional[Installation]:
+        if installation is None or (installation.user_refresh_token is None and installation.bot_refresh_token is None):
+            # No need to rotate tokens
+            return None
+
+        if self.token_rotator is None:
+            # Token rotation is required but this Bolt app is not properly configured
+            raise BoltError(self._config_error_message)
+
+        refreshed: Optional[Installation] = await self.token_rotator.perform_token_rotation(
+            installation=installation,
+            minutes_before_expiration=self.token_rotation_expiration_minutes,
+        )
+        if refreshed is not None:
+            # Save the refreshed data in database for following requests
+            await self.installation_store.async_save(refreshed)
+        return refreshed</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="slack_bolt.authorization.async_authorize.AsyncAuthorize" href="#slack_bolt.authorization.async_authorize.AsyncAuthorize">AsyncAuthorize</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.authorize_result_cache"><code class="name">var <span class="ident">authorize_result_cache</span> : Dict[str, <a title="slack_bolt.authorization.authorize_result.AuthorizeResult" href="authorize_result.html#slack_bolt.authorization.authorize_result.AuthorizeResult">AuthorizeResult</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.bot_only"><code class="name">var <span class="ident">bot_only</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.find_bot_available"><code class="name">var <span class="ident">find_bot_available</span> : Optional[bool]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.find_installation_available"><code class="name">var <span class="ident">find_installation_available</span> : Optional[bool]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.token_rotator"><code class="name">var <span class="ident">token_rotator</span> : Optional[slack_sdk.oauth.token_rotation.async_rotator.AsyncTokenRotator]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.user_token_resolution"><code class="name">var <span class="ident">user_token_resolution</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="slack_bolt.authorization" href="index.html">slack_bolt.authorization</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="slack_bolt.authorization.async_authorize.AsyncAuthorize" href="#slack_bolt.authorization.async_authorize.AsyncAuthorize">AsyncAuthorize</a></code></h4>
+</li>
+<li>
+<h4><code><a title="slack_bolt.authorization.async_authorize.AsyncCallableAuthorize" href="#slack_bolt.authorization.async_authorize.AsyncCallableAuthorize">AsyncCallableAuthorize</a></code></h4>
+</li>
+<li>
+<h4><code><a title="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize" href="#slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize">AsyncInstallationStoreAuthorize</a></code></h4>
+<ul class="">
+<li><code><a title="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.authorize_result_cache" href="#slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.authorize_result_cache">authorize_result_cache</a></code></li>
+<li><code><a title="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.bot_only" href="#slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.bot_only">bot_only</a></code></li>
+<li><code><a title="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.find_bot_available" href="#slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.find_bot_available">find_bot_available</a></code></li>
+<li><code><a title="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.find_installation_available" href="#slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.find_installation_available">find_installation_available</a></code></li>
+<li><code><a title="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.token_rotator" href="#slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.token_rotator">token_rotator</a></code></li>
+<li><code><a title="slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.user_token_resolution" href="#slack_bolt.authorization.async_authorize.AsyncInstallationStoreAuthorize.user_token_resolution">user_token_resolution</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

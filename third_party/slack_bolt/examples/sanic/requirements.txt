@@ -1,0 +1,2 @@
+sanic>=20,<21
+uvicorn<1

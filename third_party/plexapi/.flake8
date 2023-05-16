@@ -1,0 +1,16 @@
+# Flake8 configuration
+# Copy or symlink this file to ~/.flake8
+# --------------------------------------
+# E128: continuation line under-indented for visual indent
+# E701: multiple statements on one line (colon)
+# E702: multiple statements on one line (semicolon)
+# E731: do not assign a lambda expression, use a def
+# W293: blank line contains whitespace
+# W503: line break before binary operator
+# W605: invalid escape sequence
+[flake8]
+ignore=E128,E701,E702,E731,W293,W503,W605
+exclude=compat.py
+max-complexity = -1
+max-line-length = 125
+show-source = True

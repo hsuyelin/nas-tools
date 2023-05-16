@@ -1,0 +1,41 @@
+name: Run codecov
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+    env:
+      # default: multiprocessing
+      # threading is more stable on GitHub Actions
+      BOLT_PYTHON_MOCK_SERVER_MODE: threading
+      BOLT_PYTHON_CODECOV_RUNNING: "1"
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python setup.py install
+          pip install -U pip
+          pip install -e ".[async]"
+          pip install -e ".[adapter]"
+          pip install -e ".[testing]"
+          pip install -e ".[adapter_testing]"
+      - name: Run all tests for codecov
+        run: |
+          pytest --cov=./slack_bolt/ --cov-report=xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true
+          verbose: true

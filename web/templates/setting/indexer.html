@@ -1,0 +1,347 @@
+{% import 'macro/form.html' as FORM %}
+{% import 'macro/svg.html' as SVG %}
+<div class="container-xl">
+  <!-- Page title -->
+  <div class="page-header d-print-none">
+    <div class="row align-items-center">
+      <div class="col">
+        <h2 class="page-title">
+          索引器
+        </h2>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <div class="btn-list">
+          <a href="javascript:show_indexer_statistics_modal()" class="btn btn-primary d-none d-sm-inline-block">
+            {{ SVG.pie() }}
+            统计信息
+          </a>
+          <a href="javascript:show_indexer_statistics_modal()" class="btn btn-primary d-sm-none btn-icon" title="下载目录">
+            {{ SVG.pie() }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 业务页面代码 -->
+<div class="page-body">
+  <div class="container-xl">
+    <div class="d-grid gap-3 grid-normal-card">
+      <a class="card card-link-pop p-0 rounded-3 overflow-hidden" href="#" data-bs-toggle="modal" data-bs-target="#modal-builtin">
+        <div class="card-cover card-cover-blurred text-center" style="background-color: #2E72B9">
+          <span class="avatar avatar-xl avatar-thumb avatar-rounded"
+                style="background-image: url('../static/img/indexer/indexer.jpg')">
+          </span>
+        </div>
+        <div class="card-body text-center">
+          <div class="card-title mb-1">内建索引器</div>
+          <div class="text-muted">{% if Config.pt.search_indexer == "builtin" %}<span class="badge bg-green"
+                                                                                      title="已开启"></span>
+            正在使用{% endif %}</div>
+        </div>
+      </a>
+      {% for Type, Indexer in IndexerConf.items() %}
+      <a class="card card-link-pop p-0" href="#" data-bs-toggle="modal" data-bs-target="#modal-{{ Type }}">
+        <div class="card-cover card-cover-blurred text-center {{ Indexer.background }}">
+          <span class="avatar avatar-xl avatar-thumb avatar-rounded"
+                style="background-image: url('{{ Indexer.img_url }}')">
+          </span>
+        </div>
+        <div class="card-body text-center">
+          <div class="card-title mb-1">{{ Indexer.name }}</div>
+          <div class="text-muted">{% if Config.pt.search_indexer == Type %}<span class="badge bg-green"
+                                                                                      title="已开启"></span>
+            正在使用{% endif %}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% for Type, Indexer in IndexerConf.items() %}
+<div class="modal modal-blur fade" id="modal-{{ Type }}" tabindex="-1" role="dialog" aria-hidden="true"
+     data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ Indexer.name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      {{ FORM.gen_form_config_elements(Type, Config, Indexer.config) }}
+      </div>
+      <div class="modal-footer">
+        <button onclick="test_indexer_config('{{ Type }}')" id="{{ Type }}_test_btn" class="btn me-auto">
+          测试
+        </button>
+        <button onclick="save_indexer_config('{{ Type }}')" id="{{ Type }}_save_btn" class="btn btn-primary">
+          确定
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+<div class="modal modal-blur fade" id="modal-builtin" tabindex="-1" role="dialog" aria-hidden="true"
+     data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">内建索引器</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col">
+            <div class="mb-3">
+              <div class="btn-list">
+                <label class="form-label required">私有站点 <span class="form-help"
+                                                                  title="只有选中的私有站点才会在搜索中使用。内建索引器支持私有站点的先决条件：1、在站点维护中正确配置站点地址和Cookie；2、站点己被支持"
+                                                                  data-bs-toggle="tooltip">?</span></label>
+                <a href="javascript:void(0)" class="ms-auto" onclick="select_btn_SelectALL(this, 'indexer_sites_private')">全选</a>
+              </div>
+              <div class="form-selectgroup">
+                {% if PrivateCount > 0 %}
+                  {% for Indexer in Indexers %}
+                    {% if not Indexer.public %}
+                      <label class="form-selectgroup-item">
+                        <input type="checkbox" name="indexer_sites_private" value="{{ Indexer.id }}"
+                               class="form-selectgroup-input"
+                               {% if IndexerSites and Indexer.id in IndexerSites %}checked{% endif %}>
+                        <span class="form-selectgroup-label">{{ Indexer.name }}</span>
+                      </label>
+                    {% endif %}
+                  {% endfor %}
+                {% else %}
+                  <label class="form-selectgroup-item">
+                    <span class="form-selectgroup-label">无</span>
+                  </label>
+                {% endif %}
+              </div>
+            </div>
+            {% if PublicCount > 0 %}
+            <div class="mb-3">
+              <div class="btn-list">
+                <label class="form-label">公开站点 <span class="form-help"
+                                                         title="只有选中的公开站点才会在搜索中使用。公开站点只要被内建索引器支持了就会在这里显示，大部分公开站点都需要网络代理才能访问"
+                                                         data-bs-toggle="tooltip">?</span></label>
+                <a href="javascript:void(0)" class="ms-auto" onclick="select_btn_SelectALL(this, 'indexer_sites_public')">全选</a>
+              </div>
+              <div class="form-selectgroup">
+              {% for Indexer in Indexers %}
+                {% if Indexer.public %}
+                <label class="form-selectgroup-item">
+                  <input type="checkbox" name="indexer_sites_public" value="{{ Indexer.id }}"
+                          class="form-selectgroup-input"
+                          {% if IndexerSites and Indexer.id in IndexerSites %}checked{% endif %}>
+                  <span class="form-selectgroup-label">{{ Indexer.name }}</span>
+                </label>
+                {% endif %}
+              {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="save_indexer_config('builtin')" id="builtin_save_btn" class="btn btn-primary">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal modal-blur fade" id="modal-indexer-statistics" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="card modal-content" style="border-top-left-radius:var(--tblr-modal-inner-border-radius) !important; border-top-right-radius:var(--tblr-modal-inner-border-radius) !important">
+      <div class="card-header" style="border-top-left-radius:var(--tblr-modal-inner-border-radius) !important; border-top-right-radius:var(--tblr-modal-inner-border-radius) !important">
+        <ul class="nav nav-fill card-header-tabs nav-tabs rounded-3" data-bs-toggle="tabs"
+            role="tablist">
+          <li class="nav-item" role="presentation">
+            <a href="#tabs-indexer-chart" class="nav-link active" style="justify-content: center" data-bs-toggle="tab"
+               aria-selected="true" role="tab">
+              图表
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a href="#tabs-indexer-list" class="nav-link" style="justify-content: center" data-bs-toggle="tab"
+               aria-selected="false" role="tab" tabindex="-1">
+              详情
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="card-body p-0 mb-3">
+        <div class="tab-content">
+          <div class="tab-pane fade active show" id="tabs-indexer-chart" role="tabpanel">
+            <div id="indexer_chart_content"></div>
+          </div>
+          <div class="tab-pane fade" id="tabs-indexer-list" role="tabpanel">
+            <div id="table-indexer-list" class="table-responsive table-modal-body">
+              <table class="table table-vcenter card-table table-hover table-striped">
+                <thead>
+                  <tr>
+                    <th class="flex-fill"><button class="table-sort" data-sort="sort-name">索引</button></th>
+                    <th><button class="table-sort" data-sort="sort-total">请求数</button></th>
+                    <th><button class="table-sort" data-sort="sort-fail">失败数</button></th>
+                    <th><button class="table-sort" data-sort="sort-avg">平均耗时（秒）</button></th>
+                  </tr>
+                </thead>
+                <tbody id="indexer_list_content" class="table-tbody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  // 当前处理的类型
+  var currType = "";
+
+  // 保存配置
+  function save_config(type, func, test) {
+    currType = type;
+    let params = {};
+    if (type !== "builtin") {
+      params = input_select_GetVal(`modal-${type}`);
+      params['test'] = test || false;
+      params['pt.search_indexer'] = type;
+      ajax_post("update_config", params, func);
+    } else {
+      let sites = select_GetSelectedVAL("^indexer_sites");
+      let params = {
+        key: "UserIndexerSites",
+        value: sites
+      }
+      ajax_post("set_system_config", params, func);
+    }
+  }
+
+  //保存配置、关闭和刷新页面
+  function save_indexer_config(type) {
+    $(`#modal-${type}`).modal('hide');
+    save_config(type, function (ret) {
+      window_history_refresh();
+    });
+  }
+
+  //保存配置和测试配置
+  function test_indexer_config(type) {
+    $(`#${type}_test_btn`).text("测试中...").attr("disabled", true);
+    save_config(type, function (ret) {
+      let command;
+      {% for Type, Indexer in IndexerConf.items() %}
+      if (currType === "{{ Type }}") {
+        command = "{{ Indexer.test_command }}";
+      }
+      {% endfor %}
+      ajax_post("test_connection", {"command": command}, function (ret) {
+        if (ret.code === 0) {
+          $(`#${currType}_test_btn`).text("测试成功").attr("disabled", false);
+        } else {
+          $(`#${currType}_test_btn`).text("测试失败！").attr("disabled", false);
+        }
+      });
+    }, true);
+  }
+
+  // 显示索引统计
+  function show_indexer_statistics_modal(){
+    $("#modal-indexer-statistics").modal("show");
+  }
+
+</script>
+
+<script type="text/javascript">
+
+  var indexer_chat = undefined;
+
+  function init_indexer_chart() {
+
+    // 请求数据
+    ajax_post("get_indexer_statistics", {}, function(ret){
+
+      // 饼图
+      if (typeof (indexer_chat) != 'undefined')
+        indexer_chat.dispose();
+
+      indexer_chat = echarts.init($('#indexer_chart_content')[0], null, {
+        height: 300
+      });
+
+      let options = {
+        tooltip: {
+          trigger: 'item', valueFormatter: value => value + " 秒"
+        },
+        dataset: {
+          source: ret.dataset.filter(item => {
+            return (item[1] > 0 || item[1] === 'avg')
+          })
+        },
+        series: [
+          {
+            type: 'pie',
+            encode: {
+              itemName: 'indexer',
+              value: 'avg'
+            },
+            label: {
+              formatter: function (params) {
+                return params.name + ': ' + params.value[params.encode.value[0]] + " 秒";
+              }
+            }, emptyCircleStyle: {
+              color: 'transparent',
+              borderColor: '#ddd',
+              borderWidth: 1
+            }
+          }
+        ]
+      };
+      indexer_chat.setOption(options);
+
+      // 列表
+      let html = "";
+      for (let item of ret.data) {
+        html = `${html}
+                <tr>
+                  <td class="sort-name" data-name="${item.name}">${item.name}</td>
+                  <td class="sort-total" data-total="${item.total}">${item.total}</td>
+                  <td class="sort-fail" data-fail="${item.fail}">${item.fail}</td>
+                  <td class="sort-avg" data-avg="${item.avg}">${item.avg}</td>
+                </tr>
+                `
+      }
+      if (html) {
+        $("#indexer_list_content").html(html);
+      } else {
+        $("#indexer_list_content").html(`<tr><td colspan="4"></td></tr>`);
+      }
+
+      let tableDataList = new List('table-indexer-list', {
+        sortClass: 'table-sort',
+        listClass: 'table-tbody',
+        valueNames: ['sort-name', 'sort-total', 'sort-fail', 'sort-avg',
+          {attr: 'data-name', name: 'sort-name'},
+          {attr: 'data-total', name: 'sort-total'},
+          {attr: 'data-fail', name: 'sort-fail'},
+          {attr: 'data-avg', name: 'sort-avg'}
+        ]
+      });
+
+    });
+
+  }
+
+  $(document).ready(function () {
+    // 加载图表
+    $('#modal-indexer-statistics').off('shown.bs.modal').on('shown.bs.modal', function (e) {
+      init_indexer_chart();
+    });
+  });
+
+</script>

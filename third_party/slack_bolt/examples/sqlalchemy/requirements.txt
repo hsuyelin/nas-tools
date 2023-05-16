@@ -1,0 +1,3 @@
+slack_bolt>=0.6
+Flask>1
+SQLAlchemy

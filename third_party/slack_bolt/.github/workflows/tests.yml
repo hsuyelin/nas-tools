@@ -1,0 +1,84 @@
+name: Run all the unit tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    # Avoiding -latest due to https://github.com/actions/setup-python/issues/162
+    runs-on: ubuntu-20.04
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
+    env:
+      # default: multiprocessing
+      # threading is more stable on GitHub Actions
+      BOLT_PYTHON_MOCK_SERVER_MODE: threading
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python setup.py install
+          pip install -U pip
+          pip install -e ".[testing_without_asyncio]"
+      - name: Run tests without aiohttp
+        run: |
+          pytest tests/slack_bolt/
+          pytest tests/scenario_tests/
+      - name: Run tests for Socket Mode adapters
+        run: |
+          pip install -e ".[adapter]"
+          pip install -e ".[adapter_testing]"
+          pytest tests/adapter_tests/socket_mode/
+      - name: Run tests for HTTP Mode adapters (AWS)
+        run: |
+          pytest tests/adapter_tests/aws/
+      - name: Run tests for HTTP Mode adapters (Bottle)
+        run: |
+          pytest tests/adapter_tests/bottle/
+      - name: Run tests for HTTP Mode adapters (CherryPy)
+        run: |
+          pytest tests/adapter_tests/cherrypy/
+      - name: Run tests for HTTP Mode adapters (Django)
+        run: |
+          pytest tests/adapter_tests/django/
+      - name: Run tests for HTTP Mode adapters (Falcon 3.x)
+        run: |
+          pytest tests/adapter_tests/falcon/
+      - name: Run tests for HTTP Mode adapters (Falcon 2.x)
+        run: |
+          # Falcon 2.x does not support Python 3.11 or newer
+          # See also: https://github.com/slackapi/bolt-python/issues/757
+          if [ ${{ matrix.python-version }} != "3.11" ]; then
+            pip install "falcon<3"
+            pytest tests/adapter_tests/falcon/
+          fi
+      - name: Run tests for HTTP Mode adapters (Flask)
+        run: |
+          pytest tests/adapter_tests/flask/
+      - name: Run tests for HTTP Mode adapters (Pyramid)
+        run: |
+          pytest tests/adapter_tests/pyramid/
+      - name: Run tests for HTTP Mode adapters (Starlette)
+        run: |
+          pytest tests/adapter_tests/starlette/
+      - name: Run tests for HTTP Mode adapters (Tornado)
+        run: |
+          pytest tests/adapter_tests/tornado/
+      - name: Run tests for HTTP Mode adapters (asyncio-based libraries)
+        run: |
+          pip install -e ".[async]"
+          # Falcon supports Python 3.11 since its v3.1.1
+          pip install "falcon>=3.1.1,<4"
+          pytest tests/adapter_tests_async/
+      - name: Run tests for HTTP Mode adapters (ASGI)
+        run: |
+          # Requires async test dependencies
+          pytest tests/adapter_tests/asgi/

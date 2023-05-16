@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>slack_bolt.context API documentation</title>
+<meta name="description" content="All listeners have access to a context dictionary, which can be used to enrich events with additional information.
+Bolt automatically attaches …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>slack_bolt.context</code></h1>
+</header>
+<section id="section-intro">
+<p>All listeners have access to a context dictionary, which can be used to enrich events with additional information.
+Bolt automatically attaches information that is included in the incoming event,
+like <code>user_id</code>, <code>team_id</code>, <code>channel_id</code>, and <code>enterprise_id</code>.</p>
+<p>Refer to <a href="https://slack.dev/bolt-python/concepts#context">https://slack.dev/bolt-python/concepts#context</a> for details.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;All listeners have access to a context dictionary, which can be used to enrich events with additional information.
+Bolt automatically attaches information that is included in the incoming event,
+like `user_id`, `team_id`, `channel_id`, and `enterprise_id`.
+
+Refer to https://slack.dev/bolt-python/concepts#context for details.
+&#34;&#34;&#34;
+
+# Don&#39;t add async module imports here
+from .context import BoltContext
+
+__all__ = [
+    &#34;BoltContext&#34;,
+]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="slack_bolt.context.ack" href="ack/index.html">slack_bolt.context.ack</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.context.async_context" href="async_context.html">slack_bolt.context.async_context</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.context.base_context" href="base_context.html">slack_bolt.context.base_context</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.context.context" href="context.html">slack_bolt.context.context</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.context.respond" href="respond/index.html">slack_bolt.context.respond</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.context.say" href="say/index.html">slack_bolt.context.say</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="slack_bolt.context.BoltContext"><code class="flex name class">
+<span>class <span class="ident">BoltContext</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Context object associated with a request from Slack.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class BoltContext(BaseContext):
+    &#34;&#34;&#34;Context object associated with a request from Slack.&#34;&#34;&#34;
+
+    def to_copyable(self) -&gt; &#34;BoltContext&#34;:
+        new_dict = {}
+        for prop_name, prop_value in self.items():
+            if prop_name in self.standard_property_names:
+                # all the standard properties are copiable
+                new_dict[prop_name] = prop_value
+            else:
+                try:
+                    copied_value = create_copy(prop_value)
+                    new_dict[prop_name] = copied_value
+                except TypeError as te:
+                    self.logger.warning(
+                        f&#34;Skipped setting &#39;{prop_name}&#39; to a copied request for lazy listeners &#34;
+                        &#34;due to a deep-copy creation error. Consider passing the value not as part of context object &#34;
+                        f&#34;(error: {te})&#34;
+                    )
+        return BoltContext(new_dict)
+
+    @property
+    def client(self) -&gt; Optional[WebClient]:
+        &#34;&#34;&#34;The `WebClient` instance available for this request.
+
+            @app.event(&#34;app_mention&#34;)
+            def handle_events(context):
+                context.client.chat_postMessage(
+                    channel=context.channel_id,
+                    text=&#34;Thanks!&#34;,
+                )
+
+            # You can access &#34;client&#34; this way too.
+            @app.event(&#34;app_mention&#34;)
+            def handle_events(client, context):
+                client.chat_postMessage(
+                    channel=context.channel_id,
+                    text=&#34;Thanks!&#34;,
+                )
+
+        Returns:
+            `WebClient` instance
+        &#34;&#34;&#34;
+        if &#34;client&#34; not in self:
+            self[&#34;client&#34;] = WebClient(token=None)
+        return self[&#34;client&#34;]
+
+    @property
+    def ack(self) -&gt; Ack:
+        &#34;&#34;&#34;`ack()` function for this request.
+
+            @app.action(&#34;button&#34;)
+            def handle_button_clicks(context):
+                context.ack()
+
+            # You can access &#34;ack&#34; this way too.
+            @app.action(&#34;button&#34;)
+            def handle_button_clicks(ack):
+                ack()
+
+        Returns:
+            Callable `ack()` function
+        &#34;&#34;&#34;
+        if &#34;ack&#34; not in self:
+            self[&#34;ack&#34;] = Ack()
+        return self[&#34;ack&#34;]
+
+    @property
+    def say(self) -&gt; Say:
+        &#34;&#34;&#34;`say()` function for this request.
+
+            @app.action(&#34;button&#34;)
+            def handle_button_clicks(context):
+                context.ack()
+                context.say(&#34;Hi!&#34;)
+
+            # You can access &#34;ack&#34; this way too.
+            @app.action(&#34;button&#34;)
+            def handle_button_clicks(ack, say):
+                ack()
+                say(&#34;Hi!&#34;)
+
+        Returns:
+            Callable `say()` function
+        &#34;&#34;&#34;
+        if &#34;say&#34; not in self:
+            self[&#34;say&#34;] = Say(client=self.client, channel=self.channel_id)
+        return self[&#34;say&#34;]
+
+    @property
+    def respond(self) -&gt; Optional[Respond]:
+        &#34;&#34;&#34;`respond()` function for this request.
+
+            @app.action(&#34;button&#34;)
+            def handle_button_clicks(context):
+                context.ack()
+                context.respond(&#34;Hi!&#34;)
+
+            # You can access &#34;ack&#34; this way too.
+            @app.action(&#34;button&#34;)
+            def handle_button_clicks(ack, respond):
+                ack()
+                respond(&#34;Hi!&#34;)
+
+        Returns:
+            Callable `respond()` function
+        &#34;&#34;&#34;
+        if &#34;respond&#34; not in self:
+            self[&#34;respond&#34;] = Respond(
+                response_url=self.response_url,
+                proxy=self.client.proxy,
+                ssl=self.client.ssl,
+            )
+        return self[&#34;respond&#34;]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="slack_bolt.context.base_context.BaseContext" href="base_context.html#slack_bolt.context.base_context.BaseContext">BaseContext</a></li>
+<li>builtins.dict</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="slack_bolt.context.BoltContext.ack"><code class="name">var <span class="ident">ack</span> : <a title="slack_bolt.context.ack.ack.Ack" href="ack/ack.html#slack_bolt.context.ack.ack.Ack">Ack</a></code></dt>
+<dd>
+<div class="desc"><p><code><a title="slack_bolt.context.ack" href="ack/index.html">slack_bolt.context.ack</a></code> function for this request.</p>
+<pre><code>@app.action("button")
+def handle_button_clicks(context):
+    context.ack()
+
+# You can access "ack" this way too.
+@app.action("button")
+def handle_button_clicks(ack):
+    ack()
+</code></pre>
+<h2 id="returns">Returns</h2>
+<p>Callable <code><a title="slack_bolt.context.ack" href="ack/index.html">slack_bolt.context.ack</a></code> function</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def ack(self) -&gt; Ack:
+    &#34;&#34;&#34;`ack()` function for this request.
+
+        @app.action(&#34;button&#34;)
+        def handle_button_clicks(context):
+            context.ack()
+
+        # You can access &#34;ack&#34; this way too.
+        @app.action(&#34;button&#34;)
+        def handle_button_clicks(ack):
+            ack()
+
+    Returns:
+        Callable `ack()` function
+    &#34;&#34;&#34;
+    if &#34;ack&#34; not in self:
+        self[&#34;ack&#34;] = Ack()
+    return self[&#34;ack&#34;]</code></pre>
+</details>
+</dd>
+<dt id="slack_bolt.context.BoltContext.client"><code class="name">var <span class="ident">client</span> : Optional[slack_sdk.web.client.WebClient]</code></dt>
+<dd>
+<div class="desc"><p>The <code>WebClient</code> instance available for this request.</p>
+<pre><code>@app.event("app_mention")
+def handle_events(context):
+    context.client.chat_postMessage(
+        channel=context.channel_id,
+        text="Thanks!",
+    )
+
+# You can access "client" this way too.
+@app.event("app_mention")
+def handle_events(client, context):
+    client.chat_postMessage(
+        channel=context.channel_id,
+        text="Thanks!",
+    )
+</code></pre>
+<h2 id="returns">Returns</h2>
+<p><code>WebClient</code> instance</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def client(self) -&gt; Optional[WebClient]:
+    &#34;&#34;&#34;The `WebClient` instance available for this request.
+
+        @app.event(&#34;app_mention&#34;)
+        def handle_events(context):
+            context.client.chat_postMessage(
+                channel=context.channel_id,
+                text=&#34;Thanks!&#34;,
+            )
+
+        # You can access &#34;client&#34; this way too.
+        @app.event(&#34;app_mention&#34;)
+        def handle_events(client, context):
+            client.chat_postMessage(
+                channel=context.channel_id,
+                text=&#34;Thanks!&#34;,
+            )
+
+    Returns:
+        `WebClient` instance
+    &#34;&#34;&#34;
+    if &#34;client&#34; not in self:
+        self[&#34;client&#34;] = WebClient(token=None)
+    return self[&#34;client&#34;]</code></pre>
+</details>
+</dd>
+<dt id="slack_bolt.context.BoltContext.respond"><code class="name">var <span class="ident">respond</span> : Optional[<a title="slack_bolt.context.respond.respond.Respond" href="respond/respond.html#slack_bolt.context.respond.respond.Respond">Respond</a>]</code></dt>
+<dd>
+<div class="desc"><p><code><a title="slack_bolt.context.respond" href="respond/index.html">slack_bolt.context.respond</a></code> function for this request.</p>
+<pre><code>@app.action("button")
+def handle_button_clicks(context):
+    context.ack()
+    context.respond("Hi!")
+
+# You can access "ack" this way too.
+@app.action("button")
+def handle_button_clicks(ack, respond):
+    ack()
+    respond("Hi!")
+</code></pre>
+<h2 id="returns">Returns</h2>
+<p>Callable <code><a title="slack_bolt.context.respond" href="respond/index.html">slack_bolt.context.respond</a></code> function</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def respond(self) -&gt; Optional[Respond]:
+    &#34;&#34;&#34;`respond()` function for this request.
+
+        @app.action(&#34;button&#34;)
+        def handle_button_clicks(context):
+            context.ack()
+            context.respond(&#34;Hi!&#34;)
+
+        # You can access &#34;ack&#34; this way too.
+        @app.action(&#34;button&#34;)
+        def handle_button_clicks(ack, respond):
+            ack()
+            respond(&#34;Hi!&#34;)
+
+    Returns:
+        Callable `respond()` function
+    &#34;&#34;&#34;
+    if &#34;respond&#34; not in self:
+        self[&#34;respond&#34;] = Respond(
+            response_url=self.response_url,
+            proxy=self.client.proxy,
+            ssl=self.client.ssl,
+        )
+    return self[&#34;respond&#34;]</code></pre>
+</details>
+</dd>
+<dt id="slack_bolt.context.BoltContext.say"><code class="name">var <span class="ident">say</span> : <a title="slack_bolt.context.say.say.Say" href="say/say.html#slack_bolt.context.say.say.Say">Say</a></code></dt>
+<dd>
+<div class="desc"><p><code><a title="slack_bolt.context.say" href="say/index.html">slack_bolt.context.say</a></code> function for this request.</p>
+<pre><code>@app.action("button")
+def handle_button_clicks(context):
+    context.ack()
+    context.say("Hi!")
+
+# You can access "ack" this way too.
+@app.action("button")
+def handle_button_clicks(ack, say):
+    ack()
+    say("Hi!")
+</code></pre>
+<h2 id="returns">Returns</h2>
+<p>Callable <code><a title="slack_bolt.context.say" href="say/index.html">slack_bolt.context.say</a></code> function</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def say(self) -&gt; Say:
+    &#34;&#34;&#34;`say()` function for this request.
+
+        @app.action(&#34;button&#34;)
+        def handle_button_clicks(context):
+            context.ack()
+            context.say(&#34;Hi!&#34;)
+
+        # You can access &#34;ack&#34; this way too.
+        @app.action(&#34;button&#34;)
+        def handle_button_clicks(ack, say):
+            ack()
+            say(&#34;Hi!&#34;)
+
+    Returns:
+        Callable `say()` function
+    &#34;&#34;&#34;
+    if &#34;say&#34; not in self:
+        self[&#34;say&#34;] = Say(client=self.client, channel=self.channel_id)
+    return self[&#34;say&#34;]</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="slack_bolt.context.BoltContext.to_copyable"><code class="name flex">
+<span>def <span class="ident">to_copyable</span></span>(<span>self) ‑> <a title="slack_bolt.context.context.BoltContext" href="context.html#slack_bolt.context.context.BoltContext">BoltContext</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def to_copyable(self) -&gt; &#34;BoltContext&#34;:
+    new_dict = {}
+    for prop_name, prop_value in self.items():
+        if prop_name in self.standard_property_names:
+            # all the standard properties are copiable
+            new_dict[prop_name] = prop_value
+        else:
+            try:
+                copied_value = create_copy(prop_value)
+                new_dict[prop_name] = copied_value
+            except TypeError as te:
+                self.logger.warning(
+                    f&#34;Skipped setting &#39;{prop_name}&#39; to a copied request for lazy listeners &#34;
+                    &#34;due to a deep-copy creation error. Consider passing the value not as part of context object &#34;
+                    f&#34;(error: {te})&#34;
+                )
+    return BoltContext(new_dict)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="slack_bolt.context.base_context.BaseContext" href="base_context.html#slack_bolt.context.base_context.BaseContext">BaseContext</a></b></code>:
+<ul class="hlist">
+<li><code><a title="slack_bolt.context.base_context.BaseContext.actor_enterprise_id" href="base_context.html#slack_bolt.context.base_context.BaseContext.actor_enterprise_id">actor_enterprise_id</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.actor_team_id" href="base_context.html#slack_bolt.context.base_context.BaseContext.actor_team_id">actor_team_id</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.actor_user_id" href="base_context.html#slack_bolt.context.base_context.BaseContext.actor_user_id">actor_user_id</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.authorize_result" href="base_context.html#slack_bolt.context.base_context.BaseContext.authorize_result">authorize_result</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.bot_id" href="base_context.html#slack_bolt.context.base_context.BaseContext.bot_id">bot_id</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.bot_token" href="base_context.html#slack_bolt.context.base_context.BaseContext.bot_token">bot_token</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.bot_user_id" href="base_context.html#slack_bolt.context.base_context.BaseContext.bot_user_id">bot_user_id</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.channel_id" href="base_context.html#slack_bolt.context.base_context.BaseContext.channel_id">channel_id</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.enterprise_id" href="base_context.html#slack_bolt.context.base_context.BaseContext.enterprise_id">enterprise_id</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.is_enterprise_install" href="base_context.html#slack_bolt.context.base_context.BaseContext.is_enterprise_install">is_enterprise_install</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.logger" href="base_context.html#slack_bolt.context.base_context.BaseContext.logger">logger</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.matches" href="base_context.html#slack_bolt.context.base_context.BaseContext.matches">matches</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.response_url" href="base_context.html#slack_bolt.context.base_context.BaseContext.response_url">response_url</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.team_id" href="base_context.html#slack_bolt.context.base_context.BaseContext.team_id">team_id</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.token" href="base_context.html#slack_bolt.context.base_context.BaseContext.token">token</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.user_id" href="base_context.html#slack_bolt.context.base_context.BaseContext.user_id">user_id</a></code></li>
+<li><code><a title="slack_bolt.context.base_context.BaseContext.user_token" href="base_context.html#slack_bolt.context.base_context.BaseContext.user_token">user_token</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="slack_bolt" href="../index.html">slack_bolt</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="slack_bolt.context.ack" href="ack/index.html">slack_bolt.context.ack</a></code></li>
+<li><code><a title="slack_bolt.context.async_context" href="async_context.html">slack_bolt.context.async_context</a></code></li>
+<li><code><a title="slack_bolt.context.base_context" href="base_context.html">slack_bolt.context.base_context</a></code></li>
+<li><code><a title="slack_bolt.context.context" href="context.html">slack_bolt.context.context</a></code></li>
+<li><code><a title="slack_bolt.context.respond" href="respond/index.html">slack_bolt.context.respond</a></code></li>
+<li><code><a title="slack_bolt.context.say" href="say/index.html">slack_bolt.context.say</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="slack_bolt.context.BoltContext" href="#slack_bolt.context.BoltContext">BoltContext</a></code></h4>
+<ul class="">
+<li><code><a title="slack_bolt.context.BoltContext.ack" href="#slack_bolt.context.BoltContext.ack">ack</a></code></li>
+<li><code><a title="slack_bolt.context.BoltContext.client" href="#slack_bolt.context.BoltContext.client">client</a></code></li>
+<li><code><a title="slack_bolt.context.BoltContext.respond" href="#slack_bolt.context.BoltContext.respond">respond</a></code></li>
+<li><code><a title="slack_bolt.context.BoltContext.say" href="#slack_bolt.context.BoltContext.say">say</a></code></li>
+<li><code><a title="slack_bolt.context.BoltContext.to_copyable" href="#slack_bolt.context.BoltContext.to_copyable">to_copyable</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

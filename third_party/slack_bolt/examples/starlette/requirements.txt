@@ -1,0 +1,2 @@
+starlette>=0.13,<1
+uvicorn<1

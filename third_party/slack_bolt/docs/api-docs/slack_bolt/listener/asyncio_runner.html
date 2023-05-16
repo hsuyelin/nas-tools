@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>slack_bolt.listener.asyncio_runner API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>slack_bolt.listener.asyncio_runner</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import asyncio
+import time
+from asyncio import Future
+from logging import Logger
+from typing import Optional, Callable, Awaitable
+
+from slack_bolt.context.ack.async_ack import AsyncAck
+from slack_bolt.lazy_listener.async_runner import AsyncLazyListenerRunner
+from slack_bolt.listener.async_listener import AsyncListener
+from slack_bolt.listener.async_listener_start_handler import (
+    AsyncListenerStartHandler,
+)
+from slack_bolt.listener.async_listener_completion_handler import (
+    AsyncListenerCompletionHandler,
+)
+from slack_bolt.listener.async_listener_error_handler import AsyncListenerErrorHandler
+from slack_bolt.logger.messages import (
+    debug_responding,
+    debug_running_lazy_listener,
+    warning_did_not_call_ack,
+)
+from slack_bolt.request.async_request import AsyncBoltRequest
+from slack_bolt.response import BoltResponse
+from slack_bolt.util.utils import create_copy, get_name_for_callable
+
+
+class AsyncioListenerRunner:
+    logger: Logger
+    process_before_response: bool
+    listener_error_handler: AsyncListenerErrorHandler
+    listener_start_handler: AsyncListenerStartHandler
+    listener_completion_handler: AsyncListenerCompletionHandler
+    lazy_listener_runner: AsyncLazyListenerRunner
+
+    def __init__(
+        self,
+        logger: Logger,
+        process_before_response: bool,
+        listener_error_handler: AsyncListenerErrorHandler,
+        listener_start_handler: AsyncListenerStartHandler,
+        listener_completion_handler: AsyncListenerCompletionHandler,
+        lazy_listener_runner: AsyncLazyListenerRunner,
+    ):
+        self.logger = logger
+        self.process_before_response = process_before_response
+        self.listener_error_handler = listener_error_handler
+        self.listener_start_handler = listener_start_handler
+        self.listener_completion_handler = listener_completion_handler
+        self.lazy_listener_runner = lazy_listener_runner
+
+    async def run(
+        self,
+        request: AsyncBoltRequest,
+        response: BoltResponse,
+        listener_name: str,
+        listener: AsyncListener,
+        starting_time: Optional[float] = None,
+    ) -&gt; Optional[BoltResponse]:
+        ack = request.context.ack
+        starting_time = starting_time if starting_time is not None else time.time()
+        if self.process_before_response:
+            if not request.lazy_only:
+                try:
+                    await self.listener_start_handler.handle(request=request, response=response)
+                    returned_value = await listener.run_ack_function(request=request, response=response)
+                    if isinstance(returned_value, BoltResponse):
+                        response = returned_value
+                    if ack.response is None and listener.auto_acknowledgement:
+                        await ack()  # automatic ack() call if the call is not yet done
+                except Exception as e:
+                    # The default response status code is 500 in this case.
+                    # You can customize this by passing your own error handler.
+                    if response is None:
+                        response = BoltResponse(status=500)
+                    response.status = 500
+                    await self.listener_error_handler.handle(
+                        error=e,
+                        request=request,
+                        response=response,
+                    )
+                    ack.response = response
+                finally:
+                    await self.listener_completion_handler.handle(request=request, response=response)
+
+            for lazy_func in listener.lazy_functions:
+                if request.lazy_function_name:
+                    func_name = get_name_for_callable(lazy_func)
+                    if func_name == request.lazy_function_name:
+                        await self.lazy_listener_runner.run(function=lazy_func, request=request)
+                        # This HTTP response won&#39;t be sent to Slack API servers.
+                        return BoltResponse(status=200)
+                    else:
+                        continue
+                else:
+                    self._start_lazy_function(lazy_func, request)
+
+            if response is not None:
+                self._debug_log_completion(starting_time, response)
+                return response
+            elif ack.response is not None:
+                self._debug_log_completion(starting_time, ack.response)
+                return ack.response
+        else:
+            if listener.auto_acknowledgement:
+                # acknowledge immediately in case of Events API
+                await ack()
+
+            if not request.lazy_only:
+                # start the listener function asynchronously
+                # NOTE: intentionally
+                async def run_ack_function_asynchronously(
+                    ack: AsyncAck,
+                    request: AsyncBoltRequest,
+                    response: BoltResponse,
+                ):
+                    try:
+                        await self.listener_start_handler.handle(request=request, response=response)
+                        await listener.run_ack_function(request=request, response=response)
+                    except Exception as e:
+                        # The default response status code is 500 in this case.
+                        # You can customize this by passing your own error handler.
+                        if response is None:
+                            response = BoltResponse(status=500)
+                        response.status = 500
+                        if ack.response is not None:  # already acknowledged
+                            response = None
+
+                        await self.listener_error_handler.handle(
+                            error=e,
+                            request=request,
+                            response=response,
+                        )
+                        ack.response = response
+                    finally:
+                        await self.listener_completion_handler.handle(request=request, response=response)
+
+                _f: Future = asyncio.ensure_future(run_ack_function_asynchronously(ack, request, response))
+
+            for lazy_func in listener.lazy_functions:
+                if request.lazy_function_name:
+                    func_name = get_name_for_callable(lazy_func)
+                    if func_name == request.lazy_function_name:
+                        await self.lazy_listener_runner.run(function=lazy_func, request=request)
+                        # This HTTP response won&#39;t be sent to Slack API servers.
+                        return BoltResponse(status=200)
+                    else:
+                        continue
+                else:
+                    self._start_lazy_function(lazy_func, request)
+
+            # await for the completion of ack() in the async listener execution
+            while ack.response is None and time.time() - starting_time &lt;= 3:
+                await asyncio.sleep(0.01)
+
+            if response is None and ack.response is None:
+                self.logger.warning(warning_did_not_call_ack(listener_name))
+                return None
+
+            if response is None and ack.response is not None:
+                response = ack.response
+                self._debug_log_completion(starting_time, response)
+                return response
+
+            if response is not None:
+                return response
+
+        # None for both means no ack() in the listener
+        return None
+
+    def _start_lazy_function(self, lazy_func: Callable[..., Awaitable[None]], request: AsyncBoltRequest) -&gt; None:
+        # Start a lazy function asynchronously
+        func_name: str = get_name_for_callable(lazy_func)
+        self.logger.debug(debug_running_lazy_listener(func_name))
+        copied_request = self._build_lazy_request(request, func_name)
+        self.lazy_listener_runner.start(function=lazy_func, request=copied_request)
+
+    @staticmethod
+    def _build_lazy_request(request: AsyncBoltRequest, lazy_func_name: str) -&gt; AsyncBoltRequest:
+        copied_request = create_copy(request.to_copyable())
+        copied_request.method = &#34;NONE&#34;
+        copied_request.lazy_only = True
+        copied_request.lazy_function_name = lazy_func_name
+        return copied_request
+
+    def _debug_log_completion(self, starting_time: float, response: BoltResponse) -&gt; None:
+        millis = int((time.time() - starting_time) * 1000)
+        self.logger.debug(debug_responding(response.status, response.body, millis))</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner"><code class="flex name class">
+<span>class <span class="ident">AsyncioListenerRunner</span></span>
+<span>(</span><span>logger: logging.Logger, process_before_response: bool, listener_error_handler: <a title="slack_bolt.listener.async_listener_error_handler.AsyncListenerErrorHandler" href="async_listener_error_handler.html#slack_bolt.listener.async_listener_error_handler.AsyncListenerErrorHandler">AsyncListenerErrorHandler</a>, listener_start_handler: <a title="slack_bolt.listener.async_listener_start_handler.AsyncListenerStartHandler" href="async_listener_start_handler.html#slack_bolt.listener.async_listener_start_handler.AsyncListenerStartHandler">AsyncListenerStartHandler</a>, listener_completion_handler: <a title="slack_bolt.listener.async_listener_completion_handler.AsyncListenerCompletionHandler" href="async_listener_completion_handler.html#slack_bolt.listener.async_listener_completion_handler.AsyncListenerCompletionHandler">AsyncListenerCompletionHandler</a>, lazy_listener_runner: <a title="slack_bolt.lazy_listener.async_runner.AsyncLazyListenerRunner" href="../lazy_listener/async_runner.html#slack_bolt.lazy_listener.async_runner.AsyncLazyListenerRunner">AsyncLazyListenerRunner</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncioListenerRunner:
+    logger: Logger
+    process_before_response: bool
+    listener_error_handler: AsyncListenerErrorHandler
+    listener_start_handler: AsyncListenerStartHandler
+    listener_completion_handler: AsyncListenerCompletionHandler
+    lazy_listener_runner: AsyncLazyListenerRunner
+
+    def __init__(
+        self,
+        logger: Logger,
+        process_before_response: bool,
+        listener_error_handler: AsyncListenerErrorHandler,
+        listener_start_handler: AsyncListenerStartHandler,
+        listener_completion_handler: AsyncListenerCompletionHandler,
+        lazy_listener_runner: AsyncLazyListenerRunner,
+    ):
+        self.logger = logger
+        self.process_before_response = process_before_response
+        self.listener_error_handler = listener_error_handler
+        self.listener_start_handler = listener_start_handler
+        self.listener_completion_handler = listener_completion_handler
+        self.lazy_listener_runner = lazy_listener_runner
+
+    async def run(
+        self,
+        request: AsyncBoltRequest,
+        response: BoltResponse,
+        listener_name: str,
+        listener: AsyncListener,
+        starting_time: Optional[float] = None,
+    ) -&gt; Optional[BoltResponse]:
+        ack = request.context.ack
+        starting_time = starting_time if starting_time is not None else time.time()
+        if self.process_before_response:
+            if not request.lazy_only:
+                try:
+                    await self.listener_start_handler.handle(request=request, response=response)
+                    returned_value = await listener.run_ack_function(request=request, response=response)
+                    if isinstance(returned_value, BoltResponse):
+                        response = returned_value
+                    if ack.response is None and listener.auto_acknowledgement:
+                        await ack()  # automatic ack() call if the call is not yet done
+                except Exception as e:
+                    # The default response status code is 500 in this case.
+                    # You can customize this by passing your own error handler.
+                    if response is None:
+                        response = BoltResponse(status=500)
+                    response.status = 500
+                    await self.listener_error_handler.handle(
+                        error=e,
+                        request=request,
+                        response=response,
+                    )
+                    ack.response = response
+                finally:
+                    await self.listener_completion_handler.handle(request=request, response=response)
+
+            for lazy_func in listener.lazy_functions:
+                if request.lazy_function_name:
+                    func_name = get_name_for_callable(lazy_func)
+                    if func_name == request.lazy_function_name:
+                        await self.lazy_listener_runner.run(function=lazy_func, request=request)
+                        # This HTTP response won&#39;t be sent to Slack API servers.
+                        return BoltResponse(status=200)
+                    else:
+                        continue
+                else:
+                    self._start_lazy_function(lazy_func, request)
+
+            if response is not None:
+                self._debug_log_completion(starting_time, response)
+                return response
+            elif ack.response is not None:
+                self._debug_log_completion(starting_time, ack.response)
+                return ack.response
+        else:
+            if listener.auto_acknowledgement:
+                # acknowledge immediately in case of Events API
+                await ack()
+
+            if not request.lazy_only:
+                # start the listener function asynchronously
+                # NOTE: intentionally
+                async def run_ack_function_asynchronously(
+                    ack: AsyncAck,
+                    request: AsyncBoltRequest,
+                    response: BoltResponse,
+                ):
+                    try:
+                        await self.listener_start_handler.handle(request=request, response=response)
+                        await listener.run_ack_function(request=request, response=response)
+                    except Exception as e:
+                        # The default response status code is 500 in this case.
+                        # You can customize this by passing your own error handler.
+                        if response is None:
+                            response = BoltResponse(status=500)
+                        response.status = 500
+                        if ack.response is not None:  # already acknowledged
+                            response = None
+
+                        await self.listener_error_handler.handle(
+                            error=e,
+                            request=request,
+                            response=response,
+                        )
+                        ack.response = response
+                    finally:
+                        await self.listener_completion_handler.handle(request=request, response=response)
+
+                _f: Future = asyncio.ensure_future(run_ack_function_asynchronously(ack, request, response))
+
+            for lazy_func in listener.lazy_functions:
+                if request.lazy_function_name:
+                    func_name = get_name_for_callable(lazy_func)
+                    if func_name == request.lazy_function_name:
+                        await self.lazy_listener_runner.run(function=lazy_func, request=request)
+                        # This HTTP response won&#39;t be sent to Slack API servers.
+                        return BoltResponse(status=200)
+                    else:
+                        continue
+                else:
+                    self._start_lazy_function(lazy_func, request)
+
+            # await for the completion of ack() in the async listener execution
+            while ack.response is None and time.time() - starting_time &lt;= 3:
+                await asyncio.sleep(0.01)
+
+            if response is None and ack.response is None:
+                self.logger.warning(warning_did_not_call_ack(listener_name))
+                return None
+
+            if response is None and ack.response is not None:
+                response = ack.response
+                self._debug_log_completion(starting_time, response)
+                return response
+
+            if response is not None:
+                return response
+
+        # None for both means no ack() in the listener
+        return None
+
+    def _start_lazy_function(self, lazy_func: Callable[..., Awaitable[None]], request: AsyncBoltRequest) -&gt; None:
+        # Start a lazy function asynchronously
+        func_name: str = get_name_for_callable(lazy_func)
+        self.logger.debug(debug_running_lazy_listener(func_name))
+        copied_request = self._build_lazy_request(request, func_name)
+        self.lazy_listener_runner.start(function=lazy_func, request=copied_request)
+
+    @staticmethod
+    def _build_lazy_request(request: AsyncBoltRequest, lazy_func_name: str) -&gt; AsyncBoltRequest:
+        copied_request = create_copy(request.to_copyable())
+        copied_request.method = &#34;NONE&#34;
+        copied_request.lazy_only = True
+        copied_request.lazy_function_name = lazy_func_name
+        return copied_request
+
+    def _debug_log_completion(self, starting_time: float, response: BoltResponse) -&gt; None:
+        millis = int((time.time() - starting_time) * 1000)
+        self.logger.debug(debug_responding(response.status, response.body, millis))</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.lazy_listener_runner"><code class="name">var <span class="ident">lazy_listener_runner</span> : <a title="slack_bolt.lazy_listener.async_runner.AsyncLazyListenerRunner" href="../lazy_listener/async_runner.html#slack_bolt.lazy_listener.async_runner.AsyncLazyListenerRunner">AsyncLazyListenerRunner</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.listener_completion_handler"><code class="name">var <span class="ident">listener_completion_handler</span> : <a title="slack_bolt.listener.async_listener_completion_handler.AsyncListenerCompletionHandler" href="async_listener_completion_handler.html#slack_bolt.listener.async_listener_completion_handler.AsyncListenerCompletionHandler">AsyncListenerCompletionHandler</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.listener_error_handler"><code class="name">var <span class="ident">listener_error_handler</span> : <a title="slack_bolt.listener.async_listener_error_handler.AsyncListenerErrorHandler" href="async_listener_error_handler.html#slack_bolt.listener.async_listener_error_handler.AsyncListenerErrorHandler">AsyncListenerErrorHandler</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.listener_start_handler"><code class="name">var <span class="ident">listener_start_handler</span> : <a title="slack_bolt.listener.async_listener_start_handler.AsyncListenerStartHandler" href="async_listener_start_handler.html#slack_bolt.listener.async_listener_start_handler.AsyncListenerStartHandler">AsyncListenerStartHandler</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.logger"><code class="name">var <span class="ident">logger</span> : logging.Logger</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.process_before_response"><code class="name">var <span class="ident">process_before_response</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.run"><code class="name flex">
+<span>async def <span class="ident">run</span></span>(<span>self, request: <a title="slack_bolt.request.async_request.AsyncBoltRequest" href="../request/async_request.html#slack_bolt.request.async_request.AsyncBoltRequest">AsyncBoltRequest</a>, response: <a title="slack_bolt.response.response.BoltResponse" href="../response/response.html#slack_bolt.response.response.BoltResponse">BoltResponse</a>, listener_name: str, listener: <a title="slack_bolt.listener.async_listener.AsyncListener" href="async_listener.html#slack_bolt.listener.async_listener.AsyncListener">AsyncListener</a>, starting_time: Optional[float] = None) ‑> Optional[<a title="slack_bolt.response.response.BoltResponse" href="../response/response.html#slack_bolt.response.response.BoltResponse">BoltResponse</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def run(
+    self,
+    request: AsyncBoltRequest,
+    response: BoltResponse,
+    listener_name: str,
+    listener: AsyncListener,
+    starting_time: Optional[float] = None,
+) -&gt; Optional[BoltResponse]:
+    ack = request.context.ack
+    starting_time = starting_time if starting_time is not None else time.time()
+    if self.process_before_response:
+        if not request.lazy_only:
+            try:
+                await self.listener_start_handler.handle(request=request, response=response)
+                returned_value = await listener.run_ack_function(request=request, response=response)
+                if isinstance(returned_value, BoltResponse):
+                    response = returned_value
+                if ack.response is None and listener.auto_acknowledgement:
+                    await ack()  # automatic ack() call if the call is not yet done
+            except Exception as e:
+                # The default response status code is 500 in this case.
+                # You can customize this by passing your own error handler.
+                if response is None:
+                    response = BoltResponse(status=500)
+                response.status = 500
+                await self.listener_error_handler.handle(
+                    error=e,
+                    request=request,
+                    response=response,
+                )
+                ack.response = response
+            finally:
+                await self.listener_completion_handler.handle(request=request, response=response)
+
+        for lazy_func in listener.lazy_functions:
+            if request.lazy_function_name:
+                func_name = get_name_for_callable(lazy_func)
+                if func_name == request.lazy_function_name:
+                    await self.lazy_listener_runner.run(function=lazy_func, request=request)
+                    # This HTTP response won&#39;t be sent to Slack API servers.
+                    return BoltResponse(status=200)
+                else:
+                    continue
+            else:
+                self._start_lazy_function(lazy_func, request)
+
+        if response is not None:
+            self._debug_log_completion(starting_time, response)
+            return response
+        elif ack.response is not None:
+            self._debug_log_completion(starting_time, ack.response)
+            return ack.response
+    else:
+        if listener.auto_acknowledgement:
+            # acknowledge immediately in case of Events API
+            await ack()
+
+        if not request.lazy_only:
+            # start the listener function asynchronously
+            # NOTE: intentionally
+            async def run_ack_function_asynchronously(
+                ack: AsyncAck,
+                request: AsyncBoltRequest,
+                response: BoltResponse,
+            ):
+                try:
+                    await self.listener_start_handler.handle(request=request, response=response)
+                    await listener.run_ack_function(request=request, response=response)
+                except Exception as e:
+                    # The default response status code is 500 in this case.
+                    # You can customize this by passing your own error handler.
+                    if response is None:
+                        response = BoltResponse(status=500)
+                    response.status = 500
+                    if ack.response is not None:  # already acknowledged
+                        response = None
+
+                    await self.listener_error_handler.handle(
+                        error=e,
+                        request=request,
+                        response=response,
+                    )
+                    ack.response = response
+                finally:
+                    await self.listener_completion_handler.handle(request=request, response=response)
+
+            _f: Future = asyncio.ensure_future(run_ack_function_asynchronously(ack, request, response))
+
+        for lazy_func in listener.lazy_functions:
+            if request.lazy_function_name:
+                func_name = get_name_for_callable(lazy_func)
+                if func_name == request.lazy_function_name:
+                    await self.lazy_listener_runner.run(function=lazy_func, request=request)
+                    # This HTTP response won&#39;t be sent to Slack API servers.
+                    return BoltResponse(status=200)
+                else:
+                    continue
+            else:
+                self._start_lazy_function(lazy_func, request)
+
+        # await for the completion of ack() in the async listener execution
+        while ack.response is None and time.time() - starting_time &lt;= 3:
+            await asyncio.sleep(0.01)
+
+        if response is None and ack.response is None:
+            self.logger.warning(warning_did_not_call_ack(listener_name))
+            return None
+
+        if response is None and ack.response is not None:
+            response = ack.response
+            self._debug_log_completion(starting_time, response)
+            return response
+
+        if response is not None:
+            return response
+
+    # None for both means no ack() in the listener
+    return None</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="slack_bolt.listener" href="index.html">slack_bolt.listener</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner" href="#slack_bolt.listener.asyncio_runner.AsyncioListenerRunner">AsyncioListenerRunner</a></code></h4>
+<ul class="">
+<li><code><a title="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.lazy_listener_runner" href="#slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.lazy_listener_runner">lazy_listener_runner</a></code></li>
+<li><code><a title="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.listener_completion_handler" href="#slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.listener_completion_handler">listener_completion_handler</a></code></li>
+<li><code><a title="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.listener_error_handler" href="#slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.listener_error_handler">listener_error_handler</a></code></li>
+<li><code><a title="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.listener_start_handler" href="#slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.listener_start_handler">listener_start_handler</a></code></li>
+<li><code><a title="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.logger" href="#slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.logger">logger</a></code></li>
+<li><code><a title="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.process_before_response" href="#slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.process_before_response">process_before_response</a></code></li>
+<li><code><a title="slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.run" href="#slack_bolt.listener.asyncio_runner.AsyncioListenerRunner.run">run</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

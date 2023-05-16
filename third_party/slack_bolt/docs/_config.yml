@@ -1,0 +1,72 @@
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
+title: Bolt
+description: >-
+  A framework that makes Slack app development fast and straight-forward. 
+  With a single interface for Slack’s Web API, Events API, and interactive features, 
+  Bolt gives you the full power of the Slack platform out of the box.
+baseurl: /bolt-python
+url: https://slack.dev
+
+collections:
+  basic:
+    output: false
+  steps:
+    output: false
+  advanced:
+    output: false
+  tutorials:
+    output: true
+    permalink: /tutorials/:slug
+  future:
+    output: true
+    permalink: /future/:slug
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+
+# Translation strings used in templates - they are typically used using t[page.lang]
+# so it's important to have corresponding strings for each translated language
+t:
+  en:
+    basic: Basic concepts
+    steps: Workflow steps
+    advanced: Advanced concepts
+    start: Getting started
+    contribute: Contributing
+    beta: BETA
+    legacy: LEGACY
+  ja-jp:
+    basic: 基本的な概念
+    steps: ワークフローステップ
+    advanced: 応用コンセプト
+    start: Bolt 入門ガイド
+    contribute: 貢献
+    beta: BETA
+    legacy: LEGACY
+
+# Metadata
+repo_name: bolt-python
+github_username: SlackAPI
+
+code_of_conduct_url: https://slackhq.github.io/code-of-conduct
+cla_url: https://cla-assistant.io/slackapi/bolt-python
+
+google_analytics: UA-56978219-13
+google_tag_manager: GTM-KFZ5MK7
+
+# Build settings
+markdown: kramdown
+kramdown:
+  parse_block_html: true
+  syntax_highlighter_opts:
+    block:
+      line_numbers: true
+plugins:
+  - jemoji
+  - jekyll-redirect-from
+
+repository: slackapi/bolt-python

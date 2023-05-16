@@ -1,0 +1,60 @@
+repos:
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-toml
+      - id: check-yaml
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        additional_dependencies: [toml]
+
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        language_version: python3
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.261
+    hooks:
+      - id: ruff
+        args:
+          - "--fix"
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.2.0
+    hooks:
+      - id: mypy
+        files: '.*\.pyi'
+        additional_dependencies: ["types-requests", "types-six"]
+        args:
+          - "--strict"
+          - "--disallow-any-unimported"
+          - "--disallow-any-expr"
+          - "--disallow-any-decorated"
+          - "--warn-unreachable"
+          - "--warn-unused-ignores"
+          - "--warn-redundant-casts"
+          - "--strict-optional"
+          - "--show-traceback"
+
+  - repo: local
+    hooks:
+      - id: stubtest
+        name: mypy.stubtest
+        language: system
+        entry: stubtest
+        args: [ "qbittorrentapi", "--allowlist=tests/_resources/mypy_stubtest_allowlist.txt" ]
+        pass_filenames: false
+        types_or:
+          - python
+          - text
+        files: '.*\.pyi?'

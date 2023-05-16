@@ -1,0 +1,99 @@
+{% import 'macro/svg.html' as SVG %}
+{% import 'macro/head.html' as HEAD %}
+<!doctype html>
+<html lang="en">
+<head>
+  {{ HEAD.meta_link() }}
+  <title>登录 - NAStool</title>
+  <!-- CSS files -->
+  <link href="../static/css/tabler.min.css" rel="stylesheet"/>
+  <link href="../static/css/style.css" rel="stylesheet"/>
+  <style>
+    .login_background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        background-image: url(data:image/jpg;base64,{{ image_code|safe }});
+        background-size: cover;
+        background-position: center;
+        background-repeat: repeat;
+    }
+    .login_window {
+        background-color: rgba(255,255,255,0.5);
+        -webkit-backdrop-filter: blur(1rem);
+        backdrop-filter: blur(1rem)
+    }
+    .image-desc {
+        background-color: rgba(34,34,34,.8);
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        padding: 5px;
+        z-index: 10;
+        cursor: pointer;
+        margin-bottom: env(safe-area-inset-bottom) !important;
+        margin-left: env(safe-area-inset-left) !important;
+    }
+    .image-link,.image-link:hover {
+        text-decoration: none;
+        color: #fff;
+    }
+  </style>
+</head>
+<body class="d-flex flex-column login_background">
+{% if image_code and img_title %}
+<div class="image-desc card card-md border-0 rounded-3">
+  <a class="image-link" href="{{ img_link }}" target="_blank">
+    {{ SVG.link() }}
+    {{ img_title }}
+  </a>
+</div>
+{% endif %}
+<div class="page page-center">
+  <div class="container-tight py-4">
+    <form class="card card-md border-0 {% if image_code %}login_window{% endif %}" action="/" method="post" autocomplete="off">
+      <input type="hidden" name="next" value="{{ GoPage }}"/>
+      <div class="card-body">
+        <div class="text-center mb-3">
+          <a href="/" class="navbar-brand navbar-brand-autodark">
+            <img src="../static/img/logo/logo-blue.png" height="60" alt="">
+          </a>
+        </div>
+        <label class="form-label">用户名</label>
+        <div class="input-icon mb-3">
+            <span class="input-icon-addon">
+              {{ SVG.user() }}
+            </span>
+          <input type="text" name="username" class="form-control {% if err_msg %}is-invalid{% endif %}"
+                 placeholder="admin" value="" autocomplete="off">
+        </div>
+        <label class="form-label">密码</label>
+        <div class="input-icon">
+            <span class="input-icon-addon">
+              {{ SVG.keyboard() }}
+            </span>
+          <input type="password" class="form-control {% if err_msg %}is-invalid{% endif %}" name="password"
+                 placeholder="password" autocomplete="off">
+        </div>
+        <div class="invalid-feedback mb-3" id="login_retmsg" style="display:block">{{ err_msg }}</div>
+        <div class="mb-3">
+          <label class="form-check">
+            <input type="checkbox" name="remember" class="form-check-input" checked/>
+            <span class="form-check-label">保持登录</span>
+          </label>
+        </div>
+        <div class="form-footer">
+          <button type="submit" class="btn btn-primary w-100">登录</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="../static/js/tabler/tabler.min.js"></script>
+<script src="../static/js/tabler/demo.min.js"></script>
+</body>
+
+</html>

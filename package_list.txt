@@ -1,0 +1,17 @@
+git
+python3-dev
+py3-pip
+tzdata
+zip
+curl
+bash
+fuse3
+xvfb
+inotify-tools
+chromium-chromedriver
+s6-overlay
+ffmpeg
+redis
+wget
+shadow
+sudo

@@ -1,0 +1,44 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [master]
+
+  pull_request:
+    branches: [master]
+
+  schedule:
+    - cron: 0 3 * * 5
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python]
+      # Override automatic language detection by changing the below list
+      # Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - uses: Trim21/setup-poetry@dist/v1
+
+      - uses: Trim21/install-poetry-project@dist/v1
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+          config-file: ./.github/codeql/codeql-config.yaml
+          setup-python-dependencies: false
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2

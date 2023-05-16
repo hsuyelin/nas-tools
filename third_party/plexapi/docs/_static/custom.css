@@ -1,0 +1,17 @@
+@import url("css/theme.css");
+
+.modname {
+    font-size: 0.8em;
+    opacity: 0.4;
+}
+.modname::before {
+    content: '- ';
+}
+.title {
+    font-weight: bold;
+    font-size: 1.2em;
+    background-color: #eee;
+    display: block;
+    padding: 1px 5px;
+    border-left: 2px solid #ddd;
+}

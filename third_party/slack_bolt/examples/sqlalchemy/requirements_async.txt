@@ -1,0 +1,4 @@
+slack_bolt>=0.6
+sanic>=20,<21
+uvicorn<1
+databases[sqlite]

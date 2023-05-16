@@ -1,0 +1,245 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: CI
+
+on:
+  workflow_dispatch: ~
+  pull_request: ~
+  push:
+    branches:
+      - master
+
+env:
+  CACHE_VERSION: 1
+  DEFAULT_PYTHON: 3.7
+
+jobs:
+  lint-flake8:
+    name: Check flake8
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code from Github
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+      id: python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.DEFAULT_PYTHON }}
+
+    - name: Restore Python ${{ env.DEFAULT_PYTHON }} virtual environment
+      id: cache-venv
+      uses: actions/cache@v3.2.6
+      with:
+        path: venv
+        key: >-
+          ${{ env.CACHE_VERSION }}-${{ runner.os }}-venv-${{
+          steps.python.outputs.python-version }}-${{
+          hashFiles('requirements_dev.txt') }}
+        restore-keys: |
+          ${{ env.CACHE_VERSION }}-${{ runner.os }}-venv-${{ steps.python.outputs.python-version }}-
+
+    - name: Create Python virtual environment
+      if: steps.cache-venv.outputs.cache-hit != 'true'
+      run: |
+        python -m venv venv
+        . venv/bin/activate
+        pip install -U pip
+        pip install -r requirements_dev.txt
+        pip install -e .
+
+    - name: Lint with flake8
+      run: |
+        . venv/bin/activate
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 plexapi --count --select=E9,F63,F7,F82 --show-source --statistics
+        # The GitHub editor is 127 chars wide
+        flake8 plexapi --count --max-complexity=12 --max-line-length=127 --statistics
+
+
+  pytest:
+    name: pytest ${{ matrix.python-version }} (${{ matrix.plex }})
+    needs: lint-flake8
+    runs-on: ubuntu-latest
+    env:
+      PLEXAPI_AUTH_SERVER_BASEURL: http://127.0.0.1:32400
+      PLEX_CONTAINER: plexinc/pms-docker
+      PLEX_CONTAINER_TAG: latest
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        python-version: [3.7]
+        plex: ['unclaimed', 'claimed']
+        is-master:
+          - ${{ github.ref == 'refs/heads/master' }}
+        exclude:
+          - is-master: false
+            plex: claimed
+    steps:
+    - name: Check out code from Github
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      id: python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Restore Python ${{ matrix.python-version }} virtual environment
+      id: cache-venv
+      uses: actions/cache@v3.2.6
+      with:
+        path: venv
+        key: >-
+          ${{ env.CACHE_VERSION }}-${{ runner.os }}-venv-${{
+          steps.python.outputs.python-version }}-${{
+          hashFiles('requirements_dev.txt') }}
+        restore-keys: |
+          ${{ env.CACHE_VERSION }}-${{ runner.os }}-venv-${{ steps.python.outputs.python-version }}-
+
+    - name: Create Python virtual environment
+      if: steps.cache-venv.outputs.cache-hit != 'true'
+      run: |
+        python -m venv venv
+        . venv/bin/activate
+        pip install -U pip
+        pip install -r requirements_dev.txt
+        pip install -e .
+
+    - name: Get PMS Docker image digest
+      id: docker-digest
+      run: |
+        mkdir -p ~/.cache/docker/${{ env.PLEX_CONTAINER }}
+        echo "Image: ${{ env.PLEX_CONTAINER }}"
+        echo "Tag: ${{ env.PLEX_CONTAINER_TAG }}"
+        token=$(curl \
+          --silent \
+          "https://auth.docker.io/token?scope=repository:${{ env.PLEX_CONTAINER }}:pull&service=registry.docker.io" \
+          | jq -r '.token')
+        digest=$(curl \
+          --silent \
+          --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+          --header "Authorization: Bearer $token" \
+          "https://registry-1.docker.io/v2/${{ env.PLEX_CONTAINER }}/manifests/${{ env.PLEX_CONTAINER_TAG }}" \
+          | jq -r '.config.digest')
+        echo "Digest: $digest"
+        echo "digest=$digest" >> $GITHUB_OUTPUT
+
+    - name: Cache PMS Docker image
+      id: docker-cache
+      uses: actions/cache@v3.2.6
+      with:
+        path: ~/.cache/docker/plexinc
+        key: ${{ runner.os }}-docker-pms-${{ steps.docker-digest.outputs.digest }}
+
+    - name: Pull PMS Docker image
+      if: steps.docker-cache.outputs.cache-hit != 'true'
+      run: |
+        docker pull ${{ env.PLEX_CONTAINER }}:${{ env.PLEX_CONTAINER_TAG }}
+        docker save -o ~/.cache/docker/${{ env.PLEX_CONTAINER }}-${{ env.PLEX_CONTAINER_TAG }}.tar ${{ env.PLEX_CONTAINER }}:${{ env.PLEX_CONTAINER_TAG }}
+        echo "Saved image: ${{ env.PLEX_CONTAINER }}:${{ env.PLEX_CONTAINER_TAG }}"
+
+    - name: Load PMS Docker image
+      if: steps.docker-cache.outputs.cache-hit == 'true'
+      run: |
+        docker load -i ~/.cache/docker/${{ env.PLEX_CONTAINER }}-${{ env.PLEX_CONTAINER_TAG }}.tar
+
+    - name: Set Plex credentials
+      if: matrix.plex == 'claimed'
+      run: |
+        echo "PLEXAPI_AUTH_SERVER_TOKEN=${{ secrets.PLEXAPI_AUTH_SERVER_TOKEN }}" >> $GITHUB_ENV
+
+    - name: Bootstrap ${{ matrix.plex }} Plex server
+      run: |
+        . venv/bin/activate
+        python \
+          -u tools/plex-bootstraptest.py \
+          --destination plex \
+          --advertise-ip 127.0.0.1 \
+          --bootstrap-timeout 540 \
+          --docker-tag ${{ env.PLEX_CONTAINER_TAG }} \
+          --${{ matrix.plex }}
+
+    - name: Main tests with ${{ matrix.plex }} server
+      env:
+        TEST_ACCOUNT_ONCE: ${{ matrix.plex == 'unclaimed' }}
+      run: |
+        . venv/bin/activate
+        pytest \
+          -rxXs \
+          --ignore=tests/test_sync.py \
+          --tb=native \
+          --verbose \
+          --cov=plexapi \
+          tests 
+
+    - name: Unlink PMS from MyPlex account
+      if: matrix.plex == 'claimed' && always()
+      run: |
+        . venv/bin/activate
+        python -u tools/plex-teardowntest.py
+
+    - name: Upload coverage artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-${{ matrix.plex }}-${{ matrix.python-version }}
+        path: .coverage
+
+
+  coverage:
+    name: Process test coverage (${{ matrix.plex }})
+    runs-on: ubuntu-latest
+    needs: pytest
+    if: always()
+    strategy:
+      matrix:
+        plex: ['unclaimed', 'claimed']
+        is-master:
+          - ${{ github.ref == 'refs/heads/master' }}
+        exclude:
+          - is-master: false
+            plex: claimed
+    steps:
+    - name: Check out code from GitHub
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ env.DEFAULT_PYTHON }}
+      id: python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.DEFAULT_PYTHON }}
+
+    - name: Restore Python ${{ env.DEFAULT_PYTHON }} virtual environment
+      id: cache-venv
+      uses: actions/cache@v3.2.6
+      with:
+        path: venv
+        key: >-
+          ${{ env.CACHE_VERSION}}-${{ runner.os }}-venv-${{
+          steps.python.outputs.python-version }}-${{
+          hashFiles('requirements_dev.txt') }}
+        restore-keys: |
+          ${{ env.CACHE_VERSION}}-${{ runner.os }}-venv-${{ steps.python.outputs.python-version }}-
+
+    - name: Fail job if Python cache restore failed
+      if: steps.cache-venv.outputs.cache-hit != 'true'
+      run: |
+        echo "Failed to restore Python virtual environment from cache"
+        exit 1
+
+    - name: Download all coverage artifacts
+      uses: actions/download-artifact@v3
+
+    - name: Combine ${{ matrix.plex }} coverage results
+      run: |
+        . venv/bin/activate
+        coverage combine coverage-${{ matrix.plex }}*/.coverage*
+        coverage report --fail-under=50
+        coverage xml
+
+    - name: Upload ${{ matrix.plex }} coverage to Codecov
+      uses: codecov/codecov-action@v3.1.1
+      with:
+        flags: ${{ matrix.plex }}

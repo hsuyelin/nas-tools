@@ -1,0 +1,15 @@
+{
+  "version": "2.0",
+  "app_name": "bolt-python-chalice",
+  "stages": {
+    "dev": {
+      "api_gateway_stage": "api",
+      "environment_variables": {
+        "SLACK_BOT_TOKEN": "xoxb-xxx",
+        "SLACK_SIGNING_SECRET": "xxx"
+      },
+      "manage_iam_role": false,
+      "iam_role_arn": "arn:aws:iam::1111111111111:role/bolt_python_lambda_invocation"
+    }
+  }
+}

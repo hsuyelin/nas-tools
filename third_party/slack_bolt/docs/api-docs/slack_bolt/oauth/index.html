@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>slack_bolt.oauth API documentation</title>
+<meta name="description" content="Slack OAuth flow support for building an app that is installable in any workspaces …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>slack_bolt.oauth</code></h1>
+</header>
+<section id="section-intro">
+<p>Slack OAuth flow support for building an app that is installable in any workspaces.</p>
+<p>Refer to <a href="https://slack.dev/bolt-python/concepts#authenticating-oauth">https://slack.dev/bolt-python/concepts#authenticating-oauth</a> for details.</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;Slack OAuth flow support for building an app that is installable in any workspaces.
+
+Refer to https://slack.dev/bolt-python/concepts#authenticating-oauth for details.
+&#34;&#34;&#34;
+
+# Don&#39;t add async module imports here
+from .oauth_flow import OAuthFlow
+
+__all__ = [
+    &#34;OAuthFlow&#34;,
+]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="slack_bolt.oauth.async_callback_options" href="async_callback_options.html">slack_bolt.oauth.async_callback_options</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.oauth.async_internals" href="async_internals.html">slack_bolt.oauth.async_internals</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.oauth.async_oauth_flow" href="async_oauth_flow.html">slack_bolt.oauth.async_oauth_flow</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.oauth.async_oauth_settings" href="async_oauth_settings.html">slack_bolt.oauth.async_oauth_settings</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.oauth.callback_options" href="callback_options.html">slack_bolt.oauth.callback_options</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.oauth.internals" href="internals.html">slack_bolt.oauth.internals</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.oauth.oauth_flow" href="oauth_flow.html">slack_bolt.oauth.oauth_flow</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="slack_bolt.oauth.oauth_settings" href="oauth_settings.html">slack_bolt.oauth.oauth_settings</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="slack_bolt.oauth.OAuthFlow"><code class="flex name class">
+<span>class <span class="ident">OAuthFlow</span></span>
+<span>(</span><span>*, client: Optional[slack_sdk.web.client.WebClient] = None, logger: Optional[logging.Logger] = None, settings: <a title="slack_bolt.oauth.oauth_settings.OAuthSettings" href="oauth_settings.html#slack_bolt.oauth.oauth_settings.OAuthSettings">OAuthSettings</a>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The module to run the Slack app installation flow (OAuth flow).</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>client</code></strong></dt>
+<dd>The <code>slack_sdk.web.WebClient</code> instance.</dd>
+<dt><strong><code>logger</code></strong></dt>
+<dd>The logger.</dd>
+<dt><strong><code>settings</code></strong></dt>
+<dd>OAuth settings to configure this module.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class OAuthFlow:
+    settings: OAuthSettings
+    client_id: str
+    redirect_uri: Optional[str]
+    install_path: str
+    redirect_uri_path: str
+
+    success_handler: Callable[[SuccessArgs], BoltResponse]
+    failure_handler: Callable[[FailureArgs], BoltResponse]
+
+    @property
+    def client(self) -&gt; WebClient:
+        if self._client is None:
+            self._client = create_web_client(logger=self.logger)
+        return self._client
+
+    @property
+    def logger(self) -&gt; Logger:
+        if self._logger is None:
+            self._logger = logging.getLogger(__name__)
+        return self._logger
+
+    def __init__(
+        self,
+        *,
+        client: Optional[WebClient] = None,
+        logger: Optional[Logger] = None,
+        settings: OAuthSettings,
+    ):
+        &#34;&#34;&#34;The module to run the Slack app installation flow (OAuth flow).
+
+        Args:
+            client: The `slack_sdk.web.WebClient` instance.
+            logger: The logger.
+            settings: OAuth settings to configure this module.
+        &#34;&#34;&#34;
+        self._client = client
+        self._logger = logger
+        self.settings = settings
+        self.settings.logger = self._logger
+
+        self.client_id = self.settings.client_id
+        self.redirect_uri = self.settings.redirect_uri
+        self.install_path = self.settings.install_path
+        self.redirect_uri_path = self.settings.redirect_uri_path
+
+        self.default_callback_options = DefaultCallbackOptions(
+            logger=logger,
+            state_utils=self.settings.state_utils,
+            redirect_uri_page_renderer=self.settings.redirect_uri_page_renderer,
+        )
+        if settings.callback_options is None:
+            settings.callback_options = self.default_callback_options
+        self.success_handler = settings.callback_options.success
+        self.failure_handler = settings.callback_options.failure
+
+    # -----------------------------
+    # Factory Methods
+    # -----------------------------
+
+    @classmethod
+    def sqlite3(
+        cls,
+        database: str,
+        # OAuth flow parameters/credentials
+        client_id: Optional[str] = None,  # required
+        client_secret: Optional[str] = None,  # required
+        scopes: Optional[Sequence[str]] = None,
+        user_scopes: Optional[Sequence[str]] = None,
+        redirect_uri: Optional[str] = None,
+        # Handler configuration
+        install_path: Optional[str] = None,
+        redirect_uri_path: Optional[str] = None,
+        callback_options: Optional[CallbackOptions] = None,
+        success_url: Optional[str] = None,
+        failure_url: Optional[str] = None,
+        authorization_url: Optional[str] = None,
+        # Installation Management
+        # state parameter related configurations
+        state_cookie_name: str = OAuthStateUtils.default_cookie_name,
+        state_expiration_seconds: int = OAuthStateUtils.default_expiration_seconds,
+        installation_store_bot_only: bool = False,
+        token_rotation_expiration_minutes: int = 120,
+        client: Optional[WebClient] = None,
+        logger: Optional[Logger] = None,
+    ) -&gt; &#34;OAuthFlow&#34;:
+
+        client_id = client_id or os.environ[&#34;SLACK_CLIENT_ID&#34;]  # required
+        client_secret = client_secret or os.environ[&#34;SLACK_CLIENT_SECRET&#34;]  # required
+        scopes = scopes or os.environ.get(&#34;SLACK_SCOPES&#34;, &#34;&#34;).split(&#34;,&#34;)
+        user_scopes = user_scopes or os.environ.get(&#34;SLACK_USER_SCOPES&#34;, &#34;&#34;).split(&#34;,&#34;)
+        redirect_uri = redirect_uri or os.environ.get(&#34;SLACK_REDIRECT_URI&#34;)
+        return OAuthFlow(
+            client=client or WebClient(),
+            logger=logger,
+            settings=OAuthSettings(
+                # OAuth flow parameters/credentials
+                client_id=client_id,
+                client_secret=client_secret,
+                scopes=scopes,
+                user_scopes=user_scopes,
+                redirect_uri=redirect_uri,
+                # Handler configuration
+                install_path=install_path,
+                redirect_uri_path=redirect_uri_path,
+                callback_options=callback_options,
+                success_url=success_url,
+                failure_url=failure_url,
+                authorization_url=authorization_url,
+                # Installation Management
+                installation_store=SQLite3InstallationStore(
+                    database=database,
+                    client_id=client_id,
+                    logger=logger,
+                ),
+                installation_store_bot_only=installation_store_bot_only,
+                token_rotation_expiration_minutes=token_rotation_expiration_minutes,
+                # state parameter related configurations
+                state_store=SQLite3OAuthStateStore(
+                    database=database,
+                    expiration_seconds=state_expiration_seconds,
+                    logger=logger,
+                ),
+                state_cookie_name=state_cookie_name,
+                state_expiration_seconds=state_expiration_seconds,
+            ),
+        )
+
+    # -----------------------------
+    # Installation
+    # -----------------------------
+
+    def handle_installation(self, request: BoltRequest) -&gt; BoltResponse:
+        set_cookie_value: Optional[str] = None
+        url = self.build_authorize_url(&#34;&#34;, request)
+        if self.settings.state_validation_enabled is True:
+            state = self.issue_new_state(request)
+            url = self.build_authorize_url(state, request)
+            set_cookie_value = self.settings.state_utils.build_set_cookie_for_new_state(state)
+
+        if self.settings.install_page_rendering_enabled:
+            html = self.build_install_page_html(url, request)
+            return BoltResponse(
+                status=200,
+                body=html,
+                headers=self.append_set_cookie_headers(
+                    {&#34;Content-Type&#34;: &#34;text/html; charset=utf-8&#34;},
+                    set_cookie_value,
+                ),
+            )
+        else:
+            return BoltResponse(
+                status=302,
+                body=&#34;&#34;,
+                headers=self.append_set_cookie_headers(
+                    {&#34;Content-Type&#34;: &#34;text/html; charset=utf-8&#34;, &#34;Location&#34;: url},
+                    set_cookie_value,
+                ),
+            )
+
+    # ----------------------
+    # Internal methods for Installation
+
+    def issue_new_state(self, request: BoltRequest) -&gt; str:
+        return self.settings.state_store.issue()
+
+    def build_authorize_url(self, state: str, request: BoltRequest) -&gt; str:
+        team_ids: Optional[Sequence[str]] = request.query.get(&#34;team&#34;)
+        return self.settings.authorize_url_generator.generate(
+            state=state,
+            team=team_ids[0] if team_ids is not None else None,
+        )
+
+    def build_install_page_html(self, url: str, request: BoltRequest) -&gt; str:
+        return _build_default_install_page_html(url)
+
+    def append_set_cookie_headers(self, headers: dict, set_cookie_value: Optional[str]):
+        if set_cookie_value is not None:
+            headers[&#34;Set-Cookie&#34;] = [set_cookie_value]
+        return headers
+
+    # -----------------------------
+    # Callback
+    # -----------------------------
+
+    def handle_callback(self, request: BoltRequest) -&gt; BoltResponse:
+
+        # failure due to end-user&#39;s cancellation or invalid redirection to slack.com
+        error = request.query.get(&#34;error&#34;, [None])[0]
+        if error is not None:
+            return self.failure_handler(
+                FailureArgs(
+                    request=request,
+                    reason=error,
+                    suggested_status_code=200,
+                    settings=self.settings,
+                    default=self.default_callback_options,
+                )
+            )
+
+        # state parameter verification
+        if self.settings.state_validation_enabled is True:
+            state = request.query.get(&#34;state&#34;, [None])[0]
+            if not self.settings.state_utils.is_valid_browser(state, request.headers):
+                return self.failure_handler(
+                    FailureArgs(
+                        request=request,
+                        reason=&#34;invalid_browser&#34;,
+                        suggested_status_code=400,
+                        settings=self.settings,
+                        default=self.default_callback_options,
+                    )
+                )
+
+            valid_state_consumed = self.settings.state_store.consume(state)
+            if not valid_state_consumed:
+                return self.failure_handler(
+                    FailureArgs(
+                        request=request,
+                        reason=&#34;invalid_state&#34;,
+                        suggested_status_code=401,
+                        settings=self.settings,
+                        default=self.default_callback_options,
+                    )
+                )
+
+        # run installation
+        code = request.query.get(&#34;code&#34;, [None])[0]
+        if code is None:
+            return self.failure_handler(
+                FailureArgs(
+                    request=request,
+                    reason=&#34;missing_code&#34;,
+                    suggested_status_code=401,
+                    settings=self.settings,
+                    default=self.default_callback_options,
+                )
+            )
+
+        installation = self.run_installation(code)
+        if installation is None:
+            # failed to run installation with the code
+            return self.failure_handler(
+                FailureArgs(
+                    request=request,
+                    reason=&#34;invalid_code&#34;,
+                    suggested_status_code=401,
+                    settings=self.settings,
+                    default=self.default_callback_options,
+                )
+            )
+
+        # persist the installation
+        try:
+            self.store_installation(request, installation)
+        except BoltError as err:
+            return self.failure_handler(
+                FailureArgs(
+                    request=request,
+                    reason=&#34;storage_error&#34;,
+                    error=err,
+                    suggested_status_code=500,
+                    settings=self.settings,
+                    default=self.default_callback_options,
+                )
+            )
+
+        # display a successful completion page to the end-user
+        return self.success_handler(
+            SuccessArgs(
+                request=request,
+                installation=installation,
+                settings=self.settings,
+                default=self.default_callback_options,
+            )
+        )
+
+    # ----------------------
+    # Internal methods for Callback
+
+    def run_installation(self, code: str) -&gt; Optional[Installation]:
+        try:
+            oauth_response: SlackResponse = self.client.oauth_v2_access(
+                code=code,
+                client_id=self.settings.client_id,
+                client_secret=self.settings.client_secret,
+                redirect_uri=self.settings.redirect_uri,  # can be None
+            )
+            installed_enterprise: Dict[str, str] = oauth_response.get(&#34;enterprise&#34;) or {}
+            is_enterprise_install: bool = oauth_response.get(&#34;is_enterprise_install&#34;) or False
+            installed_team: Dict[str, str] = oauth_response.get(&#34;team&#34;) or {}
+            installer: Dict[str, str] = oauth_response.get(&#34;authed_user&#34;) or {}
+            incoming_webhook: Dict[str, str] = oauth_response.get(&#34;incoming_webhook&#34;) or {}
+
+            bot_token: Optional[str] = oauth_response.get(&#34;access_token&#34;)
+            # NOTE: oauth.v2.access doesn&#39;t include bot_id in response
+            bot_id: Optional[str] = None
+            enterprise_url: Optional[str] = None
+            if bot_token is not None:
+                auth_test = self.client.auth_test(token=bot_token)
+                bot_id = auth_test[&#34;bot_id&#34;]
+                if is_enterprise_install is True:
+                    enterprise_url = auth_test.get(&#34;url&#34;)
+
+            return Installation(
+                app_id=oauth_response.get(&#34;app_id&#34;),
+                enterprise_id=installed_enterprise.get(&#34;id&#34;),
+                enterprise_name=installed_enterprise.get(&#34;name&#34;),
+                enterprise_url=enterprise_url,
+                team_id=installed_team.get(&#34;id&#34;),
+                team_name=installed_team.get(&#34;name&#34;),
+                bot_token=bot_token,
+                bot_id=bot_id,
+                bot_user_id=oauth_response.get(&#34;bot_user_id&#34;),
+                bot_scopes=oauth_response.get(&#34;scope&#34;),  # comma-separated string
+                bot_refresh_token=oauth_response.get(&#34;refresh_token&#34;),  # since v1.7
+                bot_token_expires_in=oauth_response.get(&#34;expires_in&#34;),  # since v1.7
+                user_id=installer.get(&#34;id&#34;),
+                user_token=installer.get(&#34;access_token&#34;),
+                user_scopes=installer.get(&#34;scope&#34;),  # comma-separated string
+                user_refresh_token=installer.get(&#34;refresh_token&#34;),  # since v1.7
+                user_token_expires_in=installer.get(&#34;expires_in&#34;),  # since v1.7
+                incoming_webhook_url=incoming_webhook.get(&#34;url&#34;),
+                incoming_webhook_channel=incoming_webhook.get(&#34;channel&#34;),
+                incoming_webhook_channel_id=incoming_webhook.get(&#34;channel_id&#34;),
+                incoming_webhook_configuration_url=incoming_webhook.get(&#34;configuration_url&#34;),
+                is_enterprise_install=is_enterprise_install,
+                token_type=oauth_response.get(&#34;token_type&#34;),
+            )
+
+        except SlackApiError as e:
+            message = f&#34;Failed to fetch oauth.v2.access result with code: {code} - error: {e}&#34;
+            self.logger.warning(message)
+            return None
+
+    def store_installation(self, request: BoltRequest, installation: Installation):
+        # may raise BoltError
+        self.settings.installation_store.save(installation)</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="slack_bolt.adapter.aws_lambda.lambda_s3_oauth_flow.LambdaS3OAuthFlow" href="../adapter/aws_lambda/lambda_s3_oauth_flow.html#slack_bolt.adapter.aws_lambda.lambda_s3_oauth_flow.LambdaS3OAuthFlow">LambdaS3OAuthFlow</a></li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="slack_bolt.oauth.OAuthFlow.client_id"><code class="name">var <span class="ident">client_id</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.failure_handler"><code class="name">var <span class="ident">failure_handler</span> : Callable[[<a title="slack_bolt.oauth.callback_options.FailureArgs" href="callback_options.html#slack_bolt.oauth.callback_options.FailureArgs">FailureArgs</a>], <a title="slack_bolt.response.response.BoltResponse" href="../response/response.html#slack_bolt.response.response.BoltResponse">BoltResponse</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.install_path"><code class="name">var <span class="ident">install_path</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.redirect_uri"><code class="name">var <span class="ident">redirect_uri</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.redirect_uri_path"><code class="name">var <span class="ident">redirect_uri_path</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.settings"><code class="name">var <span class="ident">settings</span> : <a title="slack_bolt.oauth.oauth_settings.OAuthSettings" href="oauth_settings.html#slack_bolt.oauth.oauth_settings.OAuthSettings">OAuthSettings</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.success_handler"><code class="name">var <span class="ident">success_handler</span> : Callable[[<a title="slack_bolt.oauth.callback_options.SuccessArgs" href="callback_options.html#slack_bolt.oauth.callback_options.SuccessArgs">SuccessArgs</a>], <a title="slack_bolt.response.response.BoltResponse" href="../response/response.html#slack_bolt.response.response.BoltResponse">BoltResponse</a>]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+<h3>Static methods</h3>
+<dl>
+<dt id="slack_bolt.oauth.OAuthFlow.sqlite3"><code class="name flex">
+<span>def <span class="ident">sqlite3</span></span>(<span>database: str, client_id: Optional[str] = None, client_secret: Optional[str] = None, scopes: Optional[Sequence[str]] = None, user_scopes: Optional[Sequence[str]] = None, redirect_uri: Optional[str] = None, install_path: Optional[str] = None, redirect_uri_path: Optional[str] = None, callback_options: Optional[<a title="slack_bolt.oauth.callback_options.CallbackOptions" href="callback_options.html#slack_bolt.oauth.callback_options.CallbackOptions">CallbackOptions</a>] = None, success_url: Optional[str] = None, failure_url: Optional[str] = None, authorization_url: Optional[str] = None, state_cookie_name: str = 'slack-app-oauth-state', state_expiration_seconds: int = 600, installation_store_bot_only: bool = False, token_rotation_expiration_minutes: int = 120, client: Optional[slack_sdk.web.client.WebClient] = None, logger: Optional[logging.Logger] = None) ‑> <a title="slack_bolt.oauth.oauth_flow.OAuthFlow" href="oauth_flow.html#slack_bolt.oauth.oauth_flow.OAuthFlow">OAuthFlow</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@classmethod
+def sqlite3(
+    cls,
+    database: str,
+    # OAuth flow parameters/credentials
+    client_id: Optional[str] = None,  # required
+    client_secret: Optional[str] = None,  # required
+    scopes: Optional[Sequence[str]] = None,
+    user_scopes: Optional[Sequence[str]] = None,
+    redirect_uri: Optional[str] = None,
+    # Handler configuration
+    install_path: Optional[str] = None,
+    redirect_uri_path: Optional[str] = None,
+    callback_options: Optional[CallbackOptions] = None,
+    success_url: Optional[str] = None,
+    failure_url: Optional[str] = None,
+    authorization_url: Optional[str] = None,
+    # Installation Management
+    # state parameter related configurations
+    state_cookie_name: str = OAuthStateUtils.default_cookie_name,
+    state_expiration_seconds: int = OAuthStateUtils.default_expiration_seconds,
+    installation_store_bot_only: bool = False,
+    token_rotation_expiration_minutes: int = 120,
+    client: Optional[WebClient] = None,
+    logger: Optional[Logger] = None,
+) -&gt; &#34;OAuthFlow&#34;:
+
+    client_id = client_id or os.environ[&#34;SLACK_CLIENT_ID&#34;]  # required
+    client_secret = client_secret or os.environ[&#34;SLACK_CLIENT_SECRET&#34;]  # required
+    scopes = scopes or os.environ.get(&#34;SLACK_SCOPES&#34;, &#34;&#34;).split(&#34;,&#34;)
+    user_scopes = user_scopes or os.environ.get(&#34;SLACK_USER_SCOPES&#34;, &#34;&#34;).split(&#34;,&#34;)
+    redirect_uri = redirect_uri or os.environ.get(&#34;SLACK_REDIRECT_URI&#34;)
+    return OAuthFlow(
+        client=client or WebClient(),
+        logger=logger,
+        settings=OAuthSettings(
+            # OAuth flow parameters/credentials
+            client_id=client_id,
+            client_secret=client_secret,
+            scopes=scopes,
+            user_scopes=user_scopes,
+            redirect_uri=redirect_uri,
+            # Handler configuration
+            install_path=install_path,
+            redirect_uri_path=redirect_uri_path,
+            callback_options=callback_options,
+            success_url=success_url,
+            failure_url=failure_url,
+            authorization_url=authorization_url,
+            # Installation Management
+            installation_store=SQLite3InstallationStore(
+                database=database,
+                client_id=client_id,
+                logger=logger,
+            ),
+            installation_store_bot_only=installation_store_bot_only,
+            token_rotation_expiration_minutes=token_rotation_expiration_minutes,
+            # state parameter related configurations
+            state_store=SQLite3OAuthStateStore(
+                database=database,
+                expiration_seconds=state_expiration_seconds,
+                logger=logger,
+            ),
+            state_cookie_name=state_cookie_name,
+            state_expiration_seconds=state_expiration_seconds,
+        ),
+    )</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="slack_bolt.oauth.OAuthFlow.client"><code class="name">var <span class="ident">client</span> : slack_sdk.web.client.WebClient</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def client(self) -&gt; WebClient:
+    if self._client is None:
+        self._client = create_web_client(logger=self.logger)
+    return self._client</code></pre>
+</details>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.logger"><code class="name">var <span class="ident">logger</span> : logging.Logger</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def logger(self) -&gt; Logger:
+    if self._logger is None:
+        self._logger = logging.getLogger(__name__)
+    return self._logger</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="slack_bolt.oauth.OAuthFlow.append_set_cookie_headers"><code class="name flex">
+<span>def <span class="ident">append_set_cookie_headers</span></span>(<span>self, headers: dict, set_cookie_value: Optional[str])</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def append_set_cookie_headers(self, headers: dict, set_cookie_value: Optional[str]):
+    if set_cookie_value is not None:
+        headers[&#34;Set-Cookie&#34;] = [set_cookie_value]
+    return headers</code></pre>
+</details>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.build_authorize_url"><code class="name flex">
+<span>def <span class="ident">build_authorize_url</span></span>(<span>self, state: str, request: <a title="slack_bolt.request.request.BoltRequest" href="../request/request.html#slack_bolt.request.request.BoltRequest">BoltRequest</a>) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_authorize_url(self, state: str, request: BoltRequest) -&gt; str:
+    team_ids: Optional[Sequence[str]] = request.query.get(&#34;team&#34;)
+    return self.settings.authorize_url_generator.generate(
+        state=state,
+        team=team_ids[0] if team_ids is not None else None,
+    )</code></pre>
+</details>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.build_install_page_html"><code class="name flex">
+<span>def <span class="ident">build_install_page_html</span></span>(<span>self, url: str, request: <a title="slack_bolt.request.request.BoltRequest" href="../request/request.html#slack_bolt.request.request.BoltRequest">BoltRequest</a>) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def build_install_page_html(self, url: str, request: BoltRequest) -&gt; str:
+    return _build_default_install_page_html(url)</code></pre>
+</details>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.handle_callback"><code class="name flex">
+<span>def <span class="ident">handle_callback</span></span>(<span>self, request: <a title="slack_bolt.request.request.BoltRequest" href="../request/request.html#slack_bolt.request.request.BoltRequest">BoltRequest</a>) ‑> <a title="slack_bolt.response.response.BoltResponse" href="../response/response.html#slack_bolt.response.response.BoltResponse">BoltResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def handle_callback(self, request: BoltRequest) -&gt; BoltResponse:
+
+    # failure due to end-user&#39;s cancellation or invalid redirection to slack.com
+    error = request.query.get(&#34;error&#34;, [None])[0]
+    if error is not None:
+        return self.failure_handler(
+            FailureArgs(
+                request=request,
+                reason=error,
+                suggested_status_code=200,
+                settings=self.settings,
+                default=self.default_callback_options,
+            )
+        )
+
+    # state parameter verification
+    if self.settings.state_validation_enabled is True:
+        state = request.query.get(&#34;state&#34;, [None])[0]
+        if not self.settings.state_utils.is_valid_browser(state, request.headers):
+            return self.failure_handler(
+                FailureArgs(
+                    request=request,
+                    reason=&#34;invalid_browser&#34;,
+                    suggested_status_code=400,
+                    settings=self.settings,
+                    default=self.default_callback_options,
+                )
+            )
+
+        valid_state_consumed = self.settings.state_store.consume(state)
+        if not valid_state_consumed:
+            return self.failure_handler(
+                FailureArgs(
+                    request=request,
+                    reason=&#34;invalid_state&#34;,
+                    suggested_status_code=401,
+                    settings=self.settings,
+                    default=self.default_callback_options,
+                )
+            )
+
+    # run installation
+    code = request.query.get(&#34;code&#34;, [None])[0]
+    if code is None:
+        return self.failure_handler(
+            FailureArgs(
+                request=request,
+                reason=&#34;missing_code&#34;,
+                suggested_status_code=401,
+                settings=self.settings,
+                default=self.default_callback_options,
+            )
+        )
+
+    installation = self.run_installation(code)
+    if installation is None:
+        # failed to run installation with the code
+        return self.failure_handler(
+            FailureArgs(
+                request=request,
+                reason=&#34;invalid_code&#34;,
+                suggested_status_code=401,
+                settings=self.settings,
+                default=self.default_callback_options,
+            )
+        )
+
+    # persist the installation
+    try:
+        self.store_installation(request, installation)
+    except BoltError as err:
+        return self.failure_handler(
+            FailureArgs(
+                request=request,
+                reason=&#34;storage_error&#34;,
+                error=err,
+                suggested_status_code=500,
+                settings=self.settings,
+                default=self.default_callback_options,
+            )
+        )
+
+    # display a successful completion page to the end-user
+    return self.success_handler(
+        SuccessArgs(
+            request=request,
+            installation=installation,
+            settings=self.settings,
+            default=self.default_callback_options,
+        )
+    )</code></pre>
+</details>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.handle_installation"><code class="name flex">
+<span>def <span class="ident">handle_installation</span></span>(<span>self, request: <a title="slack_bolt.request.request.BoltRequest" href="../request/request.html#slack_bolt.request.request.BoltRequest">BoltRequest</a>) ‑> <a title="slack_bolt.response.response.BoltResponse" href="../response/response.html#slack_bolt.response.response.BoltResponse">BoltResponse</a></span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def handle_installation(self, request: BoltRequest) -&gt; BoltResponse:
+    set_cookie_value: Optional[str] = None
+    url = self.build_authorize_url(&#34;&#34;, request)
+    if self.settings.state_validation_enabled is True:
+        state = self.issue_new_state(request)
+        url = self.build_authorize_url(state, request)
+        set_cookie_value = self.settings.state_utils.build_set_cookie_for_new_state(state)
+
+    if self.settings.install_page_rendering_enabled:
+        html = self.build_install_page_html(url, request)
+        return BoltResponse(
+            status=200,
+            body=html,
+            headers=self.append_set_cookie_headers(
+                {&#34;Content-Type&#34;: &#34;text/html; charset=utf-8&#34;},
+                set_cookie_value,
+            ),
+        )
+    else:
+        return BoltResponse(
+            status=302,
+            body=&#34;&#34;,
+            headers=self.append_set_cookie_headers(
+                {&#34;Content-Type&#34;: &#34;text/html; charset=utf-8&#34;, &#34;Location&#34;: url},
+                set_cookie_value,
+            ),
+        )</code></pre>
+</details>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.issue_new_state"><code class="name flex">
+<span>def <span class="ident">issue_new_state</span></span>(<span>self, request: <a title="slack_bolt.request.request.BoltRequest" href="../request/request.html#slack_bolt.request.request.BoltRequest">BoltRequest</a>) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def issue_new_state(self, request: BoltRequest) -&gt; str:
+    return self.settings.state_store.issue()</code></pre>
+</details>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.run_installation"><code class="name flex">
+<span>def <span class="ident">run_installation</span></span>(<span>self, code: str) ‑> Optional[slack_sdk.oauth.installation_store.models.installation.Installation]</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def run_installation(self, code: str) -&gt; Optional[Installation]:
+    try:
+        oauth_response: SlackResponse = self.client.oauth_v2_access(
+            code=code,
+            client_id=self.settings.client_id,
+            client_secret=self.settings.client_secret,
+            redirect_uri=self.settings.redirect_uri,  # can be None
+        )
+        installed_enterprise: Dict[str, str] = oauth_response.get(&#34;enterprise&#34;) or {}
+        is_enterprise_install: bool = oauth_response.get(&#34;is_enterprise_install&#34;) or False
+        installed_team: Dict[str, str] = oauth_response.get(&#34;team&#34;) or {}
+        installer: Dict[str, str] = oauth_response.get(&#34;authed_user&#34;) or {}
+        incoming_webhook: Dict[str, str] = oauth_response.get(&#34;incoming_webhook&#34;) or {}
+
+        bot_token: Optional[str] = oauth_response.get(&#34;access_token&#34;)
+        # NOTE: oauth.v2.access doesn&#39;t include bot_id in response
+        bot_id: Optional[str] = None
+        enterprise_url: Optional[str] = None
+        if bot_token is not None:
+            auth_test = self.client.auth_test(token=bot_token)
+            bot_id = auth_test[&#34;bot_id&#34;]
+            if is_enterprise_install is True:
+                enterprise_url = auth_test.get(&#34;url&#34;)
+
+        return Installation(
+            app_id=oauth_response.get(&#34;app_id&#34;),
+            enterprise_id=installed_enterprise.get(&#34;id&#34;),
+            enterprise_name=installed_enterprise.get(&#34;name&#34;),
+            enterprise_url=enterprise_url,
+            team_id=installed_team.get(&#34;id&#34;),
+            team_name=installed_team.get(&#34;name&#34;),
+            bot_token=bot_token,
+            bot_id=bot_id,
+            bot_user_id=oauth_response.get(&#34;bot_user_id&#34;),
+            bot_scopes=oauth_response.get(&#34;scope&#34;),  # comma-separated string
+            bot_refresh_token=oauth_response.get(&#34;refresh_token&#34;),  # since v1.7
+            bot_token_expires_in=oauth_response.get(&#34;expires_in&#34;),  # since v1.7
+            user_id=installer.get(&#34;id&#34;),
+            user_token=installer.get(&#34;access_token&#34;),
+            user_scopes=installer.get(&#34;scope&#34;),  # comma-separated string
+            user_refresh_token=installer.get(&#34;refresh_token&#34;),  # since v1.7
+            user_token_expires_in=installer.get(&#34;expires_in&#34;),  # since v1.7
+            incoming_webhook_url=incoming_webhook.get(&#34;url&#34;),
+            incoming_webhook_channel=incoming_webhook.get(&#34;channel&#34;),
+            incoming_webhook_channel_id=incoming_webhook.get(&#34;channel_id&#34;),
+            incoming_webhook_configuration_url=incoming_webhook.get(&#34;configuration_url&#34;),
+            is_enterprise_install=is_enterprise_install,
+            token_type=oauth_response.get(&#34;token_type&#34;),
+        )
+
+    except SlackApiError as e:
+        message = f&#34;Failed to fetch oauth.v2.access result with code: {code} - error: {e}&#34;
+        self.logger.warning(message)
+        return None</code></pre>
+</details>
+</dd>
+<dt id="slack_bolt.oauth.OAuthFlow.store_installation"><code class="name flex">
+<span>def <span class="ident">store_installation</span></span>(<span>self, request: <a title="slack_bolt.request.request.BoltRequest" href="../request/request.html#slack_bolt.request.request.BoltRequest">BoltRequest</a>, installation: slack_sdk.oauth.installation_store.models.installation.Installation)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def store_installation(self, request: BoltRequest, installation: Installation):
+    # may raise BoltError
+    self.settings.installation_store.save(installation)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="slack_bolt" href="../index.html">slack_bolt</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="slack_bolt.oauth.async_callback_options" href="async_callback_options.html">slack_bolt.oauth.async_callback_options</a></code></li>
+<li><code><a title="slack_bolt.oauth.async_internals" href="async_internals.html">slack_bolt.oauth.async_internals</a></code></li>
+<li><code><a title="slack_bolt.oauth.async_oauth_flow" href="async_oauth_flow.html">slack_bolt.oauth.async_oauth_flow</a></code></li>
+<li><code><a title="slack_bolt.oauth.async_oauth_settings" href="async_oauth_settings.html">slack_bolt.oauth.async_oauth_settings</a></code></li>
+<li><code><a title="slack_bolt.oauth.callback_options" href="callback_options.html">slack_bolt.oauth.callback_options</a></code></li>
+<li><code><a title="slack_bolt.oauth.internals" href="internals.html">slack_bolt.oauth.internals</a></code></li>
+<li><code><a title="slack_bolt.oauth.oauth_flow" href="oauth_flow.html">slack_bolt.oauth.oauth_flow</a></code></li>
+<li><code><a title="slack_bolt.oauth.oauth_settings" href="oauth_settings.html">slack_bolt.oauth.oauth_settings</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="slack_bolt.oauth.OAuthFlow" href="#slack_bolt.oauth.OAuthFlow">OAuthFlow</a></code></h4>
+<ul class="">
+<li><code><a title="slack_bolt.oauth.OAuthFlow.append_set_cookie_headers" href="#slack_bolt.oauth.OAuthFlow.append_set_cookie_headers">append_set_cookie_headers</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.build_authorize_url" href="#slack_bolt.oauth.OAuthFlow.build_authorize_url">build_authorize_url</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.build_install_page_html" href="#slack_bolt.oauth.OAuthFlow.build_install_page_html">build_install_page_html</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.client" href="#slack_bolt.oauth.OAuthFlow.client">client</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.client_id" href="#slack_bolt.oauth.OAuthFlow.client_id">client_id</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.failure_handler" href="#slack_bolt.oauth.OAuthFlow.failure_handler">failure_handler</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.handle_callback" href="#slack_bolt.oauth.OAuthFlow.handle_callback">handle_callback</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.handle_installation" href="#slack_bolt.oauth.OAuthFlow.handle_installation">handle_installation</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.install_path" href="#slack_bolt.oauth.OAuthFlow.install_path">install_path</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.issue_new_state" href="#slack_bolt.oauth.OAuthFlow.issue_new_state">issue_new_state</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.logger" href="#slack_bolt.oauth.OAuthFlow.logger">logger</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.redirect_uri" href="#slack_bolt.oauth.OAuthFlow.redirect_uri">redirect_uri</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.redirect_uri_path" href="#slack_bolt.oauth.OAuthFlow.redirect_uri_path">redirect_uri_path</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.run_installation" href="#slack_bolt.oauth.OAuthFlow.run_installation">run_installation</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.settings" href="#slack_bolt.oauth.OAuthFlow.settings">settings</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.sqlite3" href="#slack_bolt.oauth.OAuthFlow.sqlite3">sqlite3</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.store_installation" href="#slack_bolt.oauth.OAuthFlow.store_installation">store_installation</a></code></li>
+<li><code><a title="slack_bolt.oauth.OAuthFlow.success_handler" href="#slack_bolt.oauth.OAuthFlow.success_handler">success_handler</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
