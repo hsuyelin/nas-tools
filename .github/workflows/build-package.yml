@@ -23,15 +23,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install wheel numpy==1.23.5 pyparsing==3.0.9 wxpython==4.2.0 pyinstaller==5.7.0
         git clone --depth=1 -b master https://github.com/hsuyelin/nas-tools --recurse-submodule
-        cd nas-tools-unlock
+        cd nas-tools
         pip install -r requirements.txt
-        echo ("NASTOOL_CONFIG=D:/a/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/config/config.yaml") >> $env:GITHUB_ENV
+        echo ("NASTOOL_CONFIG=D:/a/nas-tools/nas-tools/nas-tools/config/config.yaml") >> $env:GITHUB_ENV
         echo $env:NASTOOL_CONFIG
       shell: pwsh
 
     - name: Package through pyinstaller
       run: |
-        cd nas-tools-unlock
+        cd nas-tools
         dir
         copy .\package\rely\upx.exe c:\hostedtoolcache\windows\python\3.10.10\x64\Scripts
         copy .\package\rely\hook-cn2an.py c:\hostedtoolcache\windows\python\3.10.10\x64\lib\site-packages\pyinstaller\hooks
@@ -44,14 +44,14 @@ jobs:
         xcopy .\scripts c:\hostedtoolcache\windows\python\3.10.10\x64\lib\site-packages\scripts\ /e
         cd package
         pyinstaller nas-tools.spec
-        dir  D:/a/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist
+        dir  D:/a/nas-tools/nas-tools/nas-tools/package/dist
       shell: pwsh
 
     - name: Upload windows file
       uses: actions/upload-artifact@v3
       with:
         name: windows
-        path: D:/a/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/nas-tools.exe
+        path: D:/a/nas-tools/nas-tools/nas-tools/package/dist/nas-tools.exe
 
   Linux-build-amd64:
     runs-on: ubuntu-latest
@@ -66,15 +66,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install wheel pyinstaller==5.7.0
           git clone --depth=1 -b master https://github.com/hsuyelin/nas-tools --recurse-submodule
-          cd nas-tools-unlock
+          cd nas-tools
           pip install -r requirements.txt
-          echo ("NASTOOL_CONFIG=/home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/config/config.yaml") >> $env:GITHUB_ENV
+          echo ("NASTOOL_CONFIG=/home/runner/work/nas-tools/nas-tools/nas-tools/config/config.yaml") >> $env:GITHUB_ENV
           echo $env:NASTOOL_CONFIG
         shell: pwsh
 
       - name: Package through pyinstaller
         run: |
-          cd nas-tools-unlock
+          cd nas-tools
           pwd
           ls -all
           cp ./package/rely/hook-cn2an.py /opt/hostedtoolcache/Python/3.10.10/x64/lib/python3.10/site-packages/PyInstaller/hooks/
@@ -89,15 +89,15 @@ jobs:
           pwd
           ls -all
           pyinstaller nas-tools.spec
-          mv /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/nas-tools /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/nas-tools-unlock.linux.amd64
-          ls -all /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist
+          mv /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/nas-tools /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/nas-tools.linux.amd64
+          ls -all /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist
         shell: pwsh
 
       - name: Upload linux file
         uses: actions/upload-artifact@v3
         with:
           name: linux-amd64
-          path: /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/nas-tools-unlock.linux.amd64
+          path: /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/nas-tools.linux.amd64
 
   Linux-build-arm64:
     runs-on: ubuntu-latest
@@ -115,15 +115,15 @@ jobs:
         run: |
           mkdir rootfs
           docker buildx build --platform linux/arm64 --file ./package/builder/Dockerfile --build-arg branch=master --output type=local,dest=./rootfs .
-          mkdir -p /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/
-          cp ./rootfs/nas-tools /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/nas-tools-unlock.linux.arm64
+          mkdir -p /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/
+          cp ./rootfs/nas-tools /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/nas-tools.linux.arm64
         shell: pwsh
 
       - name: Upload linux file
         uses: actions/upload-artifact@v3
         with:
           name: linux-arm64
-          path: /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/nas-tools-unlock.linux.arm64
+          path: /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/nas-tools.linux.arm64
 
   Linux-build-amd64-musl:
     runs-on: ubuntu-latest
@@ -141,15 +141,15 @@ jobs:
         run: |
           mkdir rootfs
           docker buildx build --platform linux/amd64 --file ./package/builder/alpine.Dockerfile --build-arg branch=master --output type=local,dest=./rootfs .
-          mkdir -p /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/
-          cp ./rootfs/nas-tools /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/nas-tools-unlock.linux.musl.amd64
+          mkdir -p /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/
+          cp ./rootfs/nas-tools /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/nas-tools.linux.musl.amd64
         shell: pwsh
 
       - name: Upload linux file
         uses: actions/upload-artifact@v3
         with:
           name: linux-musl-amd64
-          path: /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/nas-tools-unlock.linux.musl.amd64
+          path: /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/nas-tools.linux.musl.amd64
 
   Linux-build-arm64-musl:
     runs-on: ubuntu-latest
@@ -167,15 +167,15 @@ jobs:
         run: |
           mkdir rootfs
           docker buildx build --platform linux/arm64 --file ./package/builder/alpine.Dockerfile --build-arg branch=master --output type=local,dest=./rootfs .
-          mkdir -p /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/
-          cp ./rootfs/nas-tools /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/nas-tools-unlock.linux.musl.arm64
+          mkdir -p /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/
+          cp ./rootfs/nas-tools /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/nas-tools.linux.musl.arm64
         shell: pwsh
 
       - name: Upload linux file
         uses: actions/upload-artifact@v3
         with:
           name: linux-musl-arm64
-          path: /home/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/nas-tools-unlock.linux.musl.arm64
+          path: /home/runner/work/nas-tools/nas-tools/nas-tools/package/dist/nas-tools.linux.musl.arm64
 
   Mac-build:
     runs-on: macos-latest
@@ -190,7 +190,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install wheel numpy==1.23.5 pyparsing==3.0.9 pyinstaller==5.7.0
           git clone --depth=1 -b master https://github.com/hsuyelin/nas-tools --recurse-submodule
-          cd nas-tools-unlock
+          cd nas-tools
           pip install -r requirements.txt
           CURRENT_DIR=$(pwd)
           echo "NASTOOL_CONFIG=$CURRENT_DIR/config/config.yaml" >> $GITHUB_ENV
@@ -199,7 +199,7 @@ jobs:
 
       - name: Package through pyinstaller
         run: |
-          cd nas-tools-unlock
+          cd nas-tools
           pwd
           ls -all
           cp ./package/rely/hook-cn2an.py $Python_ROOT_DIR/lib/python3.10/site-packages/PyInstaller/hooks/
@@ -212,7 +212,7 @@ jobs:
           cp -r ./scripts/. $Python_ROOT_DIR/lib/python3.10/site-packages/scripts/
           cd package
           pyinstaller nas-tools.spec
-          mv ./dist/nas-tools ./dist/nas-tools-unlock.macos
+          mv ./dist/nas-tools ./dist/nas-tools.macos
           pwd
           ls -all ./dist/
         shell: bash
@@ -221,7 +221,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: macos
-          path: /Users/runner/work/nas-tools-unlock/nas-tools-unlock/nas-tools-unlock/package/dist/nas-tools-unlock.macos
+          path: /Users/runner/work/nas-tools/nas-tools/nas-tools/package/dist/nas-tools.macos
 
   Create-release_Send-message:
     permissions: write-all
@@ -244,12 +244,12 @@ jobs:
         pwd
         ls -all
         mkdir releases
-        mv ./windows/nas-tools.exe /home/runner/work/nas-tools-unlock/nas-tools-unlock/releases/nastool_win_v${{ env.app_version }}.exe
-        mv ./linux-amd64/nas-tools-unlock.linux.amd64 /home/runner/work/nas-tools-unlock/nas-tools-unlock/releases/nastool_linux_amd64_v${{ env.app_version }}
-        mv ./linux-arm64/nas-tools-unlock.linux.arm64 /home/runner/work/nas-tools-unlock/nas-tools-unlock/releases/nastool_linux_arm64_v${{ env.app_version }}
-        mv ./linux-musl-amd64/nas-tools-unlock.linux.musl.amd64 /home/runner/work/nas-tools-unlock/nas-tools-unlock/releases/nastool_linux_musl_amd64_v${{ env.app_version }}
-        mv ./linux-musl-arm64/nas-tools-unlock.linux.musl.arm64 /home/runner/work/nas-tools-unlock/nas-tools-unlock/releases/nastool_linux_musl_arm64_v${{ env.app_version }}
-        mv ./macos/nas-tools-unlock.macos /home/runner/work/nas-tools-unlock/nas-tools-unlock/releases/nastool_macos_v${{ env.app_version }}
+        mv ./windows/nas-tools.exe /home/runner/work/nas-tools/nas-tools/releases/nastool_win_v${{ env.app_version }}.exe
+        mv ./linux-amd64/nas-tools.linux.amd64 /home/runner/work/nas-tools/nas-tools/releases/nastool_linux_amd64_v${{ env.app_version }}
+        mv ./linux-arm64/nas-tools.linux.arm64 /home/runner/work/nas-tools/nas-tools/releases/nastool_linux_arm64_v${{ env.app_version }}
+        mv ./linux-musl-amd64/nas-tools.linux.musl.amd64 /home/runner/work/nas-tools/nas-tools/releases/nastool_linux_musl_amd64_v${{ env.app_version }}
+        mv ./linux-musl-arm64/nas-tools.linux.musl.arm64 /home/runner/work/nas-tools/nas-tools/releases/nastool_linux_musl_arm64_v${{ env.app_version }}
+        mv ./macos/nas-tools.macos /home/runner/work/nas-tools/nas-tools/releases/nastool_macos_v${{ env.app_version }}
         pwd
         ls -all
 
@@ -272,4 +272,4 @@ jobs:
       with:
         release_id: ${{ steps.create_release.outputs.id }}
         assets_path: |
-            /home/runner/work/nas-tools-unlock/nas-tools-unlock/releases/
+            /home/runner/work/nas-tools/nas-tools/releases/

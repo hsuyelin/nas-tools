@@ -36,7 +36,7 @@ docker run -d \
     -e UMASK=000  `# 掩码权限，默认000，可以考虑设置为022` \
     -e NASTOOL_AUTO_UPDATE=false `# 如需在启动容器时自动升级程程序请设置为true` \
     -e NASTOOL_CN_UPDATE=false `# 如果开启了容器启动自动升级程序，并且网络不太友好时，可以设置为true，会使用国内源进行软件更新` \
-    challengerv/nas-tools-unlock
+    challengerv/nas-tools
 ```
 
 如果你访问github的网络不太好，可以考虑在创建容器时增加设置一个环境变量`-e REPO_URL="https://ghproxy.com/https://github.com/hsuyelin/nas-tools.git" \`。
