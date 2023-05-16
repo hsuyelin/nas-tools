@@ -47,7 +47,8 @@ RUN mkdir ${HOME} \
     && python_ver=$(python3 -V | awk '{print $2}') \
     && python_path=$(which python3) \
     && echo "${python_path} <<<<<<<<<<----------------------->>>>>>>>>> ${python_ver}" \
-    && echo "${WORKDIR}/" > ${python_path}/site-packages/nas-tools.pth \
+    && [ -d "/usr/lib/python${python_ver%.*}/site-packages" ] || mkdir -p "/usr/lib/python${python_ver%.*}/site-packages" \
+    && echo "${WORKDIR}/" > /usr/lib/python${python_ver%.*}/site-packages/nas-tools.pth \
     && echo 'fs.inotify.max_user_watches=5242880' >> /etc/sysctl.conf \
     && echo 'fs.inotify.max_user_instances=5242880' >> /etc/sysctl.conf \
     && echo "nt ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
