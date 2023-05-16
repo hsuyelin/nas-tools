@@ -1,5 +1,4 @@
 FROM alpine AS Builder
-ARG PYTHON_VERSION=3.10.11-r0
 RUN apk add --no-cache --virtual .build-deps \
         libffi-dev \
         gcc \
@@ -7,8 +6,6 @@ RUN apk add --no-cache --virtual .build-deps \
         libxml2-dev \
         libxslt-dev \
     && apk add --no-cache $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/hsuyelin/nas-tools/master/package_list.txt)) \
-    && apk del python3-dev \
-    && apk add --no-cache python3-dev=${PYTHON_VERSION} \
     && ln -sf /usr/bin/python3 /usr/bin/python \
     && curl https://rclone.org/install.sh | bash \
     && if [ "$(uname -m)" = "x86_64" ]; then ARCH=amd64; elif [ "$(uname -m)" = "aarch64" ]; then ARCH=arm64; fi \
