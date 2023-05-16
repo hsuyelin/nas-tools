@@ -22,7 +22,7 @@ export class LayoutNavbar extends CustomElement {
     this.layout_appversion = "v3.0.0";
     this._active_name = "";
     this._update_appversion = "";
-    this._update_url = "https://github.com/YaoShuwei/nas-tools";
+    this._update_url = "https://github.com/hsuyelin/nas-tools";
     this._is_update = false;
     this._is_expand = false;
     this.classList.add("navbar","navbar-vertical","navbar-expand-lg","lit-navbar-fixed","lit-navbar","lit-navbar-hide-scrollbar");
@@ -88,7 +88,7 @@ export class LayoutNavbar extends CustomElement {
             url = ret.url;
             break;
           case 2:
-            url = "https://github.com/YaoShuwei/nas-tools-unlock/commits/master"
+            url = "https://github.com/hsuyelin/nas-tools/commits/master"
             break;
         }
         if (url) {

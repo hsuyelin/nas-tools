@@ -96,7 +96,7 @@ class Message(object):
         state, ret_msg = self.__build_class(ctype=ctype,
                                             conf=config).send_msg(title="测试",
                                                                   text="这是一条测试消息",
-                                                                  url="https://github.com/YaoShuwei/nas-tools-unlock")
+                                                                  url="https://github.com/hsuyelin/nas-tools")
         if not state:
             log.error(f"【Message】{ctype} 发送测试消息失败：%s" % ret_msg)
         return state
