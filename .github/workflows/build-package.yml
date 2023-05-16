@@ -1,7 +1,11 @@
 name: NAStool Package
 on:
   workflow_dispatch:
-  push:
+    inputs:
+      github_token:
+        description: 'github token'
+        required: true
+        default: ''
     branches:
       - master
     paths:
@@ -257,7 +261,7 @@ jobs:
       id: create_release
       uses: actions/create-release@latest
       env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
       with:
         tag_name: v${{ env.app_version }}
         release_name: v${{ env.app_version }}
@@ -268,7 +272,7 @@ jobs:
     - name: Upload release asset
       uses: dwenegar/upload-release-assets@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        GITHUB_TOKEN: ${{ github.event.inputs.github_token }}
       with:
         release_id: ${{ steps.create_release.outputs.id }}
         assets_path: |
