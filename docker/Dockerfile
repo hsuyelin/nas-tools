@@ -1,4 +1,4 @@
-FROM alpine AS Builder
+FROM python:3.10.11-alpine AS Builder
 RUN apk add --no-cache --virtual .build-deps \
         libffi-dev \
         gcc \
