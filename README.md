@@ -36,6 +36,14 @@ export NASTOOL_CONFIG="/xxx/config/config.yaml"
 nohup python3 run.py & 
 ```
 
+### 3、可执行文件运行
+仅支持python3.10版本，先从tag下载对应的可执行文件，打开终端，例如下载的是macos版本，文件名为：nastool_macos_v3.2.2：
+```
+mv nastool_macos_v3.2.2 nastools
+chmod +x nastools
+./nastools（如果需要不在终端输出执行：./nastool &> /dev/null）
+```
+
 ## 免责声明
 1) 本软件仅供学习交流使用，软件本身不提供任何内容，仅作为辅助工具简化用户手工操作，对用户的行为及内容毫不知情，使用本软件产生的任何责任需由使用者本人承担。
 2) 本软件代码开源，基于开源代码进行修改，人为去除相关限制导致软件被分发、传播并造成责任事件的，需由代码修改发布者承担全部责任。同时按AGPL-3.0开源协议要求，基于此软件代码的所有修改必须开源。
