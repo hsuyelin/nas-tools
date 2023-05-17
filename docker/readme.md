@@ -26,8 +26,8 @@
 
 ```
 docker run -d \
-    --name nas-tools-unlocked \
-    --hostname nas-tools-unlocked \
+    --name nas-tools \
+    --hostname nas-tools \
     -p 3000:3000   `# 默认的webui控制端口` \
     -v $(pwd)/config:/config  `# 冒号左边请修改为你想在主机上保存配置文件的路径` \
     -v /你的媒体目录:/你想设置的容器内能见到的目录    `# 媒体目录，多个目录需要分别映射进来` \
@@ -36,7 +36,7 @@ docker run -d \
     -e UMASK=000  `# 掩码权限，默认000，可以考虑设置为022` \
     -e NASTOOL_AUTO_UPDATE=false `# 如需在启动容器时自动升级程程序请设置为true` \
     -e NASTOOL_CN_UPDATE=false `# 如果开启了容器启动自动升级程序，并且网络不太友好时，可以设置为true，会使用国内源进行软件更新` \
-    hsuyelin/nas-tools-unlocked
+    hsuyelin/nas-tools
 ```
 
 如果你访问github的网络不太好，可以考虑在创建容器时增加设置一个环境变量`-e REPO_URL="https://ghproxy.com/https://github.com/hsuyelin/nas-tools.git" \`。
@@ -49,7 +49,7 @@ docker run -d \
 version: "3"
 services:
   nas-tools:
-    image: hsuyelin/nas-tools-unlocked:latest
+    image: hsuyelin/nas-tools:latest
     ports:
       - 3000:3000        # 默认的webui控制端口
     volumes:
@@ -64,8 +64,8 @@ services:
      #- REPO_URL=https://ghproxy.com/https://github.com/hsuyelin/nas-tools.git  # 当你访问github网络很差时，可以考虑解释本行注释
     restart: always
     network_mode: bridge
-    hostname: nas-tools-unlocked
-    container_name: nas-tools-unlocked
+    hostname: nas-tools
+    container_name: nas-tools
 ```
 
 ## 后续如何更新

@@ -1,7 +1,7 @@
 version: "3"
 services:
-  nas-tools-unlocked:
-    image: hsuyelin/nas-tools-unlocked:latest
+  nas-tools:
+    image: hsuyelin/nas-tools:latest
     ports:
       - 3000:3000        # 默认的webui控制端口
     volumes:
@@ -15,5 +15,5 @@ services:
      #- REPO_URL=https://ghproxy.com/https://github.com/hsuyelin/nas-tools.git  # 当你访问github网络很差时，可以考虑解释本行注释
     restart: always
     network_mode: bridge
-    hostname: nas-tools-unlocked
-    container_name: nas-tools-unlocked
+    hostname: nas-tools
+    container_name: nas-tools
