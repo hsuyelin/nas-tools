@@ -12,6 +12,8 @@
 
 - 可以设置文件掩码权限umask。
 
+- 集成完全插件（no authentication required）
+
 ## 创建
 
 **注意**
