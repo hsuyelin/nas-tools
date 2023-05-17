@@ -66,5 +66,5 @@ jobs:
             linux/arm64
           push: true
           tags: |
-            ${{ github.event.inputs.docker_username }}/nas-tools-unlocked:latest
-            ${{ github.event.inputs.docker_username }}/nas-tools-unlocked:${{ env.app_version }}
+            ${{ github.event.inputs.docker_username }}/nas-tools:latest
+            ${{ github.event.inputs.docker_username }}/nas-tools:${{ env.app_version }}
