@@ -233,7 +233,7 @@ class Qbittorrent(_IDownloadClient):
         :param tag: 标签内容
         """
         try:
-            return self.qbc.torrents_delete_tags(torrent_hashes=ids, tags=tag)
+            return self.qbc.torrents_remove_tags(torrent_hashes=ids, tags=tag)
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
             return False
@@ -247,6 +247,25 @@ class Qbittorrent(_IDownloadClient):
         try:
             # 打标签
             self.qbc.torrents_add_tags(tags="已整理", torrent_hashes=ids)
+        except Exception as err:
+            ExceptionUtils.exception_traceback(err)
+
+    def set_torrents_tag(self, ids, tags):
+        """
+        设置种子标签，以及是否强制做种
+        """
+        if not self.qbc:
+            return
+        try:
+            # 打标签
+            
+            torrents, error_flag = self.get_torrents(ids=ids)
+            if error_flag:
+                return None
+            for torrent in torrents:
+                old_tags = list(map(lambda s: s.strip(), (torrent.get("tags") or "").split(",")))
+                self.qbc.torrents_remove_tags(old_tags, torrent_hashes=ids)
+                self.qbc.torrents_add_tags(tags, torrent_hashes=ids)
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
 

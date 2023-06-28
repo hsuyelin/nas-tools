@@ -1,6 +1,5 @@
 from enum import Enum
 from typing import Any
-from typing import Literal
 from typing import Optional
 from typing import Text
 from typing import Type
@@ -34,27 +33,27 @@ class APINames(Enum):
     Search: Text
     EMPTY: Text
 
-class TorrentState(Enum):
-    ERROR: Literal["error"]
-    MISSING_FILES: Literal["missingFiles"]
-    UPLOADING: Literal["uploading"]
-    PAUSED_UPLOAD: Literal["pausedUP"]
-    QUEUED_UPLOAD: Literal["queuedUP"]
-    STALLED_UPLOAD: Literal["stalledUP"]
-    CHECKING_UPLOAD: Literal["checkingUP"]
-    FORCED_UPLOAD: Literal["forcedUP"]
-    ALLOCATING: Literal["allocating"]
-    DOWNLOADING: Literal["downloading"]
-    METADATA_DOWNLOAD: Literal["metaDL"]
-    FORCED_METADATA_DOWNLOAD: Literal["forcedMetaDL"]
-    PAUSED_DOWNLOAD: Literal["pausedDL"]
-    QUEUED_DOWNLOAD: Literal["queuedDL"]
-    FORCED_DOWNLOAD: Literal["forcedDL"]
-    STALLED_DOWNLOAD: Literal["stalledDL"]
-    CHECKING_DOWNLOAD: Literal["checkingDL"]
-    CHECKING_RESUME_DATA: Literal["checkingResumeData"]
-    MOVING: Literal["moving"]
-    UNKNOWN: Literal["unknown"]
+class TorrentStates(Enum):
+    ERROR: Text
+    MISSING_FILES: Text
+    UPLOADING: Text
+    PAUSED_UPLOAD: Text
+    QUEUED_UPLOAD: Text
+    STALLED_UPLOAD: Text
+    CHECKING_UPLOAD: Text
+    FORCED_UPLOAD: Text
+    ALLOCATING: Text
+    DOWNLOADING: Text
+    METADATA_DOWNLOAD: Text
+    FORCED_METADATA_DOWNLOAD: Text
+    PAUSED_DOWNLOAD: Text
+    QUEUED_DOWNLOAD: Text
+    FORCED_DOWNLOAD: Text
+    STALLED_DOWNLOAD: Text
+    CHECKING_DOWNLOAD: Text
+    CHECKING_RESUME_DATA: Text
+    MOVING: Text
+    UNKNOWN: Text
     @property
     def is_downloading(self) -> bool: ...
     @property
@@ -67,17 +66,6 @@ class TorrentState(Enum):
     def is_errored(self) -> bool: ...
     @property
     def is_paused(self) -> bool: ...
-
-TorrentStates = TorrentState
-
-class TrackerStatus(Enum):
-    DISABLED: Literal[0]
-    NOT_CONTACTED: Literal[1]
-    WORKING: Literal[2]
-    UPDATING: Literal[3]
-    NOT_WORKING: Literal[4]
-    @property
-    def display(self) -> Text: ...
 
 class ClientCache:
     _client: Client

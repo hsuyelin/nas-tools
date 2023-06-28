@@ -641,7 +641,6 @@ class BrushTask(object):
                            f"种子大小：{StringUtils.str_filesize(size)}\n" \
                            f"添加时间：{time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}"
                 self.message.send_brushtask_added_message(title=msg_title, text=msg_text)
-
         # 插入种子数据
         if self.dbhelper.insert_brushtask_torrent(brush_id=taskid,
                                                   title=title,

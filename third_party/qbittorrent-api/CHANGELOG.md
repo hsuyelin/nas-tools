@@ -1,13 +1,7 @@
 Change log
 ==========
-### v2023.4.46 (14 apr 2023)
-- Fix building docs after implementing ``src-layout``
-
-### v2023.4.45 (11 apr 2023)
-- Add the ``TrackerStatus`` Enum to identify tracker statuses from ``torrents/trackers``
-
 ### v2023.3.44 (09 mar 2023)
-- Add support for torrent status filters ``seeding``, ``moving``, ``errored``, and ``checking``
+- Add support for torrent status filters ``seeding``, ``moving``, ``errored``, and ``checking``.
 
 ### v2023.2.43 (27 feb 2023)
 - Advertise support for qBittorrent v4.5.2

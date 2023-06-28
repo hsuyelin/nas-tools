@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from threading import Event, Lock
 from time import sleep
 
@@ -53,7 +53,9 @@ class DoubanSync(_IPluginModule):
     subscribe = None
     _enable = False
     _onlyonce = False
-    _interval = False
+    _sync_type = False
+    _rss_interval = 0
+    _interval = 0
     _auto_search = False
     _auto_rss = False
     _users = []
@@ -70,11 +72,23 @@ class DoubanSync(_IPluginModule):
         if config:
             self._enable = config.get("enable")
             self._onlyonce = config.get("onlyonce")
-            self._interval = config.get("interval")
-            if self._interval and str(self._interval).isdigit():
-                self._interval = int(self._interval)
-            else:
+            self._sync_type = config.get("sync_type")
+            if self._sync_type == '1':
                 self._interval = 0
+                rss_interval = config.get("rss_interval")
+                if rss_interval and str(rss_interval).isdigit():
+                    self._rss_interval = int(rss_interval)
+                    if self._rss_interval < 300:
+                        self._rss_interval = 300
+                else:
+                    self._rss_interval = 0
+            else:
+                self._rss_interval = 0
+                interval = config.get("interval")
+                if interval and str(interval).isdigit():
+                    self._interval = int(interval)
+                else:
+                    self._interval = 0
             self._auto_search = config.get("auto_search")
             self._auto_rss = config.get("auto_rss")
             self._cookie = config.get("cookie")
@@ -99,20 +113,28 @@ class DoubanSync(_IPluginModule):
         if self.get_state() or self._onlyonce:
             self._scheduler = BackgroundScheduler(timezone=Config().get_timezone())
             if self._interval:
-                self.info(f"订阅服务启动，周期：{self._interval} 小时，类型：{self._types}，用户：{self._users}")
+                self.info(f"豆瓣全量同步服务启动，周期：{self._interval} 小时，类型：{self._types}，用户：{self._users}")
                 self._scheduler.add_job(self.sync, 'interval',
                                         hours=self._interval)
+            if self._rss_interval:
+                self.info(f"豆瓣近期动态同步服务启动，周期：{self._rss_interval} 秒，类型：{self._types}，用户：{self._users}")
+                self._scheduler.add_job(self.sync, 'interval',
+                                        seconds=self._rss_interval)
 
             if self._onlyonce:
-                self.info(f"同步服务启动，立即运行一次")
+                self.info("豆瓣同步服务启动，立即运行一次")
                 self._scheduler.add_job(self.sync, 'date',
-                                        run_date=datetime.now(tz=pytz.timezone(Config().get_timezone())))
+                                        run_date=datetime.now(tz=pytz.timezone(Config().get_timezone())) + timedelta(
+                                            seconds=3))
+
                 # 关闭一次性开关
                 self._onlyonce = False
                 self.update_config({
                     "onlyonce": self._onlyonce,
                     "enable": self._enable,
+                    "sync_type": self._sync_type,
                     "interval": self._interval,
+                    "rss_interval": self._rss_interval,
                     "auto_search": self._auto_search,
                     "auto_rss": self._auto_rss,
                     "cookie": self._cookie,
@@ -127,9 +149,10 @@ class DoubanSync(_IPluginModule):
 
     def get_state(self):
         return self._enable \
-            and self._interval \
-            and self._users \
-            and self._types
+               and self._users \
+               and self._types \
+            and ((self._sync_type == '1' and self._rss_interval)
+                 or (self._sync_type != '1' and self._interval))
 
     @staticmethod
     def get_fields():
@@ -143,7 +166,7 @@ class DoubanSync(_IPluginModule):
                         {
                             'title': '开启豆瓣同步',
                             'required': "",
-                            'tooltip': '开启后，定时同步豆瓣在看、想看、看过记录，有新内容时自动添加订阅或者搜索下载',
+                            'tooltip': '开启后，定时同步豆瓣在看、想看、看过记录，有新内容时自动添加订阅或者搜索下载，支持全量同步及近期动态两种模式，分别设置同步间隔',
                             'type': 'switch',
                             'id': 'enable',
                         }
@@ -171,7 +194,7 @@ class DoubanSync(_IPluginModule):
                             ]
                         },
                         {
-                            'title': '同步数据类型',
+                            'title': '同步内容',
                             'required': "required",
                             'tooltip': '同步哪些类型的收藏数据：do 在看，wish 想看，collect 看过，用英文逗号,分隔配置',
                             'type': 'text',
@@ -181,13 +204,30 @@ class DoubanSync(_IPluginModule):
                                     'placeholder': 'do,wish,collect',
                                 }
                             ]
+                        },
+                        {
+                            'title': '同步方式',
+                            'required': "required",
+                            'tooltip': '选择使用哪种方式同步豆瓣数据：全量同步（根据同步范围全量同步所有数据）、近期动态（同步用户近期的10条动态数据）',
+                            'type': 'select',
+                            'content': [
+                                {
+                                    'id': 'sync_type',
+                                    'options': {
+                                        '0': '全量同步',
+                                        '1': '近期动态'
+                                    },
+                                    'default': '0',
+                                    'onchange': 'DoubanSync_sync_rss_change(this)'
+                                }
+                            ]
                         }
                     ],
                     [
                         {
-                            'title': '同步范围（天）',
+                            'title': '全量同步范围（天）',
                             'required': "required",
-                            'tooltip': '同步多少天内的记录，0表示同步全部',
+                            'tooltip': '同步多少天内的记录，0表示同步全部，仅适用于全量同步',
                             'type': 'text',
                             'content': [
                                 {
@@ -197,14 +237,26 @@ class DoubanSync(_IPluginModule):
                             ]
                         },
                         {
-                            'title': '同步间隔（小时）',
+                            'title': '全量同步间隔（小时）',
                             'required': "required",
-                            'tooltip': '间隔多久同步一次豆瓣数据，为了避免被豆瓣封禁IP，应尽可能拉长间隔时间',
+                            'tooltip': '间隔多久同步一次时间范围内的用户标记的数据，为了避免被豆瓣封禁IP，应尽可能拉长间隔时间',
                             'type': 'text',
                             'content': [
                                 {
                                     'id': 'interval',
                                     'placeholder': '6',
+                                }
+                            ]
+                        },
+                        {
+                            'title': '近期动态同步间隔（秒）',
+                            'required': "required",
+                            'tooltip': '豆瓣近期动态的同步时间间隔，最小300秒，可设置较小的间隔同步用户近期动态数据，但无法同步全部标记数据',
+                            'type': 'text',
+                            'content': [
+                                {
+                                    'id': 'rss_interval',
+                                    'placeholder': '300',
                                 }
                             ]
                         }
@@ -342,7 +394,24 @@ class DoubanSync(_IPluginModule):
             ajax_post("run_plugin_method", {"plugin_id": 'DoubanSync', 'method': 'delete_sync_history', 'douban_id': id}, function (ret) {
               $("#douban_history_" + id).remove();
             });
-        
+          }
+          
+          // 同步方式切换
+          function DoubanSync_sync_rss_change(obj){
+            if ($(obj).val() == '1') {
+                $('#doubansync_rss_interval').parent().parent().show();
+                $('#doubansync_interval').parent().parent().hide();
+                $('#doubansync_days').parent().parent().hide();
+            }else{
+                $('#doubansync_rss_interval').parent().parent().hide();
+                $('#doubansync_interval').parent().parent().show();
+                $('#doubansync_days').parent().parent().show();
+            }
+          }
+          
+          // 初始化完成后执行的方法
+          function DoubanSync_PluginInit(){
+            DoubanSync_sync_rss_change('#doubansync_sync_type');
           }
         """
 
@@ -385,11 +454,10 @@ class DoubanSync(_IPluginModule):
         """
         同步豆瓣数据
         """
-        if not self._interval:
+        if not self._interval and not self._rss_interval:
             self.info("豆瓣配置：同步间隔未配置或配置不正确")
             return
         with lock:
-            self.info("开始同步豆瓣数据...")
             # 拉取豆瓣数据
             medias = self.__get_all_douban_movies()
             # 开始搜索
@@ -505,17 +573,12 @@ class DoubanSync(_IPluginModule):
         获取每一个用户的每一个类型的豆瓣标记
         :return: 搜索到的媒体信息列表（不含TMDB信息）
         """
-        if not self._interval \
-                or not self._users \
-                or not self._types:
-            self.error("豆瓣插件未配置或配置不正确")
-            return []
+        self.info(f"同步方式：{'近期动态' if self._sync_type else '全量同步'}")
+
         # 返回媒体列表
         media_list = []
         # 豆瓣ID列表
         douban_ids = {}
-        # 每页条数
-        perpage_number = 15
         # 每一个用户
         for user in self._users:
             if not user:
@@ -525,66 +588,101 @@ class DoubanSync(_IPluginModule):
             userinfo = self.douban.get_user_info(userid=user)
             if userinfo:
                 user_name = userinfo.get("name")
-            # 每一个类型成功数量
-            user_succnum = 0
-            for mtype in self._types:
-                if not mtype:
-                    continue
-                self.info(f"开始获取 {user_name or user} 的 {mtype} 数据...")
-                # 开始序号
-                start_number = 0
-                # 类型成功数量
-                user_type_succnum = 0
-                # 每一页
-                while True:
-                    # 页数
-                    page_number = int(start_number / perpage_number + 1)
-                    # 当前页成功数量
-                    sucess_urlnum = 0
-                    # 是否继续下一页
-                    continue_next_page = True
-                    self.debug(f"开始解析第 {page_number} 页数据...")
-                    try:
-                        items = self.douban.get_douban_wish(dtype=mtype, userid=user, start=start_number, wait=True)
-                        if not items:
-                            self.warn(f"第 {page_number} 页未获取到数据")
-                            break
-                        # 解析豆瓣ID
-                        for item in items:
-                            # 时间范围
-                            date = item.get("date")
-                            if not date:
-                                continue_next_page = False
+
+            if self._sync_type != "1":
+                # 每页条数
+                perpage_number = 15
+                # 所有类型成功数量
+                user_succnum = 0
+                for mtype in self._types:
+                    if not mtype:
+                        continue
+                    self.info(f"开始获取 {user_name or user} 的 {mtype} 数据...")
+                    # 开始序号
+                    start_number = 0
+                    # 类型成功数量
+                    user_type_succnum = 0
+                    # 每一页
+                    while True:
+                        # 页数
+                        page_number = int(start_number / perpage_number + 1)
+                        # 当前页成功数量
+                        sucess_urlnum = 0
+                        # 是否继续下一页
+                        continue_next_page = True
+                        self.debug(f"开始解析第 {page_number} 页数据...")
+                        try:
+                            items = self.douban.get_douban_wish(dtype=mtype, userid=user, start=start_number, wait=True)
+                            if not items:
+                                self.warn(f"第 {page_number} 页未获取到数据")
                                 break
-                            else:
-                                mark_date = datetime.strptime(date, '%Y-%m-%d')
-                                if self._days and not (datetime.now() - mark_date).days < int(self._days):
+                            # 解析豆瓣ID
+                            for item in items:
+                                # 时间范围
+                                date = item.get("date")
+                                if not date:
                                     continue_next_page = False
                                     break
-                            doubanid = item.get("id")
-                            if str(doubanid).isdigit():
-                                self.info("解析到媒体：%s" % doubanid)
-                                if doubanid not in douban_ids:
-                                    douban_ids[doubanid] = {
-                                        "user_name": user_name
-                                    }
-                                sucess_urlnum += 1
-                                user_type_succnum += 1
-                                user_succnum += 1
-                        self.debug(
-                            f"{user_name or user} 第 {page_number} 页解析完成，共获取到 {sucess_urlnum} 个媒体")
-                    except Exception as err:
-                        ExceptionUtils.exception_traceback(err)
-                        self.error(f"{user_name or user} 第 {page_number} 页解析出错：%s" % str(err))
-                        break
-                    # 继续下一页
-                    if continue_next_page:
-                        start_number += perpage_number
-                    else:
-                        break
-                # 当前类型解析结束
-                self.debug(f"用户 {user_name or user} 的 {mtype} 解析完成，共获取到 {user_type_succnum} 个媒体")
-            self.info(f"用户 {user_name or user} 解析完成，共获取到 {user_succnum} 个媒体")
+                                else:
+                                    mark_date = datetime.strptime(date, '%Y-%m-%d')
+                                    if self._days and not (datetime.now() - mark_date).days < int(self._days):
+                                        continue_next_page = False
+                                        break
+                                doubanid = item.get("id")
+                                if str(doubanid).isdigit():
+                                    self.info("解析到媒体：%s" % doubanid)
+                                    if doubanid not in douban_ids:
+                                        douban_ids[doubanid] = {
+                                            "user_name": user_name
+                                        }
+                                    sucess_urlnum += 1
+                                    user_type_succnum += 1
+                                    user_succnum += 1
+                            self.debug(
+                                f"{user_name or user} 第 {page_number} 页解析完成，共获取到 {sucess_urlnum} 个媒体")
+                        except Exception as err:
+                            ExceptionUtils.exception_traceback(err)
+                            self.error(f"{user_name or user} 第 {page_number} 页解析出错：%s" % str(err))
+                            break
+                        # 继续下一页
+                        if continue_next_page:
+                            start_number += perpage_number
+                        else:
+                            break
+                    # 当前类型解析结束
+                    self.debug(f"用户 {user_name or user} 的 {mtype} 解析完成，共获取到 {user_type_succnum} 个媒体")
+                self.info(f"用户 {user_name or user} 解析完成，共获取到 {user_succnum} 个媒体")
+            else:
+                all_items = self.douban.get_latest_douban_interests(dtype='all', userid=user, wait=True)
+                self.debug(f"开始解析 {user_name or user} 的数据...")
+                self.debug(f"共获取到 {len(all_items)} 条数据")
+                # 所有类型成功数量
+                user_succnum = 0
+                for mtype in self._types:
+                    # 类型成功数量
+                    user_type_succnum = 0
+                    items = list(filter(lambda x: x.get("type") == mtype, all_items))
+                    for item in items:
+                        # 时间范围
+                        date = item.get("date")
+                        if not date:
+                            continue
+                        else:
+                            mark_date = datetime.strptime(date, '%Y-%m-%d')
+                            if self._days and not (datetime.now() - mark_date).days < int(self._days):
+                                continue
+                        doubanid = item.get("id")
+                        if str(doubanid).isdigit():
+                            self.info("解析到媒体：%s" % doubanid)
+                            if doubanid not in douban_ids:
+                                douban_ids[doubanid] = {
+                                    "user_name": user_name
+                                }
+                            user_type_succnum += 1
+                            user_succnum += 1
+                    self.debug(f"用户 {user_name or user} 的 {mtype} 解析完成，共获取到 {user_type_succnum} 个媒体")
+                self.debug(f"用户 {user_name or user} 解析完成，共获取到 {user_succnum} 个媒体")
+
         self.info(f"所有用户解析完成，共获取到 {len(douban_ids)} 个媒体")
         # 查询豆瓣详情
         for doubanid, info in douban_ids.items():

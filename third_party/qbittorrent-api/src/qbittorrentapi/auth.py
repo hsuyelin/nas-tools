@@ -71,7 +71,7 @@ class AuthAPIMixIn(Request):
         There isn't a reliable way to know if an existing session is still valid
         without attempting to use it. qBittorrent invalidates cookies when they expire.
 
-        :returns: True/False if current authorization cookie is accepted by qBittorrent
+        :returns: True/False if current auth cookie is accepted by qBittorrent.
         """
         try:
             self._post(_name=APINames.Application, _method="version")

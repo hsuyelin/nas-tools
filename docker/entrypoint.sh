@@ -14,7 +14,7 @@ if [ "${NASTOOL_AUTO_UPDATE}" = "true" ]; then
     if [ ! -s /tmp/package_list.txt.sha256sum ]; then
         sha256sum package_list.txt > /tmp/package_list.txt.sha256sum
     fi
-    echo "从${REPO_URL}更新主程序..."
+    echo "更新主程序..."
     git remote set-url origin "${REPO_URL}" &> /dev/null
     echo "windows/" > .gitignore
     # 更新分支

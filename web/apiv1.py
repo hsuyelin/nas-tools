@@ -95,13 +95,14 @@ class UserLogin(Resource):
             return {"code": 1, "success": False, "message": "用户名或密码错误"}
         # 缓存Token
         token = generate_access_token(username)
-        TokenCache.set(token, token)
+        apikey = Config().get_config("security").get("api_key")
+        TokenCache.set(apikey, token)
         return {
             "code": 0,
             "success": True,
             "data": {
                 "token": token,
-                "apikey": Config().get_config("security").get("api_key"),
+                "apikey": apikey,
                 "userinfo": {
                     "userid": user_info.id,
                     "username": user_info.username,
@@ -160,20 +161,6 @@ class UserList(ClientResource):
         查询所有用户
         """
         return WebAction().api_action(cmd='get_users')
-
-
-@user.route('/auth')
-class UserAuth(ClientResource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('site', type=str, help='合作站点', location='form', required=True)
-    parser.add_argument('params', type=str, help='认证参数', location='form', required=True)
-
-    @user.doc(parser=parser)
-    def post(self):
-        """
-        用户认证
-        """
-        return WebAction().api_action(cmd='auth_user_level', data=self.parser.parse_args())
 
 
 @service.route('/mediainfo')

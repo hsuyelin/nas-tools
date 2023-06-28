@@ -58,7 +58,7 @@ setuptools.setup(
     ),
     include_package_data=True,  # MANIFEST.in
     install_requires=[
-        "slack_sdk>=3.21.1,<4",
+        "slack_sdk>=3.20.2,<4",
     ],
     setup_requires=["pytest-runner==5.2"],
     tests_require=async_test_dependencies,

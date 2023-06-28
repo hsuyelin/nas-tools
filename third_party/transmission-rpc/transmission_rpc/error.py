@@ -1,7 +1,10 @@
 """
 exception raise by this package
 """
-from typing import Any, Optional
+# Copyright (c) 2018-2021 Trim21 <i@trim21.me>
+# Copyright (c) 2008-2014 Erik Svensson <erik.public@gmail.com>
+# Licensed under the MIT license.
+from typing import Optional
 
 from requests.models import Response
 
@@ -12,28 +15,9 @@ class TransmissionError(Exception):
     communication with Transmission.
     """
 
-    message: str
-    method: Optional[Any]  # rpc call method
-    argument: Optional[Any]  # rpc call arguments
-    response: Optional[Any]  # parsed json response, may be dict with keys 'result' and 'arguments'
-    rawResponse: Optional[str]  # raw text http response
-    original: Optional[Response]  # original http requests
-
-    def __init__(
-        self,
-        message: str = "",
-        method: Optional[Any] = None,
-        argument: Optional[Any] = None,
-        response: Optional[Any] = None,
-        rawResponse: Optional[str] = None,
-        original: Optional[Response] = None,
-    ):
+    def __init__(self, message: str = "", original: Optional[Response] = None):
         super().__init__()
         self.message = message
-        self.method = method
-        self.argument = argument
-        self.response = response
-        self.rawResponse = rawResponse
         self.original = original
 
     def __str__(self) -> str:

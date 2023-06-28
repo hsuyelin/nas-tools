@@ -1,5 +1,6 @@
 from json import dumps
 
+from qbittorrentapi._version_support import v
 from qbittorrentapi.app import AppAPIMixIn
 from qbittorrentapi.decorators import alias
 from qbittorrentapi.decorators import aliased
@@ -50,11 +51,6 @@ class RSS(ClientCache):
     def add_feed(self, url=None, item_path=None, **kwargs):
         """Implements :meth:`~RSSAPIMixIn.rss_add_feed`"""
         return self._client.rss_add_feed(url=url, item_path=item_path, **kwargs)
-
-    @alias("setFeedURL")
-    def set_feed_url(self, url=None, item_path=None, **kwargs):
-        """Implements :meth:`~RSSAPIMixIn.rss_set_feed_url`"""
-        return self._client.rss_set_feed_url(url=url, item_path=item_path, **kwargs)
 
     @alias("removeItem")
     def remove_item(self, item_path=None, **kwargs):
@@ -172,24 +168,8 @@ class RSSAPIMixIn(AppAPIMixIn):
         :param item_path: Name and/or path for new feed (e.g. ``Folder\\Subfolder\\FeedName``)
         :return: None
         """
-        data = {"path": item_path, "url": url}
+        data = {"url": url, "path": item_path}
         self._post(_name=APINames.RSS, _method="addFeed", data=data, **kwargs)
-
-    @endpoint_introduced("2.9.1", "rss/setFeedURL")
-    @alias("rss_setFeedURL")
-    @login_required
-    def rss_set_feed_url(self, url=None, item_path=None, **kwargs):
-        """
-        Update the URL for an existing RSS feed.
-
-        :raises Conflict409Error:
-
-        :param url: URL of RSS feed (e.g https://distrowatch.com/news/torrents.xml)
-        :param item_path: Name and/or path for feed (e.g. ``Folder\\Subfolder\\FeedName``)
-        :return: None
-        """
-        data = {"path": item_path, "url": url}
-        self._post(_name=APINames.RSS, _method="setFeedURL", data=data, **kwargs)
 
     @alias("rss_removeItem")
     @login_required
@@ -246,14 +226,13 @@ class RSSAPIMixIn(AppAPIMixIn):
         """
         Trigger a refresh for an RSS item.
 
-        Note: qBittorrent v4.1.5 thru v4.1.8 all use Web API 2.2. However, this endpoint was
-        introduced with v4.1.8; so, behavior may be undefined for these versions.
-
         :param item_path: path to item to be refreshed (e.g. ``Folder\\Subfolder\\ItemName``)
         :return: None
         """
-        data = {"itemPath": item_path}
-        self._post(_name=APINames.RSS, _method="refreshItem", data=data, **kwargs)
+        # HACK: v4.1.7 and v4.1.8 both use api v2.2; however, refreshItem was introduced in v4.1.8
+        if v(self.app_version()) > v("v4.1.7"):
+            data = {"itemPath": item_path}
+            self._post(_name=APINames.RSS, _method="refreshItem", data=data, **kwargs)
 
     @endpoint_introduced("2.5.1", "rss/markAsRead")
     @alias("rss_markAsRead")

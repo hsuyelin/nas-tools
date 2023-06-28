@@ -234,7 +234,7 @@ class SearchAPIMixIn(AppAPIMixIn):
 
         :raises NotFound404Error:
 
-        :param search_id: ID of search to get status; leave empty for status of all jobs
+        :param search_id: ID of search to get status; leave emtpy for status of all jobs
         :return: :class:`SearchStatusesList` - `<https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-search-status>`_
         """  # noqa: E501
         params = {"id": search_id}

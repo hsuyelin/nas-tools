@@ -1,4 +1,5 @@
 import re
+from urllib.parse import quote
 
 import log
 from app.mediaserver.client._base import _IMediaClient
@@ -482,14 +483,14 @@ class Jellyfin(_IMediaClient):
         if not image_tag or not item_id:
             return ""
         if not remote:
-            image_url = f"{self._host}Items/{item_id}/"\
+            image_url = f"{self._host}Items/{item_id}/" \
                         f"Images/Backdrop?tag={image_tag}&fillWidth=666&api_key={self._apikey}"
             if inner:
                 return self.get_nt_image_url(image_url)
             return image_url
         else:
             host = self._play_host or self._host
-            image_url = f"{host}Items/{item_id}/"\
+            image_url = f"{host}Items/{item_id}/" \
                         f"Images/Backdrop?tag={image_tag}&fillWidth=666&api_key={self._apikey}"
             if IpUtils.is_internal(host):
                 return self.get_nt_image_url(url=image_url, remote=True)
@@ -569,7 +570,7 @@ class Jellyfin(_IMediaClient):
             if res and res.status_code == 200:
                 sessions = res.json()
                 for session in sessions:
-                    if session.get("NowPlayingItem"):
+                    if session.get("NowPlayingItem") and not session.get("PlayState", {}).get("IsPaused"):
                         playing_sessions.append(session)
             return playing_sessions
         except Exception as e:
@@ -582,7 +583,8 @@ class Jellyfin(_IMediaClient):
         """
         eventItem = {'event': message.get('NotificationType', ''),
                      'item_name': message.get('Name'),
-                     'user_name': message.get('NotificationUsername')
+                     'user_name': message.get('NotificationUsername'),
+                     'play_url': f"/open?url={quote(self.get_play_url(message.get('Id')))}&type=jellyfin"
                      }
         return eventItem
 

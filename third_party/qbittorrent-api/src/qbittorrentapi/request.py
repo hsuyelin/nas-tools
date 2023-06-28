@@ -84,7 +84,7 @@ class URL(object):
         and prefixed to all subsequent API calls.
 
         :param headers: HTTP headers for request
-        :param requests_kwargs: arguments from user for HTTP ``HEAD`` request
+        :param requests_kwargs: additional params from user for HTTP ``HEAD`` request
         :return: base URL as a ``string`` for Web API endpoint
         """
         if self.client._API_BASE_URL is not None:
@@ -143,7 +143,7 @@ class URL(object):
         :param alt_scheme: alternative scheme to use for URL if default doesn't work
         :param headers: HTTP headers for request
         :param requests_kwargs: kwargs for calls to Requests
-        :return: scheme (i.e. ``HTTP`` or ``HTTPS``)
+        :return: scheme (ie ``HTTP`` or ``HTTPS``)
         """
         logger.debug("Detecting scheme for URL...")
         prefer_https = False
@@ -215,8 +215,8 @@ class Request(object):
         """
         Initialize and/or reset communications context with qBittorrent.
 
-        This is necessary on startup or when the authorization cookie needs
-        to be replaced...perhaps because it expired, qBittorrent was
+        This is necessary on startup or when the auth cookie needs to be
+        replaced...perhaps because it expired, qBittorrent was
         restarted, significant settings changes, etc.
         """
         logger.debug("Re-initializing context...")
@@ -520,7 +520,7 @@ class Request(object):
         :param data: key/value pairs to send with a ``POST`` request
         :param files: files to be sent with the request
         :param response_class: class to use to cast the API response
-        :param kwargs: arbitrary keyword arguments to send with the request
+        :param kwargs: arbitrary keyword args to send to qBittorrent with the request
         :return: Requests :class:`~requests.Response`
         """
         response_kwargs, kwargs = self._get_response_kwargs(kwargs)
@@ -580,7 +580,7 @@ class Request(object):
         ``self._EXTRA_HEADERS`` are merged in Requests itself.
 
         :param headers: headers specified for this specific request
-        :param more_headers: headers from requests_kwargs arguments
+        :param more_headers: headers from requests_kwargs config
         :return: final dictionary of headers for this specific request
         """
         user_headers = more_headers or {}
@@ -590,7 +590,7 @@ class Request(object):
     @staticmethod
     def _get_data(http_method, params=None, data=None, files=None, **kwargs):
         """
-        Determine ``data``, ``params``, and ``files`` for the Requests call.
+        Determine data, params, and files for the Requests call.
 
         :param http_method: ``get`` or ``post``
         :param params: key value pairs to send with GET calls

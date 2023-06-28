@@ -52,7 +52,7 @@ Requests Configuration
 
 Additional HTTP Headers
 ***********************
-* For consistency, HTTP Headers can be specified using the method above; for backwards compatibility, the methods below are supported as well.
+* For consistency, HTTP Headers can be specified using the method above; for backwards compatability, the methods below are supported as well.
 * Either way, these additional headers will be incorporated (using clobbering) into the rest of the headers to be sent.
 * To send a custom HTTP header in all requests made from an instantiated client, declare them during instantiation:
 
