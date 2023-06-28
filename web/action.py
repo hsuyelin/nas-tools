@@ -13,6 +13,7 @@ from math import floor
 from pathlib import Path
 from urllib.parse import unquote
 
+
 import cn2an
 from flask_login import logout_user, current_user
 from werkzeug.security import generate_password_hash
@@ -211,7 +212,6 @@ class WebAction:
             "get_season_episodes": self.__get_season_episodes,
             "get_user_menus": self.get_user_menus,
             "get_top_menus": self.get_top_menus,
-            "auth_user_level": self.auth_user_level,
             "update_downloader": self.__update_downloader,
             "del_downloader": self.__del_downloader,
             "check_downloader": self.__check_downloader,
@@ -233,6 +233,20 @@ class WebAction:
             "get_category_config": self.get_category_config,
             "get_system_processes": self.get_system_processes,
             "run_plugin_method": self.run_plugin_method,
+            "update_all_config": self.__update_all_config
+        }
+        # 远程命令响应
+        self._commands = {
+            "/ptr": {"func": TorrentRemover().auto_remove_torrents, "desc": "自动删种"},
+            "/ptt": {"func": Downloader().transfer, "desc": "下载文件转移"},
+            "/rst": {"func": Sync().transfer_sync, "desc": "目录同步"},
+            "/rss": {"func": Rss().rssdownload, "desc": "电影/电视剧订阅"},
+            "/ssa": {"func": Subscribe().subscribe_search_all, "desc": "订阅搜索"},
+            "/tbl": {"func": self.truncate_blacklist, "desc": "清理转移缓存"},
+            "/trh": {"func": self.truncate_rsshistory, "desc": "清理RSS缓存"},
+            "/utf": {"func": self.unidentification, "desc": "重新识别"},
+            "/udt": {"func": self.update_system, "desc": "系统更新"},
+            "/sta": {"func": self.user_statistics, "desc": "站点数据统计"}
         }
         # 远程命令响应
         self._commands = {
@@ -420,6 +434,11 @@ class WebAction:
                                                       cfg_value, "http": "%s" % cfg_value}
             else:
                 cfg['app']['proxies'] = {"https": None, "http": None}
+            return cfg
+        # 索引器
+        if cfg_key == "jackett.indexers":
+            vals = cfg_value.split("\n")
+            cfg['jackett']['indexers'] = vals
             return cfg
         # 最大支持三层赋值
         keys = cfg_key.split(".")
@@ -618,9 +637,8 @@ class WebAction:
         dl_setting = data.get("dl_setting")
         files = data.get("files") or []
         urls = data.get("urls") or []
-        magnets = data.get("magnets") or []
-        if not files and not urls and not magnets:
-            return {"code": -1, "msg": "没有种子文件/种子链接/磁力链接"}
+        if not files and not urls:
+            return {"code": -1, "msg": "没有种子文件或者种子链接"}
         # 下载种子
         for file_item in files:
             if not file_item:
@@ -645,15 +663,17 @@ class WebAction:
                 continue
             # 查询站点
             site_info = Sites().get_sites(siteurl=url)
-            if not site_info:
-                continue
-            # 下载种子文件，并读取信息
-            file_path, _, _, _, retmsg = Torrent().get_torrent_info(
-                url=url,
-                cookie=site_info.get("cookie"),
-                ua=site_info.get("ua"),
-                proxy=site_info.get("proxy")
-            )
+            if not url.startswith("magnet:"):
+                # 下载种子文件，并读取信息
+                file_path, _, _, _, retmsg = Torrent().get_torrent_info(
+                    url=url,
+                    cookie=site_info.get("cookie"),
+                    ua=site_info.get("ua"),
+                    proxy=site_info.get("proxy")
+                )
+            else:
+                file_dir = Config().get_temp_path()
+                file_path, retmsg = Torrent().magent2torrent(url, file_dir)
             if not file_path:
                 return {"code": -1, "msg": f"下载种子文件失败： {retmsg}"}
             media_info = Media().get_media_info(title=os.path.basename(file_path))
@@ -666,27 +686,7 @@ class WebAction:
                                   torrent_file=file_path,
                                   in_from=SearchType.WEB,
                                   user_name=current_user.username)
-        if magnets and not isinstance(magnets, list):
-            magnets = [magnets]
-        for magnet in magnets:
-            if not magnet:
-                continue
-            file_path = None
-            title = Torrent().get_magnet_title(magnet)
-            if title:
-                media_info = Media().get_media_info(title=title)
-            else:
-                media_info = MetaInfo(title="磁力链接")
-                media_info.org_string = magnet
-            media_info.set_torrent_info(enclosure=magnet,
-                                        download_volume_factor=0,
-                                        upload_volume_factor=1)
-            Downloader().download(media_info=media_info,
-                                  download_dir=dl_dir,
-                                  download_setting=dl_setting,
-                                  torrent_file=file_path,
-                                  in_from=SearchType.WEB,
-                                  user_name=current_user.username)
+
         return {"code": 0, "msg": "添加下载完成！"}
 
     @staticmethod
@@ -1077,8 +1077,8 @@ class WebAction:
         """
         检查新版本
         """
-        version, url = WebUtils.get_latest_version()
-        if version:
+        version, url, flag = WebUtils.get_latest_version()
+        if flag:
             return {"code": 0, "version": version, "url": url}
         return {"code": -1, "version": "", "url": ""}
 
@@ -2396,7 +2396,7 @@ class WebAction:
             # 参数
             params = data.get("params") or {}
             # 排序
-            sort = params.get("sort") or "T"
+            sort = params.get("sort") or "R"
             # 选中的分类
             tags = params.get("tags") or ""
             # 过滤参数
@@ -4748,250 +4748,11 @@ class WebAction:
         # 需要过滤的菜单
         ignore = []
         # 查询最早加入PT站的时间, 如果不足一个月, 则隐藏刷流任务
-        # first_pt_site = SiteUserInfo().get_pt_site_min_join_date()
-        # if not first_pt_site or not StringUtils.is_one_month_ago(first_pt_site):
-        #     ignore.append('brushtask')
+        first_pt_site = SiteUserInfo().get_pt_site_min_join_date()
+        if not first_pt_site or not StringUtils.is_one_month_ago(first_pt_site):
+            ignore.append('brushtask')
         # 获取可用菜单
-        # menus = current_user.get_usermenus(ignore=ignore)
-        menus = [
-            {
-                'name': '我的媒体库',
-                'level': 1,
-                'page': 'index',
-                'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><polyline points="5 12 3 12 12 3 21 12 19 12"></polyline><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"></path><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"></path></svg>\n                    '
-            },
-            {
-                'name': '探索',
-                'level': 1,
-                'list': [
-                    {
-                        'name': '榜单推荐',
-                        'level': 2,
-                        'page': 'ranking',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-align-box-bottom-center" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M9 15v2"></path><path d="M12 11v6"></path><path d="M15 13v4"></path></svg>'
-                    }, {
-                        'name': '豆瓣电影',
-                        'level': 2,
-                        'page': 'douban_movie',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-movie" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M8 4l0 16"></path><path d="M16 4l0 16"></path><path d="M4 8l4 0"></path><path d="M4 16l4 0"></path><path d="M4 12l16 0"></path><path d="M16 8l4 0"></path><path d="M16 16l4 0"></path></svg>'
-                    }, {
-                        'name': '豆瓣电视剧',
-                        'level': 2,
-                        'page': 'douban_tv',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-device-tv" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"></path><path d="M16 3l-4 4l-4 -4"></path></svg>'
-                    }, {
-                        'name': 'TMDB电影',
-                        'level': 2,
-                        'page': 'tmdb_movie',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-movie" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M8 4l0 16"></path><path d="M16 4l0 16"></path><path d="M4 8l4 0"></path><path d="M4 16l4 0"></path><path d="M4 12l16 0"></path><path d="M16 8l4 0"></path><path d="M16 16l4 0"></path></svg>'
-                    }, {
-                        'name': 'TMDB电视剧',
-                        'level': 2,
-                        'page': 'tmdb_tv',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-device-tv" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"></path><path d="M16 3l-4 4l-4 -4"></path></svg>'
-                    }, {
-                        'name': 'BANGGUMI',
-                        'level': 2,
-                        'page': 'bangumi',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-device-tv-old" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"></path><path d="M16 3l-4 4l-4 -4"></path><path d="M15 7v13"></path><path d="M18 15v.01"></path><path d="M18 12v.01"></path></svg>'
-                    },
-                ],
-            },
-            {
-                'name': '资源搜索',
-                'level': 1,
-                'page': 'search',
-                'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><circle cx="10" cy="10" r="7"></circle><line x1="21" y1="21" x2="15" y2="15"></line></svg>'
-            },
-            {
-                'name': '站点管理',
-                'level': 1,
-                'list': [
-                    {
-                        'name': '站点维护',
-                        'level': 2,
-                        'page': 'site',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-server-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><rect x="3" y="4" width="18" height="8" rx="3"></rect><rect x="3" y="12" width="18" height="8" rx="3"></rect><line x1="7" y1="8" x2="7" y2="8.01"></line><line x1="7" y1="16" x2="7" y2="16.01"></line><path d="M11 8h6"></path><path d="M11 16h6"></path></svg>'
-                    },
-                    {
-                        'name': '数据统计',
-                        'level': 2,
-                        'page': 'statistics',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-chart-pie" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 3.2a9 9 0 1 0 10.8 10.8a1 1 0 0 0 -1 -1h-6.8a2 2 0 0 1 -2 -2v-7a.9 .9 0 0 0 -1 -.8"></path><path d="M15 3.5a9 9 0 0 1 5.5 5.5h-4.5a1 1 0 0 1 -1 -1v-4.5"></path></svg>'
-                    },
-                    {
-                        'name': '刷流任务',
-                        'level': 2,
-                        'page': 'brushtask',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check-list" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9.615 20h-2.615a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8"></path><path d="M14 19l2 2l4 -4"></path><path d="M9 8h4"></path><path d="M9 12h2"></path></svg>'
-                    },
-                    {
-                        'name': '站点资源',
-                        'level': 2,
-                        'page': 'sitelist',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-cloud-computing" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M6.657 16c-2.572 0 -4.657 -2.007 -4.657 -4.483c0 -2.475 2.085 -4.482 4.657 -4.482c.393 -1.762 1.794 -3.2 3.675 -3.773c1.88 -.572 3.956 -.193 5.444 1c1.488 1.19 2.162 3.007 1.77 4.769h.99c1.913 0 3.464 1.56 3.464 3.486c0 1.927 -1.551 3.487 -3.465 3.487h-11.878"></path><path d="M12 16v5"></path><path d="M16 16v4a1 1 0 0 0 1 1h4"></path><path d="M8 16v4a1 1 0 0 1 -1 1h-4"></path></svg>'
-                    }
-                ]
-            },
-            {
-                'name': '订阅管理',
-                'level': 1,
-                'list': [
-                    {
-                        'name': '电影订阅',
-                        'level': 2,
-                        'page': 'movie_rss',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-movie" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M8 4l0 16"></path><path d="M16 4l0 16"></path><path d="M4 8l4 0"></path><path d="M4 16l4 0"></path><path d="M4 12l16 0"></path><path d="M16 8l4 0"></path><path d="M16 16l4 0"></path></svg>'
-                    },
-                    {
-                        'name': '电视剧订阅',
-                        'level': 2,
-                        'page': 'tv_rss',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-device-tv" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"></path><path d="M16 3l-4 4l-4 -4"></path></svg>'
-                    },
-                    {
-                        'name': '自定义订阅',
-                        'level': 2,
-                        'page': 'user_rss',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-file-rss" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M14 3v4a1 1 0 0 0 1 1h4"></path><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"></path><path d="M12 17a3 3 0 0 0 -3 -3"></path><path d="M15 17a6 6 0 0 0 -6 -6"></path><path d="M9 17h.01"></path></svg>'
-                    },
-                    {
-                        'name': '订阅日历',
-                        'level': 2,
-                        'page': 'rss_calendar',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M16 3l0 4"></path><path d="M8 3l0 4"></path><path d="M4 11l16 0"></path><path d="M11 15l1 0"></path><path d="M12 15l0 3"></path></svg>'
-                    }
-                ]
-            },
-            {
-                'name': '下载管理',
-                'level': 1,
-                'list': [
-                    {
-                        'name': '正在下载',
-                        'level': 2,
-                        'page': 'downloading',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-loader" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 6l0 -3"></path><path d="M16.25 7.75l2.15 -2.15"></path><path d="M18 12l3 0"></path><path d="M16.25 16.25l2.15 2.15"></path><path d="M12 18l0 3"></path><path d="M7.75 16.25l-2.15 2.15"></path><path d="M6 12l-3 0"></path><path d="M7.75 7.75l-2.15 -2.15"></path></svg>'
-                    },
-                    {
-                        'name': '近期下载',
-                        'level': 2,
-                        'page': 'downloaded',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-download" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path><path d="M7 11l5 5l5 -5"></path><path d="M12 4l0 12"></path></svg>'
-                    },
-                ]
-            },
-            {
-                'name': '媒体整理',
-                'level': 1,
-                'list': [
-                    {
-                        'name': '文件管理',
-                        'level': 2,
-                        'page': 'mediafile',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-file-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>  <path d="M14 3v4a1 1 0 0 0 1 1h4"></path>  <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"></path>  <path d="M10 18l5 -5a1.414 1.414 0 0 0 -2 -2l-5 5v2h2z"></path></svg>'
-                    },
-                    {
-                        'name': '手动识别',
-                        'level': 2,
-                        'page': 'unidentification',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-accessible" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>  <path d="M10 16.5l2 -3l2 3m-2 -3v-2l3 -1m-6 0l3 1"></path>  <circle cx="12" cy="7.5" r=".5" fill="currentColor"></circle></svg>'
-                    },
-                    {
-                        'name': '历史记录',
-                        'level': 2,
-                        'page': 'history',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-history" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>  <path d="M12 8l0 4l2 2"></path>  <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"></path></svg>'
-                    },
-                    {
-                        'name': 'TMDB缓存',
-                        'level': 2,
-                        'page': 'tmdbcache',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-headlessui" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>  <path d="M6.744 4.325l7.82 -1.267a4.456 4.456 0 0 1 5.111 3.686l1.267 7.82a4.456 4.456 0 0 1 -3.686 5.111l-7.82 1.267a4.456 4.456 0 0 1 -5.111 -3.686l-1.267 -7.82a4.456 4.456 0 0 1 3.686 -5.111z"></path>  <path d="M7.252 7.704l7.897 -1.28a1 1 0 0 1 1.147 .828l.36 2.223l-9.562 3.51l-.67 -4.134a1 1 0 0 1 .828 -1.147z"></path></svg>'
-                    }
-                ]
-            },
-            {
-                'name': '服务',
-                'level': 1,
-                'page': 'service',
-                'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-layout-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><rect x="4" y="4" width="6" height="5" rx="2"></rect><rect x="4" y="13" width="6" height="7" rx="2"></rect><rect x="14" y="4" width="6" height="7" rx="2"></rect><rect x="14" y="15" width="6" height="5" rx="2"></rect></svg>\n                    '
-            },
-            {
-                'name': '系统设置',
-                'also': '设置',
-                'level': 1,
-                'list': [
-                    {
-                        'name': '基础设置',
-                        'level': 2,
-                        'page': 'basic',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-settings" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>'
-                    },
-                    {
-                        'name': '用户管理',
-                        'level': 2,
-                        'page': 'users',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-users" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path></svg>'
-                    },
-                    {
-                        'name': '媒体库',
-                        'level': 2,
-                        'page': 'library',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-stereo-glasses" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>  <path d="M8 3h-2l-3 9"></path>  <path d="M16 3h2l3 9"></path>  <path d="M3 12v7a1 1 0 0 0 1 1h4.586a1 1 0 0 0 .707 -.293l2 -2a1 1 0 0 1 1.414 0l2 2a1 1 0 0 0 .707 .293h4.586a1 1 0 0 0 1 -1v-7h-18z"></path>  <path d="M7 16h1"></path>  <path d="M16 16h1"></path></svg>'
-                    },
-                    {
-                        'name': '目录同步',
-                        'level': 2,
-                        'page': 'directorysync',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-refresh" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>  <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>  <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path></svg>'
-                    },
-                    {
-                        'name': '消息通知',
-                        'level': 2,
-                        'page': 'notification',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-bell" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"></path><path d="M9 17v1a3 3 0 0 0 6 0v-1"></path></svg>'
-                    },
-                    {
-                        'name': '过滤规则',
-                        'level': 2,
-                        'page': 'filterrule',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-filter" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M5.5 5h13a1 1 0 0 1 .5 1.5l-5 5.5l0 7l-4 -3l0 -4l-5 -5.5a1 1 0 0 1 .5 -1.5"></path></svg>'
-                    },
-                    {
-                        'name': '自定义识别词',
-                        'level': 1,
-                        'page': 'customwords',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-a-b" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>  <path d="M3 16v-5.5a2.5 2.5 0 0 1 5 0v5.5m0 -4h-5"></path>  <path d="M12 6l0 12"></path>  <path d="M16 16v-8h3a2 2 0 0 1 0 4h-3m3 0a2 2 0 0 1 0 4h-3"></path></svg>'
-                    },
-                    {
-                        'name': '索引器',
-                        'level': 2,
-                        'page': 'indexer',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-list-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 15m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path><path d="M18.5 18.5l2.5 2.5"></path><path d="M4 6h16"></path><path d="M4 12h4"></path><path d="M4 18h4"></path></svg>'
-                    },
-                    {
-                        'name': '下载器',
-                        'level': 2,
-                        'page': 'downloader',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-download" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path><path d="M7 11l5 5l5 -5"></path><path d="M12 4l0 12"></path></svg>'
-                    },
-                    {
-                        'name': '媒体服务器',
-                        'level': 2,
-                        'page': 'mediaserver',
-                        'page': 'mediaserver',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-server-cog" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 4m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z"></path><path d="M12 20h-6a3 3 0 0 1 -3 -3v-2a3 3 0 0 1 3 -3h10.5"></path><path d="M18 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"></path><path d="M18 14.5v1.5"></path><path d="M18 20v1.5"></path><path d="M21.032 16.25l-1.299 .75"></path><path d="M16.27 19l-1.3 .75"></path><path d="M14.97 16.25l1.3 .75"></path><path d="M19.733 19l1.3 .75"></path><path d="M7 8v.01"></path><path d="M7 16v.01"></path></svg>'
-                    },
-                    {
-                        'name': '插件',
-                        'level': 2,
-                        'page': 'plugin',
-                        'icon': '<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-codesandbox" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>   <path d="M20 7.5v9l-4 2.25l-4 2.25l-4 -2.25l-4 -2.25v-9l4 -2.25l4 -2.25l4 2.25z"></path>   <path d="M12 12l4 -2.25l4 -2.25"></path>   <path d="M12 12l0 9"></path>   <path d="M12 12l-4 -2.25l-4 -2.25"></path>   <path d="M20 12l-4 2v4.75"></path>   <path d="M4 12l4 2l0 4.75"></path>   <path d="M8 5.25l4 2.25l4 -2.25"></path></svg>'
-                    }
-                ]
-            }
-        ]
+        menus = current_user.get_usermenus(ignore=ignore)
         return {
             "code": 0,
             "menus": menus,
@@ -5008,34 +4769,7 @@ class WebAction:
             "menus": current_user.get_topmenus()
         }
 
-    @staticmethod
-    def auth_user_level(data=None):
-        """
-        用户认证
-        """
-        if data:
-            site = data.get("site")
-            params = data.get("params")
-        else:
-            UserSiteAuthParams = SystemConfig().get(SystemConfigKey.UserSiteAuthParams)
-            if UserSiteAuthParams:
-                site = UserSiteAuthParams.get("site")
-                params = UserSiteAuthParams.get("params")
-            else:
-                return {"code": 1, "msg": "参数错误"}
-        # state, msg = User().check_user(site, params)
-        # if state:
-        # 保存认证数据
-        SystemConfig().set(key=SystemConfigKey.UserSiteAuthParams,
-                           value={
-                               "site": site,
-                               "params": params
-                           })
-        return {"code": 0, "msg": "认证成功"}
-        # return {"code": 1, "msg": f"{msg or '认证失败，请检查合作站点账号是否正常！'}"}
-
-    @staticmethod
-    def __update_downloader(data):
+    def __update_downloader(self, data):
         """
         更新下载器
         """
@@ -5403,6 +5137,26 @@ class WebAction:
         data.pop("method")
         result = PluginManager().run_plugin_method(pid=plugin_id, method=method, **data)
         return {"code": 0, "result": result}
+
+    @staticmethod
+    def __update_all_config(data):
+        """
+        设置系统设置（数据库）
+        """
+        conf = data.get("conf")
+        db = data.get("db")
+        if data.get('test'):
+            conf = data
+        if conf:
+            ret = WebAction().__update_config(conf)
+            if ret.get('code') == 1:
+                return ret
+        if db:
+            ret = WebAction().__set_system_config(db)
+            if ret.get('code') == 1:
+                return ret
+
+        return {"code": 0}
 
     def get_commands(self):
         """

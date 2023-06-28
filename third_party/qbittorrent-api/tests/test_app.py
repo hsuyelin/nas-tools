@@ -1,6 +1,7 @@
 import pytest
 
 from qbittorrentapi._attrdict import AttrDict
+from qbittorrentapi._version_support import v
 from tests.conftest import IS_QBT_DEV
 
 
@@ -10,25 +11,24 @@ def test_version(client, app_version):
     assert client.application.version == app_version
 
 
-@pytest.mark.skipif(IS_QBT_DEV, reason="testing devel version of qBittorrent")
 def test_web_api_version(client, api_version):
+    if IS_QBT_DEV:
+        return
+
     assert client.app_web_api_version() == api_version
     assert client.app.web_api_version == api_version
     assert client.application.web_api_version == api_version
 
 
-@pytest.mark.skipif_before_api_version("2.3")
-def test_build_info(client):
-    assert "libtorrent" in client.app_build_info()
-    assert "libtorrent" in client.app.build_info
-
-
-@pytest.mark.skipif_after_api_version("2.3")
-def test_build_info_not_implemented(client):
-    with pytest.raises(NotImplementedError):
+def test_build_info(client, api_version):
+    if v(api_version) >= v("2.3"):
         assert "libtorrent" in client.app_build_info()
-    with pytest.raises(NotImplementedError):
         assert "libtorrent" in client.app.build_info
+    else:
+        with pytest.raises(NotImplementedError):
+            assert "libtorrent" in client.app_build_info()
+        with pytest.raises(NotImplementedError):
+            assert "libtorrent" in client.app.build_info
 
 
 def test_preferences(client):

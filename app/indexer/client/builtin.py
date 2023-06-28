@@ -50,6 +50,9 @@ class BuiltinIndexer(_IIndexClient):
     def get_type(self):
         return self.client_type
 
+    def get_client_id(self):
+        return self.client_id
+
     def get_status(self):
         """
         检查连通性
@@ -91,7 +94,7 @@ class BuiltinIndexer(_IIndexClient):
                     indexer.name = site.get("name")
                     ret_indexers.append(indexer)
         # 公开站点
-        if public:
+        if public and self._show_more_sites:
             for indexer in IndexerHelper().get_all_indexers():
                 if not indexer.get("public"):
                     continue

@@ -78,7 +78,7 @@ class Client(
         certs will cause a :class:`qbittorrentapi.exceptions.APIConnectionError` exception to be raised.
     :param EXTRA_HEADERS: Dictionary of HTTP Headers to include in all requests made to qBittorrent.
     :param REQUESTS_ARGS: Dictionary of configuration for Requests package: `<https://requests.readthedocs.io/en/latest/api/#requests.request>`_
-    :param FORCE_SCHEME_FROM_HOST: If a scheme (i.e. ``http`` or ``https``) is specified in host, it will be used regardless
+    :param FORCE_SCHEME_FROM_HOST: If a scheme (i.e. ``http`` or ``https``) is specifed in host, it will be used regardless
         of whether qBittorrent is configured for HTTP or HTTPS communication. Normally, this client will attempt to
         determine which scheme qBittorrent is actually listening on...but this can cause problems in rare cases.
     :param RAISE_NOTIMPLEMENTEDERROR_FOR_UNIMPLEMENTED_API_ENDPOINTS: Some Endpoints may not be implemented in older

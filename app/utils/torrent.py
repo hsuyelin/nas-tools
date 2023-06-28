@@ -1,8 +1,11 @@
 import datetime
 import os.path
+import time
 import re
+import tempfile
 from urllib.parse import unquote
 
+import libtorrent
 from bencode import bdecode
 
 import log
@@ -206,15 +209,6 @@ class Torrent:
         return file_name
 
     @staticmethod
-    def get_magnet_title(url):
-        """
-        从磁力链接中获取标题
-        """
-        if not url:
-            return ""
-        title = re.findall(r"dn=(.+)&?", url)
-        return unquote(title[0]) if title else ""
-    @staticmethod
     def get_intersection_episodes(target, source, title):
         """
         对两个季集字典进行判重，有相同项目的取集的交集
@@ -290,3 +284,46 @@ class Torrent:
                 can_download_list.append(media_name)
                 can_download_list_item.append(t_item)
         return can_download_list_item
+
+    @staticmethod
+    def magent2torrent(url, path, timeout=20):
+        """
+        磁力链接转种子文件
+        :param url: 磁力链接
+        :param path: 保存目录
+        :param timeout: 获取元数据超时时间
+        :return: 转换后种子路径
+        """
+
+        log.info(f"【Downloader】转换磁力链接：{url}")
+        session = libtorrent.session()
+        magnet_info = libtorrent.parse_magnet_uri(url)
+        magnet_info.save_path = path
+        handle = session.add_torrent(magnet_info)
+
+        log.debug("【Downloader】获取元数据中")
+        tout = 0
+        while not handle.status().name:
+            time.sleep(1)
+            tout += 1
+            if tout > timeout:
+                log.debug("【Downloader】元数据获取超时")
+                return None, "种子元数据获取超时"
+        session.pause()
+
+        log.debug("【Downloader】获取元数据完成")
+        tf = handle.torrent_file()
+        ti = libtorrent.torrent_info(tf)
+        torrent_file = libtorrent.create_torrent(ti)
+        torrent_file.set_comment(ti.comment())
+        torrent_file.set_creator(ti.creator())
+
+        file_path = os.path.join(path, "%s.torrent" % handle.status().name)
+
+        with open(file_path, 'wb') as f_handle:
+            f_handle.write(libtorrent.bencode(torrent_file.generate()))
+            f_handle.close()
+
+        session.remove_torrent(handle, 1)
+        log.info(f"【Downloader】转换后的种子路径：{file_path}")
+        return file_path, ""

@@ -179,6 +179,20 @@ class Transmission(_IDownloadClient):
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
 
+    def set_torrents_tag(self, ids, tags):
+        """
+        设置种子为已整理状态
+        """
+        if not self.trc:
+            return
+        ids = self.__parse_ids(ids)
+        # 打标签
+        try:
+            self.trc.change_torrent(labels=tags, ids=ids)
+            log.info(f"【{self.client_name}】设置transmission种子标签成功")
+        except Exception as err:
+            ExceptionUtils.exception_traceback(err)
+
     def set_torrent_tag(self, tid, tag):
         """
         设置种子标签

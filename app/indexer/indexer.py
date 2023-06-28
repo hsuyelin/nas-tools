@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import log
 from app.helper import ProgressHelper, SubmoduleHelper, DbHelper
+from app.indexer.client import BuiltinIndexer
 from app.utils import ExceptionUtils, StringUtils
 from app.utils.commons import singleton
 from app.utils.types import SearchType, IndexerType, ProgressKey
@@ -81,6 +82,13 @@ class Indexer(object):
         """
         return [indexer.name for indexer in self.get_indexers(check=True)]
 
+    @staticmethod
+    def get_builtin_indexers(check=True, indexer_id=None):
+        """
+        获取内置索引器的索引站点
+        """
+        return BuiltinIndexer().get_indexers(check=check, indexer_id=indexer_id)
+
     def list_resources(self, index_id, page=0, keyword=None):
         """
         获取内置索引器的资源列表
@@ -88,7 +96,7 @@ class Indexer(object):
         :param page: 页码
         :param keyword: 搜索关键字
         """
-        return self._client.list(index_id=index_id, page=page, keyword=keyword)
+        return BuiltinIndexer().list(index_id=index_id, page=page, keyword=keyword)
 
     def __get_client(self, ctype: [IndexerType, str], conf=None):
         return self.__build_class(ctype=ctype, conf=conf)
@@ -173,4 +181,4 @@ class Indexer(object):
         """
         获取索引器统计信息
         """
-        return self.dbhelper.get_indexer_statistics()
+        return self.dbhelper.get_indexer_statistics(self._client.get_client_id())

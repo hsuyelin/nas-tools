@@ -215,10 +215,8 @@ def web():
     Indexers = Indexer().get_indexers()
     SearchSource = "douban" if Config().get_config("laboratory").get("use_douban_titles") else "tmdb"
     CustomScriptCfg = SystemConfig().get(SystemConfigKey.CustomScript)
-    CooperationSites = current_user.get_authsites()
     Menus = WebAction().get_user_menus().get("menus") or []
     Commands = WebAction().get_commands()
-    current_user.level = 2
     return render_template('navigation.html',
                            GoPage=GoPage,
                            CurrentUser=current_user,
@@ -233,7 +231,6 @@ def web():
                            Indexers=Indexers,
                            SearchSource=SearchSource,
                            CustomScriptCfg=CustomScriptCfg,
-                           CooperationSites=CooperationSites,
                            DefaultPath=DefaultPath,
                            Menus=Menus,
                            Commands=Commands)
@@ -391,11 +388,17 @@ def sites():
 @App.route('/sitelist', methods=['POST', 'GET'])
 @login_required
 def sitelist():
-    IndexerSites = Indexer().get_indexers(check=False)
+    # IndexerSites = Indexer().get_indexers(check=False)
+    IndexerSites = Indexer().get_builtin_indexers(check=False)
     return render_template("site/sitelist.html",
                            Sites=IndexerSites,
                            Count=len(IndexerSites))
 
+
+# 唤起App中转页面
+@App.route('/open', methods=['POST', 'GET'])
+def open_app():
+    return render_template("openapp.html")
 
 # 站点资源页面
 @App.route('/resources', methods=['POST', 'GET'])
@@ -918,7 +921,7 @@ def download_setting():
 @login_required
 def indexer():
     # 只有选中的索引器才搜索
-    indexers = Indexer().get_indexers(check=False)
+    indexers = Indexer().get_builtin_indexers(check=False)
     private_count = len([item.id for item in indexers if not item.public])
     public_count = len([item.id for item in indexers if item.public])
     indexer_sites = SystemConfig().get(SystemConfigKey.UserIndexerSites)
@@ -1200,9 +1203,9 @@ def plex_webhook():
     request_json = json.loads(request.form.get('payload', {}))
     log.debug("收到Plex Webhook报文：%s" % str(request_json))
     # 事件类型
-    event_match = request_json.get("event") in ["media.play", "media.stop"]
+    event_match = request_json.get("event") in ["media.play", "media.stop", "library.new"]
     # 媒体类型
-    type_match = request_json.get("Metadata", {}).get("type") in ["movie", "episode"]
+    type_match = request_json.get("Metadata", {}).get("type") in ["movie", "episode", "show"]
     # 是否直播
     is_live = request_json.get("Metadata", {}).get("live") == "1"
     # 如果事件类型匹配,媒体类型匹配,不是直播

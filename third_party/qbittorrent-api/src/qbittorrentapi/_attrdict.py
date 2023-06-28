@@ -85,7 +85,7 @@ def merge(left, right):
 @six.add_metaclass(ABCMeta)
 class Attr(Mapping):
     """
-    A ``mixin`` class for a mapping that allows for attribute-style access of
+    A mixin class for a mapping that allows for attribute-style access of
     values.
 
     A key may be used as an attribute if:
@@ -222,7 +222,7 @@ class Attr(Mapping):
 
 @six.add_metaclass(ABCMeta)
 class MutableAttr(Attr, MutableMapping):
-    """A ``mixin`` class for a mapping that allows for attribute-style access of
+    """A mixin class for a mapping that allows for attribute-style access of
     values."""
 
     def _setattr(self, key, value):

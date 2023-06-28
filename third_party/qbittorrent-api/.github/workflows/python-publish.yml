@@ -8,20 +8,16 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.5.2
+      - uses: actions/checkout@v3.5.0
       - name: Set up Python
         uses: actions/setup-python@v4.5.0
         with:
           python-version: '3.x'
-
-      - name: Install Build Tools
+      - name: Install dependencies and build
         run: |
-          python -m pip install -U pip setuptools wheel
-          python -m pip install .[dev]
-
-      - name: Build Package
-        run: tox -e package
-
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade build
+          python -m build
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:

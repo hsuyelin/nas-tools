@@ -1,15 +1,7 @@
 name: NAStool Docker
 on:
   workflow_dispatch:
-    inputs:
-      docker_username:
-        description: 'docker user name'
-        required: true
-        default: ''
-      docker_password:
-        description: 'docker user password'
-        required: true
-        default: ''
+  push:
     branches:
       - master
     paths:
@@ -47,13 +39,8 @@ jobs:
         name: Login DockerHub
         uses: docker/login-action@v1
         with:
-          username: ${{ github.event.inputs.docker_username }}
-          password: ${{ github.event.inputs.docker_password }}
-          
-      - name: Init Python 3.10.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10.10'
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - 
         name: Build Image
@@ -66,5 +53,5 @@ jobs:
             linux/arm64
           push: true
           tags: |
-            ${{ github.event.inputs.docker_username }}/nas-tools:latest
-            ${{ github.event.inputs.docker_username }}/nas-tools:${{ env.app_version }}
+            ${{ secrets.DOCKER_USERNAME }}/nas-tools:latest
+            ${{ secrets.DOCKER_USERNAME }}/nas-tools:${{ env.app_version }}

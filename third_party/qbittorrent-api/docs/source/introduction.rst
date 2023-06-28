@@ -94,14 +94,14 @@ Usage
 -----
 First, the Web API endpoints are organized in to eight namespaces.
 
-* Authentication (``auth``)
-* Application (``app``)
-* Log (``log``)
-* Sync (``sync``)
-* Transfer (``transfer``)
-* Torrent Management (``torrents``)
-* RSS (``rss``)
-* Search (``search``)
+* Authentication (auth)
+* Application (app)
+* Log (log)
+* Sync (sync)
+* Transfer (transfer)
+* Torrent Management (torrents)
+* RSS (rss)
+* Search (search)
 
 Second, this client has two modes of interaction with the qBittorrent Web API.
 

@@ -27,13 +27,6 @@ class RSS(ClientCache):
         **kwargs: KwargsT
     ) -> None: ...
     addFeed = add_feed
-    def set_feed_url(
-        self,
-        url: Optional[Text] = None,
-        item_path: Optional[Text] = None,
-        **kwargs: KwargsT
-    ) -> None: ...
-    setFeedURL = set_feed_url
     def remove_item(
         self,
         item_path: Optional[Text] = None,
@@ -112,13 +105,6 @@ class RSSAPIMixIn(AppAPIMixIn):
         **kwargs: KwargsT
     ) -> None: ...
     rss_addFeed = rss_add_feed
-    def rss_set_feed_url(
-        self,
-        url: Optional[Text] = None,
-        item_path: Optional[Text] = None,
-        **kwargs: KwargsT
-    ) -> None: ...
-    rss_setFeedURL = rss_set_feed_url
     def rss_remove_item(
         self,
         item_path: Optional[Text] = None,

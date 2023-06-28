@@ -1,11 +1,11 @@
-FROM python:3.10.11-alpine AS Builder
+FROM alpine:3.17 AS Builder
 RUN apk add --no-cache --virtual .build-deps \
         libffi-dev \
         gcc \
         musl-dev \
         libxml2-dev \
         libxslt-dev \
-    && apk add --no-cache $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/hsuyelin/nas-tools/master/package_list.txt)) \
+    && apk add --no-cache $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/linyuan0213/nas-tools/master/package_list.txt)) \
     && ln -sf /usr/bin/python3 /usr/bin/python \
     && curl https://rclone.org/install.sh | bash \
     && if [ "$(uname -m)" = "x86_64" ]; then ARCH=amd64; elif [ "$(uname -m)" = "aarch64" ]; then ARCH=arm64; fi \
@@ -13,7 +13,7 @@ RUN apk add --no-cache --virtual .build-deps \
     && chmod +x /usr/bin/mc \
     && pip install --upgrade pip setuptools wheel \
     && pip install cython \
-    && pip install -r https://raw.githubusercontent.com/hsuyelin/nas-tools/master/requirements.txt \
+    && pip install -r https://raw.githubusercontent.com/linyuan0213/nas-tools/master/requirements.txt \
     && apk del --purge .build-deps \
     && rm -rf /tmp/* /root/.cache /var/cache/apk/*
 COPY --chmod=755 ./rootfs /
@@ -33,7 +33,7 @@ ENV S6_SERVICES_GRACETIME=30000 \
     NASTOOL_CN_UPDATE=true \
     NASTOOL_VERSION=master \
     PS1="\u@\h:\w \$ " \
-    REPO_URL="https://github.com/hsuyelin/nas-tools.git" \
+    REPO_URL="https://github.com/linyuan0213/nas-tools.git" \
     PYPI_MIRROR="https://pypi.tuna.tsinghua.edu.cn/simple" \
     ALPINE_MIRROR="mirrors.ustc.edu.cn" \
     PUID=0 \
@@ -45,9 +45,6 @@ RUN mkdir ${HOME} \
     && addgroup -S nt -g 911 \
     && adduser -S nt -G nt -h ${HOME} -s /bin/bash -u 911 \
     && python_ver=$(python3 -V | awk '{print $2}') \
-    && python_path=$(which python3) \
-    && echo "${python_path} <<<<<<<<<<----------------------->>>>>>>>>> ${python_ver}" \
-    && [ -d "/usr/lib/python${python_ver%.*}/site-packages" ] || mkdir -p "/usr/lib/python${python_ver%.*}/site-packages" \
     && echo "${WORKDIR}/" > /usr/lib/python${python_ver%.*}/site-packages/nas-tools.pth \
     && echo 'fs.inotify.max_user_watches=5242880' >> /etc/sysctl.conf \
     && echo 'fs.inotify.max_user_instances=5242880' >> /etc/sysctl.conf \

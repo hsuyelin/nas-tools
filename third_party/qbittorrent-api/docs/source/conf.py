@@ -16,7 +16,7 @@ from configparser import ConfigParser
 from datetime import datetime
 
 base_path = os.path.abspath("../..")
-sys.path.insert(0, os.path.join(base_path, "src"))
+sys.path.insert(0, base_path)
 
 setup_cfg = ConfigParser()
 setup_cfg.read(os.path.join(base_path, "setup.cfg"))
@@ -75,7 +75,7 @@ linkcheck_ignore = [
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ["_static"]
+## html_static_path = ["_static"]
 
 html_theme = "furo"
 
@@ -91,23 +91,3 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "requests": ("https://requests.readthedocs.io/en/latest/", None),
 }
-
-suppress_warnings = [
-    # Suppress builds warnings while building epub
-    "epub.unknown_project_files",
-]
-
-# -- Options for spelling -------------------------------------------
-
-# Spelling check needs an additional module that is not installed by default.
-# Add it only if spelling check is requested so docs can be generated without it.
-if "spelling" in sys.argv:
-    extensions.append("sphinxcontrib.spelling")
-
-# Spelling language.
-spelling_lang = "en_US"
-
-# Location of word list.
-spelling_word_list_filename = "spelling_wordlist"
-
-spelling_ignore_pypi_package_names = False

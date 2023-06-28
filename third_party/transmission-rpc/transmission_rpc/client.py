@@ -229,28 +229,14 @@ class Client:
             self.logger.error("Error: %s", str(error))
             self.logger.error('Request: "%s"', query)
             self.logger.error('HTTP data: "%s"', http_data)
-            raise TransmissionError(
-                "failed to parse response as json", method=method, argument=arguments, rawResponse=http_data
-            ) from error
+            raise TransmissionError("failed to parse response as json") from error
 
         self.logger.debug(json.dumps(data, indent=2))
         if "result" not in data:
-            raise TransmissionError(
-                "Query failed, response data missing without result.",
-                method=method,
-                argument=arguments,
-                response=data,
-                rawResponse=http_data,
-            )
+            raise TransmissionError("Query failed, response data missing without result.")
 
         if data["result"] != "success":
-            raise TransmissionError(
-                f'Query failed with result "{data["result"]}".',
-                method=method,
-                argument=arguments,
-                response=data,
-                rawResponse=http_data,
-            )
+            raise TransmissionError(f'Query failed with result "{data["result"]}".')
 
         res = data["arguments"]
 
@@ -266,13 +252,7 @@ class Client:
             if item:
                 results[item["id"]] = Torrent(fields=item)
             else:
-                raise TransmissionError(
-                    "Invalid torrent-add response.",
-                    method=method,
-                    argument=arguments,
-                    response=data,
-                    rawResponse=http_data,
-                )
+                raise TransmissionError("Invalid torrent-add response.")
         elif method == RpcMethod.SessionGet:
             self.raw_session.update(res)
         elif method == RpcMethod.SessionStats:

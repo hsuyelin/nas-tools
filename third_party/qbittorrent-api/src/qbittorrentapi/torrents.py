@@ -25,7 +25,7 @@ from qbittorrentapi.definitions import ClientCache
 from qbittorrentapi.definitions import Dictionary
 from qbittorrentapi.definitions import List
 from qbittorrentapi.definitions import ListEntry
-from qbittorrentapi.definitions import TorrentState
+from qbittorrentapi.definitions import TorrentStates
 from qbittorrentapi.exceptions import TorrentFileError
 from qbittorrentapi.exceptions import TorrentFileNotFoundError
 from qbittorrentapi.exceptions import TorrentFilePermissionError
@@ -36,7 +36,7 @@ logger = getLogger(__name__)
 @aliased
 class TorrentDictionary(Dictionary):
     """
-    Item in :class:`TorrentInfoList`. Allows interaction with individual
+    Item in :class:`TorrentInfoList`. Alows interaction with individual
     torrents via the ``Torrents`` API endpoints.
 
     :Usage:
@@ -73,11 +73,12 @@ class TorrentDictionary(Dictionary):
 
     @property
     def state_enum(self):
-        """Returns the state of a :class:`~qbittorrentapi.definitions.TorrentState`."""
+        """Returns the formalized Enumeration for Torrent State instead of the
+        raw string."""
         try:
-            return TorrentState(self.state)
+            return TorrentStates(self.state)
         except ValueError:
-            return TorrentState.UNKNOWN
+            return TorrentStates.UNKNOWN
 
     @property
     def info(self):
@@ -1013,7 +1014,7 @@ class Torrents(ClientCache):
 @aliased
 class TorrentCategories(ClientCache):
     """
-    Allows interaction with torrent categories within the ``Torrents`` API
+    Alows interaction with torrent categories within the ``Torrents`` API
     endpoints.
 
     :Usage:
@@ -1218,24 +1219,22 @@ class TorrentsAPIMixIn(AppAPIMixIn):
         :raises TorrentFileNotFoundError: if a torrent file doesn't exist
         :raises TorrentFilePermissionError: if read permission is denied to torrent file
 
-        :param urls: single instance or an iterable of URLs (``http://``, ``https://``, ``magnet:``, ``bc://bt/``)
+        :param urls: single instance or an iterable of URLs (http://, https://, magnet: and bc://bt/)
         :param torrent_files: several options are available to send torrent files to qBittorrent:
-
-            * single instance of bytes: useful if torrent file already read from disk or downloaded from internet.
-            * single instance of file handle to torrent file: use ``open(<filepath>, 'rb')`` to open the torrent file.
-            * single instance of a filepath to torrent file: e.g. ``/home/user/torrent_filename.torrent``
-            * an iterable of the single instances above to send more than one torrent file
-            * dictionary with key/value pairs of torrent name and single instance of above object
-
+            - single instance of bytes: useful if torrent file already read from disk or downloaded from internet.
+            - single instance of file handle to torrent file: use open(<filepath>, 'rb') to open the torrent file.
+            - single instance of a filepath to torrent file: e.g. '/home/user/torrent_filename.torrent'
+            - an iterable of the single instances above to send more than one torrent file
+            - dictionary with key/value pairs of torrent name and single instance of above object
             Note: The torrent name in a dictionary is useful to identify which torrent file
             errored. qBittorrent provides back that name in the error text. If a torrent
             name is not provided, then the name of the file will be used. And in the case of
-            bytes (or if filename cannot be determined), the value 'torrent__n' will be used.
+            bytes (or if filename cannot be determined), the value 'torrent__n' will be used
         :param save_path: location to save the torrent data
         :param cookie: cookie to retrieve torrents by URL
         :param category: category to assign to torrent(s)
-        :param is_skip_checking: ``True`` to skip hash checking
-        :param is_paused: ``True`` to add the torrent(s) without starting their downloading
+        :param is_skip_checking: skip hash checking
+        :param is_paused: ``True`` to start torrent(s) paused
         :param is_root_folder: ``True`` or ``False`` to create root folder (superseded by content_layout with v4.3.2)
         :param rename: new name for torrent(s)
         :param upload_limit: upload limit in bytes/second
@@ -1423,7 +1422,6 @@ class TorrentsAPIMixIn(AppAPIMixIn):
     def torrents_trackers(self, torrent_hash=None, **kwargs):
         """
         Retrieve individual torrent's trackers.
-        Tracker status is defined in :class:`~qbittorrentapi.definitions.TrackerStatus`.
 
         :raises NotFound404Error:
 
@@ -1531,7 +1529,7 @@ class TorrentsAPIMixIn(AppAPIMixIn):
         :raises NotFound404Error:
 
         :param torrent_hash: hash for torrent
-        :param urls: tracker URLs to add to torrent
+        :param urls: tracker urls to add to torrent
         :return: None
         """
         data = {
@@ -1578,7 +1576,7 @@ class TorrentsAPIMixIn(AppAPIMixIn):
         :raises Conflict409Error:
 
         :param torrent_hash: hash for torrent
-        :param urls: tracker URLs to removed from torrent
+        :param urls: tracker urls to removed from torrent
         :return: None
         """
         data = {
@@ -1796,7 +1794,7 @@ class TorrentsAPIMixIn(AppAPIMixIn):
         :param limit: Limit length of list
         :param offset: Start of list (if < 0, offset from end of list)
         :param torrent_hashes: Filter list by hash (separate multiple hashes with a '|') (added in Web API 2.0.1)
-        :param tag: Filter list by tag (empty string means "untagged"; no "tag" parameter means "any tag"; added in Web API 2.8.3)
+        :param tag: Filter list by tag (empty string means "untagged"; no "tag" param means "any tag"; added in Web API 2.8.3)
         :return: :class:`TorrentInfoList` - `<https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-torrent-list>`_
         """  # noqa: E501
         data = {
