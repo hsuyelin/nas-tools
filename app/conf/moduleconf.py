@@ -709,6 +709,54 @@ class ModuleConf(object):
                     "placeholder": ""
                 }
             }
+        },
+        "pan115": {
+            "name": "115网盘",
+            "img_url": "../static/img/115.jpg",
+            "color": "#B30100",
+            "monitor_enable": True,
+            "config": {
+                "cookie": {
+                    "id": "pan115.cookie",
+                    "required": True,
+                    "title": "Cookie",
+                    "tooltip": "115网盘Cookie，通过115网盘网页端抓取Cookie",
+                    "type": "text",
+                    "placeholder": "USERSESSIONID=xxx;115_lang=zh;UID=xxx;CID=xxx;SEID=xxx"
+                }
+            }
+        },
+        "pikpak": {
+            "name": "PikPak",
+            "img_url": "../static/img/pikpak.png",
+            "color": "#B30100",
+            "monitor_enable": True,
+            "config": {
+                "username": {
+                    "id": "pikpak.username",
+                    "required": True,
+                    "title": "用户名",
+                    "tooltip": "用户名",
+                    "type": "text",
+                    "placeholder": ""
+                },
+                "password": {
+                    "id": "pikpak.password",
+                    "required": True,
+                    "title": "密码",
+                    "tooltip": "密码",
+                    "type": "password",
+                    "placeholder": ""
+                },
+                "proxy": {
+                    "id": "pikpak.proxy",
+                    "required": False,
+                    "title": "代理",
+                    "tooltip": "如果需要代理才能访问pikpak可以在此处填入代理地址",
+                    "type": "text",
+                    "placeholder": "127.0.0.1:7890"
+                }
+            }
         }
     }
 

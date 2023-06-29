@@ -92,7 +92,7 @@
 <div class="modal modal-blur fade" id="modal-downloader" tabindex="-1" role="dialog" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
-    <div class="modal-content">
+    <div class="modal-content-minWidth">
       <div class="modal-header">
         <h5 class="modal-title" id="downloader_modal_title">新增下载器</h5>
         <input type="hidden" id="downloader_id">
@@ -325,6 +325,9 @@
 
   // 新增/编辑下载器
   function add_or_edit_or_test_downloader(action) {
+    let downloaderConf = {{ DownloaderConf|tojson|safe }};
+    let items = Object.entries(downloaderConf);
+    console.log(items);
     let type = $('input:radio[name=downloader_type]:checked').val();
     let config = {};
     let transfer = 0;
@@ -346,6 +349,11 @@
             {% if FieldAttr.required %}
               if (!config.{{ FieldId }}) {
                 $("#{{ FieldAttr.id }}").addClass("is-invalid");
+                let test_btn = $("#test_downloader_btn");
+                test_btn.text("测试失败！").attr("disabled", false);
+                setTimeout(function() {
+                  test_btn.text("测试").attr("enabled", true);
+                }, 1500);
                 return;
               } else {
                 $("#{{ FieldAttr.id }}").removeClass("is-invalid");
