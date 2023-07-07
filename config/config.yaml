@@ -95,6 +95,8 @@ media:
   tv_name_format: "{title} ({year})/Season {season}/{title}-{part} - {season_episode} - 第{episode}集"
   # 【刮削元数据及图片】：开启后文件转移完成时会自动生成nfo描述文件及poster海报，协助媒体服务器识别和搜刮
   nfo_poster: false
+  # 【搜索结果中包含成人内容条目】：需要先去TMDB个人设置中将<搜索结果中包含成人内容条目>选项开启，开启该选项后将会在刮削或者检索时包含成人内容
+  include_adult: false
   # 文件管理、自定义识别等默认路径
   media_default_path:
   # 默认文件转移方式

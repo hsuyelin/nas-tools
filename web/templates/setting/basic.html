@@ -409,7 +409,18 @@
                   </label>
                 </div>
               </div>
-            </div>
+              <div class="col-lg">
+                  <div class="mb-3">
+                    <label class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="media.include_adult"
+                             {% if Config.media.include_adult %}checked{% endif %}>
+                      <span class="form-check-label">搜索结果中包含成人内容条目 <span class="form-help"
+                                                                            title="开启该选项后将会在刮削或者检索时包含成人内容，请谨慎打开"
+                                                                            data-bs-toggle="tooltip">?</span></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
           </div>
           <div class="card-footer">
             <div class="row align-items-center">
