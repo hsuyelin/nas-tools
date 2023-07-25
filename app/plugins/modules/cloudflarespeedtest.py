@@ -273,7 +273,7 @@ class CloudflareSpeedTest(_IPluginModule):
             _result_file_basename = os.path.basename(self._result_file)
             _cf_ipv4_basename = os.path.basename(self._cf_ipv4)
             _cf_ipv6_basename = os.path.basename(self._cf_ipv6)
-            cf_command = f'cd {self._cf_path} && chmod a+x ./{self._binary_name} && ./{self._binary_name} {self._additional_args} -o {_result_file_basename}' + (
+            cf_command = f'cd {self._cf_path} && chmod a+x {self._binary_name} && ./{self._binary_name} {self._additional_args} -o {_result_file_basename}' + (
                 f' -f {_cf_ipv4_basename}' if {self._ipv4} else '') + (f' -f {_cf_ipv6_basename}' if {self._ipv6} else '')
             self.info(f'正在执行优选命令 {cf_command}')
             os.system(cf_command)
