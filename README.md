@@ -44,6 +44,22 @@ chmod +x nastools
 ./nastools（如果需要不在终端输出执行：./nastool &> /dev/null）
 ```
 
+### 4、关于 Cloudflare IP优选插件
+• 必须开启自定义Hosts插件
+• 优选ip：自定义hosts中需要定时更新的域名ip
+• 优选周期：5位cron表达式（分 时 天 月 周）
+• 自动校准：开启后会获取自定义Hosts插件中，出现频率最高的ip作为优选ip
+• 高级参数：-dd -t 1
+可大大减少优选时间（-dd:禁用测速；-t 1失败一次后放弃）
+
+注意问题：
+• 打开站点，F12看请求的response的Server属性，如果是cloudflare，则可添加到自定义Hosts插件
+• cf优选插件当前版本显示暂未安装
+1. 基础设置—日志等级调整为debug，docker logs -f nt容器名看插件执行日志排查问题
+2.如果没有设置代理服务器添加代理服务器试试， 如果设置已代理服务器，把代理服务器删掉试试（本地或者梯子网络访问github api受限）
+3.手动下载[最新版本CloudflareSpeedTest](https://github.com/XIU2/CloudflareSpeedTest/releases)，压缩包直接放于nt容器/config/plugins/CloudflareSpeedTest/路径下，再次插件立即运行一次即可
+
+
 ## 免责声明
 1) 本软件仅供学习交流使用，软件本身不提供任何内容，仅作为辅助工具简化用户手工操作，对用户的行为及内容毫不知情，使用本软件产生的任何责任需由使用者本人承担。
 2) 本软件代码开源，基于开源代码进行修改，人为去除相关限制导致软件被分发、传播并造成责任事件的，需由代码修改发布者承担全部责任。同时按AGPL-3.0开源协议要求，基于此软件代码的所有修改必须开源。
