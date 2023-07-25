@@ -231,8 +231,8 @@ class CloudflareSpeedTest(_IPluginModule):
         CloudflareSpeedTest优选
         """
         self._cf_path = self.get_data_path()
-        self._ipv4 = os.path.join(self._cf_path, "ip.txt")
-        self._ipv6 = os.path.join(self._cf_path, "ipv6.txt")
+        self._cf_ipv4 = os.path.join(self._cf_path, "ip.txt")
+        self._cf_ipv6 = os.path.join(self._cf_path, "ipv6.txt")
         self._result_file = os.path.join(self._cf_path, "result.csv")
 
         # 获取自定义Hosts插件，若无设置则停止
@@ -270,8 +270,11 @@ class CloudflareSpeedTest(_IPluginModule):
         if err_flag:
             self.info("正在进行CLoudflare CDN优选，请耐心等待")
             # 执行优选命令，-dd不测速
-            cf_command = f'cd {self._cf_path} && ./{self._binary_name} {self._additional_args} -o {self._result_file}' + (
-                f' -f {self._cf_ipv4}' if self._ipv4 else '') + (f' -f {self._cf_ipv6}' if self._ipv6 else '')
+            _result_file_basename = os.path.basename(self._result_file)
+            _cf_ipv4_basename = os.path.basename(self._cf_ipv4)
+            _cf_ipv6_basename = os.path.basename(self._cf_ipv6)
+            cf_command = f'cd {self._cf_path} && chmod a+x ./{self._binary_name} && ./{self._binary_name} {self._additional_args} -o {_result_file_basename}' + (
+                f' -f {_cf_ipv4_basename}' if {self._ipv4} else '') + (f' -f {_cf_ipv6_basename}' if {self._ipv6} else '')
             self.info(f'正在执行优选命令 {cf_command}')
             os.system(cf_command)
 
