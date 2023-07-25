@@ -199,7 +199,10 @@ class WebUtils:
         """
         带缓存的请求
         """
-        ret = RequestUtils().get_res(url)
+        if url.find('douban'):
+            ret = RequestUtils(referer="https://movie.douban.com").get_res(url)
+        else:
+            ret = RequestUtils().get_res(url)
         if ret:
             return ret.content
         return None
