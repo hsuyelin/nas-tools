@@ -14,11 +14,28 @@ class IndexerHelper:
         self.init_config()
 
     def init_config(self):
+        # 网站替换映射关系
+        site_replacements = {
+            "https://chdbits.co/": "https://ptchdbits.co/",
+            "https://www.hdarea.co/": "https://www.hdarea.club/"
+        }
         try:
-            with open(os.path.join(Config().get_inner_config_path(),
-                                   "sites.dat"),
-                      "rb") as f:
+            with open(os.path.join(Config().get_inner_config_path(), "sites.dat"), "rb") as f:
                 self._indexers = pickle.load(f).get("indexer")
+                for index, indexer in enumerate(self._indexers):
+                    domain = indexer.get("domain")
+                    if domain in site_replacements:
+                        print(domain)
+                        indexer['domain'] = site_replacements[domain]
+                        print(indexer.get("domain"))
+                        self._indexers[index] = indexer
+
+
+                        with open(os.path.join(Config().get_inner_config_path(), "sites.dat"), "rb") as f2:
+                            new_dat = pickle.load(f2)
+                            new_dat['indexer'] = self._indexers
+                            with open(os.path.join(Config().get_inner_config_path(), "sites.dat"), "wb") as f3:
+                                pickle.dump(new_dat, f3)
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
 
