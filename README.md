@@ -10,7 +10,7 @@
 
 TG频道：https://t.me/nastool_official (官方)
 
-Wiki：https://t.me/NAStool_wiki
+Wiki：https://wiki.nastool.org/
 
 API: http://localhost:3000/api/v1/
 
