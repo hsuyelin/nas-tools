@@ -589,3 +589,11 @@ class MEDIASYNCSTATISTIC(BaseMedia):
     MOVIE_COUNT = Column(Text)
     TV_COUNT = Column(Text)
     UPDATE_TIME = Column(Text)
+
+class INDEXERCUSTOMSITE(Base):
+    __tablename__ = 'INDEXER_CUSTOM_SITE'
+
+    ID = Column(Integer, Sequence('ID'), primary_key=True)
+    SITE = Column(Text, index=True)
+    INDEXER = Column(Text)
+    DATE = Column(Text)
