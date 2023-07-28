@@ -2,7 +2,7 @@ import re
 import json
 
 from app.plugins.modules._base import _IPluginModule
-from app.helper import DbHelper
+from app.helper import IndexerHelper, IndexerConf, ProgressHelper, ChromeHelper, DbHelper
 from app.utils import JsonUtils
 from jinja2 import Template
 
@@ -205,8 +205,7 @@ class Customindexer(_IPluginModule):
         """
 
     def get_oid_indexer(self, old_site=None, site=None):
-        indexer = User().get_indexer(url=old_site,
-                                     public=False)
+        indexer = IndexerHelper().get_indexer(url=old_site, public=False)
         pattern = re.compile(r'http[s]?://(.*?)\.')
         match_site = pattern.match(site)
         if match_site:

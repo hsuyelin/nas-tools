@@ -1,10 +1,11 @@
 import os.path
 import pickle
+import json
 
 from app.utils import StringUtils, ExceptionUtils
 from app.utils.commons import singleton
 from config import Config
-
+from app.helper import DbHelper
 
 @singleton
 class IndexerHelper:
@@ -22,7 +23,14 @@ class IndexerHelper:
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
 
+        try:
+            for inexer in DbHelper().get_indexer_custom_site():
+                self._indexers.append(json.loads(inexer.INDEXER))
+        except Exception as err:
+            pass
+
     def get_all_indexers(self):
+        self.init_config()
         return self._indexers
 
     def get_indexer_info(self, url, public=False):
