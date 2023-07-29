@@ -233,7 +233,7 @@ class Qbittorrent(_IDownloadClient):
         :param tag: 标签内容
         """
         try:
-            return self.qbc.torrents_remove_tags(torrent_hashes=ids, tags=tag)
+            return self.qbc.torrents_delete_tags(torrent_hashes=ids, tags=tag)
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
             return False
@@ -675,3 +675,4 @@ class Qbittorrent(_IDownloadClient):
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
             return False
+ 
