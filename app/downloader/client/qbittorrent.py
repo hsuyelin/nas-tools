@@ -675,4 +675,3 @@ class Qbittorrent(_IDownloadClient):
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
             return False
- 
