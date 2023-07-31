@@ -21,7 +21,6 @@ class PikPak(_IDownloadClient):
     username = None
     password = None
     proxy = None
-    download_dir = []
     def __init__(self, config=None):
         if config:
             self._client_config = config
@@ -38,7 +37,6 @@ class PikPak(_IDownloadClient):
                     self.proxy = "http://" + self.host
                 if self.proxy.endswith('/'):
                     self.proxy = self.host[:-1]
-            self.download_dir = self._client_config.get('download_dir') or []
             if self.username and self.password:
                 self._client = PikPakApi(
                 username=self.username,
@@ -108,17 +106,9 @@ class PikPak(_IDownloadClient):
 
     def add_torrent(self, content, download_dir=None, **kwargs):
         try:
-            folder = asyncio.run(
-                self._client.path_to_id(download_dir, True))
-            count = len(folder)
-            if count == 0:
-                print("create parent folder failed")
-                return None
-            else:
-                task = asyncio.run(self._client.offline_download(
-                    content, folder[count - 1]["id"]
-                ))
-                return task["task"]["id"]
+            task = asyncio.run(self._client.offline_download(content))
+            taskId = task.get('task', {}).get('id')
+            return taskId is not None and bool(taskId)
         except Exception as e:
             log.error("PikPak 添加离线下载任务失败: %s" % str(e))
             return None
@@ -168,3 +158,12 @@ class PikPak(_IDownloadClient):
 
     def get_type(self):
         return self.client_type
+
+    def get_files(self, tid):
+        pass
+
+    def recheck_torrents(self, ids):
+        pass
+
+    def set_torrents_tag(self, ids, tags):
+        pass

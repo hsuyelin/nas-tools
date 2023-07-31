@@ -30,7 +30,7 @@ class Pan115(_IDownloadClient):
             self.cookie = self._client_config.get("cookie")
             self.download_dir = self._client_config.get('download_dir') or []
             if self.cookie:
-                self._client = Py115(cookie=self.cookie)
+                self._client = PyPan115(cookie=self.cookie)
 
     @classmethod
     def match(cls, ctype):
@@ -148,3 +148,12 @@ class Pan115(_IDownloadClient):
 
     def get_type(self):
         return self.client_type
+
+    def get_files(self, tid):
+        pass
+
+    def recheck_torrents(self, ids):
+        pass
+
+    def set_torrents_tag(self, ids, tags):
+        pass

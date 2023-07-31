@@ -6,6 +6,7 @@ from urllib import parse
 
 import requests
 
+import log
 from app.utils import RequestUtils, ExceptionUtils
 
 
@@ -13,8 +14,7 @@ class PyPan115:
     cookie = None
     user_agent = None
     req = None
-    uid = None
-    sign = None
+    space_info = None
     err = None
 
     def __init__(self, cookie):
@@ -23,11 +23,31 @@ class PyPan115:
 
     # 登录
     def login(self):
-        if not self.getuid():
-            return False
-        if not self.getsign():
+        if not self.getSpaceInfo():
             return False
         return True
+
+    # 获取space info
+    def getSpaceInfo(self):
+        try:
+            self.space_info = {}
+            url = "https://webapi.115.com/files/index_info"
+            p = self.req.get_res(url=url)
+            if p:
+                rootobject = p.json()
+                if not rootobject.get("state"):
+                    self.err = "获取 SpaceInfo 错误：{}".format(rootobject.get("error"))
+                    return False
+                self.space_info = rootobject.get('data', {}).get('space_info', {})
+                all_total = self.space_info.get('all_total', {}).get('size_format', '未知')
+                all_remain = self.space_info.get('all_remain', {}).get('size_format', '未知')
+                all_use = self.space_info.get('all_use', {}).get('size_format', '未知')
+                log.info(f"115空间统计: [总计可用]: {all_total} | [当前剩余]: {all_remain} | [已使用]: {all_use}")
+                return True
+        except Exception as result:
+            ExceptionUtils.exception_traceback(result)
+            self.err = "异常错误：{}".format(result)
+        return False
 
     # 获取目录ID
     def getdirid(self, tdir):
@@ -45,50 +65,13 @@ class PyPan115:
             self.err = "异常错误：{}".format(result)
         return False, ''
 
-    # 获取sign
-    def getsign(self):
-        try:
-            self.sign = ''
-            url = "https://115.com/?ct=offline&ac=space&_=" + str(round(time.time() * 1000))
-            p = self.req.get_res(url=url)
-            if p:
-                rootobject = p.json()
-                if not rootobject.get("state"):
-                    self.err = "获取 SIGN 错误：{}".format(rootobject.get("error_msg"))
-                    return False
-                self.sign = rootobject.get("sign")
-                return True
-        except Exception as result:
-            ExceptionUtils.exception_traceback(result)
-            self.err = "异常错误：{}".format(result)
-        return False
-
-    # 获取UID
-    def getuid(self):
-        try:
-            self.uid = ''
-            url = "https://webapi.115.com/files?aid=1&cid=0&o=user_ptime&asc=0&offset=0&show_dir=1&limit=30&code=&scid=&snap=0&natsort=1&star=1&source=&format=json"
-            p = self.req.get_res(url=url)
-            if p:
-                rootobject = p.json()
-                if not rootobject.get("state"):
-                    self.err = "获取 UID 错误：{}".format(rootobject.get("error_msg"))
-                    return False
-                self.uid = rootobject.get("uid")
-                return True
-        except Exception as result:
-            ExceptionUtils.exception_traceback(result)
-            self.err = "异常错误：{}".format(result)
-        return False
-
     # 获取任务列表
     def gettasklist(self, page=1):
         try:
             tasks = []
             url = "https://115.com/web/lixian/?ct=lixian&ac=task_lists"
             while True:
-                postdata = "page={}&uid={}&sign={}&time={}".format(page, self.uid, self.sign,
-                                                                   str(round(time.time() * 1000)))
+                postdata = "page={}".format(page)
                 p = self.req.post_res(url=url, params=postdata.encode('utf-8'))
                 if p:
                     rootobject = p.json()
@@ -123,17 +106,15 @@ class PyPan115:
                     ExceptionUtils.exception_traceback(result)
                     content = str(result).replace("No connection adapters were found for '", "").replace("'", "")
 
-            url = "https://115.com/web/lixian/?ct=lixian&ac=add_task_url"
-            postdata = "url={}&savepath=&wp_path_id={}&uid={}&sign={}&time={}".format(parse.quote(content), dirid,
-                                                                                      self.uid, self.sign,
-                                                                                      str(round(time.time() * 1000)))
+            url = "https://115.com/web/lixian/?ct=lixian&ac=add_task_urls"
+            postdata = "url[0]={}&savepath=&wp_path_id={}".format(parse.quote(content), dirid)
             p = self.req.post_res(url=url, params=postdata.encode('utf-8'))
             if p:
                 rootobject = p.json()
                 if not rootobject.get("state"):
-                    self.err = rootobject.get("error_msg")
+                    self.err = rootobject.get("error")
                     return False, ''
-                return True, rootobject.get("info_hash")
+                return True, rootobject.get('result', [{}])[0].get('info_hash', '未知')
         except Exception as result:
             ExceptionUtils.exception_traceback(result)
             self.err = "异常错误：{}".format(result)
@@ -143,8 +124,7 @@ class PyPan115:
     def deltask(self, thash):
         try:
             url = "https://115.com/web/lixian/?ct=lixian&ac=task_del"
-            postdata = "hash[0]={}&uid={}&sign={}&time={}".format(thash, self.uid, self.sign,
-                                                                  str(round(time.time() * 1000)))
+            postdata = "hash[0]={}".format(thash)
             p = self.req.post_res(url=url, params=postdata.encode('utf-8'))
             if p:
                 rootobject = p.json()

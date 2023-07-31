@@ -713,11 +713,11 @@ class ModuleConf(object):
         "pan115": {
             "name": "115网盘",
             "img_url": "../static/img/115.jpg",
-            "color": "#B30100",
-            "monitor_enable": True,
+            "background": "bg-azure",
+            "test_command": "app.downloader.client.pan115|Pan115",
             "config": {
                 "cookie": {
-                    "id": "pan115.cookie",
+                    "id": "pan115_cookie",
                     "required": True,
                     "title": "Cookie",
                     "tooltip": "115网盘Cookie，通过115网盘网页端抓取Cookie",
@@ -729,19 +729,19 @@ class ModuleConf(object):
         "pikpak": {
             "name": "PikPak",
             "img_url": "../static/img/pikpak.png",
-            "color": "#B30100",
-            "monitor_enable": True,
+            "background": "bg-indigo",
+            "test_command": "app.downloader.client.pikpak|PikPak",
             "config": {
                 "username": {
-                    "id": "pikpak.username",
+                    "id": "pikpak_username",
                     "required": True,
-                    "title": "用户名",
-                    "tooltip": "用户名",
+                    "title": "账号",
+                    "tooltip": "PikPak的账号一般是手机号或者邮箱",
                     "type": "text",
                     "placeholder": ""
                 },
                 "password": {
-                    "id": "pikpak.password",
+                    "id": "pikpak_password",
                     "required": True,
                     "title": "密码",
                     "tooltip": "密码",
@@ -749,7 +749,7 @@ class ModuleConf(object):
                     "placeholder": ""
                 },
                 "proxy": {
-                    "id": "pikpak.proxy",
+                    "id": "pikpak_proxy",
                     "required": False,
                     "title": "代理",
                     "tooltip": "如果需要代理才能访问pikpak可以在此处填入代理地址",
