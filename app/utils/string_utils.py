@@ -109,6 +109,14 @@ class StringUtils:
         return True
 
     @staticmethod
+    def is_int_or_float(word):
+        """
+        判断是否是整型或浮点型的格式
+        """
+        pattern = r'^[-+]?\d+(\.\d+)?$'
+        return re.match(pattern, word) is not None
+
+    @staticmethod
     def xstr(s):
         """
         字符串None输出为空
@@ -149,8 +157,11 @@ class StringUtils:
         float_val = 0.0
         if not text:
             return 0.0
+        text_val = text.strip().replace(',', '')
+        if not is_int_or_float(text_val):
+            return float_val
         try:
-            float_val = float(text.strip().replace(',', ''))
+            float_val = float(text_val)
         except Exception as e:
             ExceptionUtils.exception_traceback(e)
         return float_val
