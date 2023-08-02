@@ -182,11 +182,11 @@ security:
 
 # 【实验室】
 laboratory:
-  # 【识别增强】关键字猜想
+  # 【识别增强】：关键字猜想
   search_keyword: false
-  # 【WEB识别增强】通过TMDB WEB检索
+  # 【WEB识别增强】：通过TMDB WEB检索
   search_tmdbweb: false
-  # 【ChatGPT识别增强】通过ChatGPT识别文件名
+  # 【ChatGPT识别增强】：通过ChatGPT识别文件名
   chatgpt_enable: false
   # 【TMDB缓存过期策略】：是否开启TMDB缓存过期策略，默认7天过期，过期缓存将被删除,  7天内访问过期时间可以被刷新
   tmdb_cache_expire: true
@@ -196,3 +196,5 @@ laboratory:
   search_en_title: false
   # 【显示更多PT站点】：开启后会展示更多PT站点，有些需要手动进行映射
   show_more_sites: false
+  # 【入库通知精简】：开启后入库通知推送消息会精简
+  simplify_library_notification: false

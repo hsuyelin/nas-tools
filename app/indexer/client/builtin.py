@@ -41,7 +41,7 @@ class BuiltinIndexer(_IIndexClient):
         self.sites = Sites()
         self.progress = ProgressHelper()
         self.dbhelper = DbHelper()
-        self._show_more_sites = Config().get_config("laboratory").get('show_more_sites')
+        self._show_more_sites = Config().get_config("laboratory").get("show_more_sites")
 
     @classmethod
     def match(cls, ctype):

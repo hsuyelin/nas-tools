@@ -711,6 +711,18 @@
                   </label>
                 </div>
               </div>
+              <div class="col-12 col-xl-3">
+                <div class="mb-3">
+                  <label class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="laboratory.simplify_library_notification" {% if
+                      Config.laboratory and Config.laboratory.simplify_library_notification %}checked{% endif %}>
+                    <span class="form-check-label">入库通知精简 <span class="form-help"
+                                                                            title="开启后入库通知推送消息会精简"
+                                                                            data-bs-toggle="tooltip">?</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
           <div class="card-footer">

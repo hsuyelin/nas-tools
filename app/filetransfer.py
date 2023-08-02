@@ -54,11 +54,13 @@ class FileTransfer:
     _tv_file_rmt_format = ""
     _ignored_paths = []
     _ignored_files = ''
+    _simplify_library_notification = False
 
     def __init__(self):
         self.init_config()
 
     def init_config(self):
+        self._simplify_library_notification = Config().get_config("laboratory").get("simplify_library_notification")
         self.media = Media()
         self.message = Message()
         self.category = Category()
@@ -859,10 +861,16 @@ class FileTransfer:
                     self.update_transfer_unknown_state(file_item)
                 # 电影立即发送消息
                 if media.type == MediaType.MOVIE:
-                    self.message.send_transfer_movie_message(in_from,
+                    if self._simplify_library_notification:
+                        self.message.send_simplify_transfer_movie_message(in_from,
                                                              media,
                                                              exist_filenum,
                                                              self._movie_category_flag)
+                    else:
+                        self.message.send_transfer_movie_message(in_from,
+                                                                 media,
+                                                                 exist_filenum,
+                                                                 self._movie_category_flag)
                 # 否则登记汇总发消息
                 else:
                     # 按季汇总
@@ -918,7 +926,10 @@ class FileTransfer:
         # 循环结束
         # 统计完成情况，发送通知
         if message_medias:
-            self.message.send_transfer_tv_message(message_medias, in_from)
+            if self._simplify_library_notification:
+                self.message.send_simplify_transfer_tv_message(message_medias, in_from)
+            else:
+                self.message.send_transfer_tv_message(message_medias, in_from)
         # 总结
         log.info("【Rmt】%s 处理完成，总数：%s，失败：%s" % (in_path, total_count, failed_count))
         if alert_count > 0:

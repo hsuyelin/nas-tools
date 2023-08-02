@@ -385,6 +385,13 @@ class MetaBase(object):
         else:
             return ""
 
+    # 返回自定义占位符字符串
+    def get_customization_string(self):
+        if self.customization:
+            return self.customization
+        else:
+            return ""
+
     # 返回视频编码
     def get_video_encode_string(self):
         return self.video_encode or ""
