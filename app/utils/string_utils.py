@@ -117,6 +117,16 @@ class StringUtils:
         return re.match(pattern, word) is not None
 
     @staticmethod
+    def is_string_and_not_empty(word):
+        """
+        判断是否是字符串并且字符串是否为空
+        """
+        if isinstance(word, str) and word.strip():
+            return True
+        else:
+            return False
+
+    @staticmethod
     def xstr(s):
         """
         字符串None输出为空

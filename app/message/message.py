@@ -293,6 +293,8 @@ class Message(object):
                 msg_str = f"{msg_str}，类别：{media_info.category}"
         if media_info.get_resource_type_string():
             msg_str = f"{msg_str}，质量：{media_info.get_resource_type_string()}"
+        if StringUtils.is_string_and_not_empty(media_info.get_resource_team_string()):
+            msg_str = f"{msg_str}，发布组/字幕组：{media_info.get_resource_team_string()}"
         msg_str = f"{msg_str}，大小：{StringUtils.str_filesize(media_info.size)}，来自：{in_from.value}"
         if exist_filenum != 0:
             msg_str = f"{msg_str}，{exist_filenum}个文件已存在"
@@ -324,6 +326,10 @@ class Message(object):
                 msg_str = f"类型：{item_info.type.value}"
             if item_info.category:
                 msg_str = f"{msg_str}，类别：{item_info.category}"
+            if StringUtils.is_string_and_not_empty(item_info.get_resource_type_string()):
+                msg_str = f"{msg_str}，质量：{item_info.get_resource_type_string()}"
+            if StringUtils.is_string_and_not_empty(item_info.get_resource_team_string()):
+                msg_str = f"{msg_str}，发布组/字幕组：{item_info.get_resource_team_string()}"
             if item_info.total_episodes == 1:
                 msg_str = f"{msg_str}，大小：{StringUtils.str_filesize(item_info.size)}，来自：{in_from.value}"
             else:
