@@ -384,10 +384,6 @@ class Message(object):
         if media_info.category:
             if category_flag:
                 msg_str = f"{msg_str}，类型：{media_info.category}"
-
-        # 获取类别，如：动漫
-        if media_info.get_resource_type_string():
-            msg_str = f"{msg_str}，{media_info.get_resource_type_string()}"
         
         if exist_filenum != 0:
             msg_str = f"{msg_str}，{exist_filenum}个文件已存在"
