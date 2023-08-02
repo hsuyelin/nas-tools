@@ -1,4 +1,4 @@
-FROM python:3.10.11-alpine AS Builder
+FROM python:3.10.11-alpine
 RUN apk add --no-cache --virtual .build-deps \
         libffi-dev \
         gcc \
@@ -17,8 +17,6 @@ RUN apk add --no-cache --virtual .build-deps \
     && apk del --purge .build-deps \
     && rm -rf /tmp/* /root/.cache /var/cache/apk/*
 COPY --chmod=755 ./rootfs /
-FROM scratch AS APP
-COPY --from=Builder / /
 ENV S6_SERVICES_GRACETIME=30000 \
     S6_KILL_GRACETIME=60000 \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
