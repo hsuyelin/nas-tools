@@ -168,7 +168,7 @@ class StringUtils:
         if not text:
             return 0.0
         text_val = text.strip().replace(',', '')
-        if not is_int_or_float(text_val):
+        if not StringUtils.is_int_or_float(text_val):
             return float_val
         try:
             float_val = float(text_val)
