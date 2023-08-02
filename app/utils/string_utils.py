@@ -150,8 +150,11 @@ class StringUtils:
         int_val = 0
         if not text:
             return int_val
+        text_val = text.strip().replace(',', '')
+        if not StringUtils.is_int_or_float(text_val):
+            return int_val
         try:
-            int_val = int(text.strip().replace(',', ''))
+            int_val = int(text_val)
         except Exception as e:
             ExceptionUtils.exception_traceback(e)
 
