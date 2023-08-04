@@ -180,6 +180,9 @@ class Config(object):
     def get_inner_config_path(self):
         return os.path.join(self.get_root_path(), "config")
 
+    def get_inner_temp_path(self):
+        return os.path.join(self.get_inner_config_path(), "temp")
+
     def get_script_path(self):
         return os.path.join(self.get_root_path(), "scripts", "sqls")
 
