@@ -51,9 +51,9 @@ class ChromeHelper(object):
                 driver_executable_path = self.download_driver()
             except Exception as e:
                 ExceptionUtils.exception_traceback(e)
-                quit()
+                self.quit()
 
-    def download_driver():
+    def download_driver(self):
         """
         下载ChromeDriver
         @return ChromeDriver文件路径:
