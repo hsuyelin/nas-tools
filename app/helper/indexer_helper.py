@@ -1,7 +1,9 @@
 import os.path
 import pickle
 import json
+import base64
 
+import log
 from app.utils import StringUtils, ExceptionUtils
 from app.utils.commons import singleton
 from config import Config
@@ -16,10 +18,9 @@ class IndexerHelper:
 
     def init_config(self):
         try:
-            with open(os.path.join(Config().get_inner_config_path(),
-                                   "sites.dat"),
-                      "rb") as f:
-                self._indexers = pickle.load(f).get("indexer")
+            with open(os.path.join(Config().get_inner_config_path(), "sites.dat"), "r") as f:
+                _indexers_json = base64.b64decode(f.read())
+                self._indexers = json.loads(_indexers_json).get("indexer")
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
 

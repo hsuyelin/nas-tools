@@ -1,5 +1,7 @@
 import os
 import pickle
+import base64
+import json
 import random
 import time
 from functools import lru_cache
@@ -81,10 +83,9 @@ class SiteConf:
 
     def init_config(self):
         try:
-            with open(os.path.join(Config().get_inner_config_path(),
-                                   "sites.dat"),
-                      "rb") as f:
-                self._RSS_SITE_GRAP_CONF = pickle.load(f).get("conf")
+            with open(os.path.join(Config().get_inner_config_path(), "sites.dat"), "r") as f:
+                _indexers_json = base64.b64decode(f.read())
+                self._RSS_SITE_GRAP_CONF = json.loads(_indexers_json).get("conf")
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
 
