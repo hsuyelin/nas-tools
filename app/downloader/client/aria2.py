@@ -7,6 +7,7 @@ from app.utils.types import DownloaderType
 from config import Config
 from app.downloader.client._base import _IDownloadClient
 from app.downloader.client._pyaria2 import PyAria2
+from app.downloader.client._pyaria2rpc import PyAria2RPC
 
 
 class Aria2(_IDownloadClient):
@@ -43,7 +44,10 @@ class Aria2(_IDownloadClient):
             self.download_dir = self._client_config.get('download_dir') or []
             self.use_jsonRpc = self._client_config.get('use_jsonRpc') or False
             if self.host and self.port:
-                self._client = PyAria2(secret=self.secret, host=self.host, port=self.port, useJsonRpc=self.use_jsonRpc)
+                if self.use_jsonRpc:
+                    self._client = PyAria2RPC(secret=self.secret, host=self.host, port=self.port)
+                else:
+                    self._client = PyAria2(secret=self.secret, host=self.host, port=self.port)
 
     @classmethod
     def match(cls, ctype):
