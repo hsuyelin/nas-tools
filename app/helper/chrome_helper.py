@@ -10,6 +10,7 @@ import requests
 import undetected_chromedriver as uc
 from webdriver_manager.chrome import ChromeDriverManager
 
+import log
 import app.helper.cloudflare_helper as CloudflareHelper
 from app.utils import SystemUtils, RequestUtils, ExceptionUtils, StringUtils
 from config import Config
@@ -63,19 +64,24 @@ class ChromeHelper(object):
         if not StringUtils.is_string_and_not_empty(latest_version):
             raise ValueError('【chromedriver】未获取到chromedriver最新版本')
         download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_win32.zip"
-        remote_file = requests.get(download_url)
-        file_path = os.path.join(Config.get_inner_temp_path(), 'chromedriver_win32.zip')
-        with open(file_path, "wb") as file:
-            file.write(remote_file.content)
+        log.info(f"chromedriver download url: {download_url}")
+        response = requests.get(download_url)
+        file_path =  os.path.join(Config().get_temp_path(), 'chromedriver_win32.zip')
+        log.info(f"chromedriver save path: {file_path}")
+        if response.status_code == 200:
+            with open(file_path, "wb") as file:
+                file.write(response.content)
+        else:
+            raise ValueError('【chromedriver】文件下载失败')
         zip_ref = zipfile.ZipFile(file_path, "r")
         contents = zip_ref.namelist()
         f_name = 'chromedriver.exe'
         if not f_name in contents:
             raise ValueError('【chromedriver】未获取到chromedriver文件')
-        new_file = os.path.join(Config.get_inner_config_path(), str(f_name))
+        new_file = os.path.join(Config().get_config_path(), str(f_name))
         if os.path.exists(new_file):
             os.remove(new_file)
-        zip_ref.extractall(Config.get_inner_config_path())
+        zip_ref.extractall(Config().get_config_path())
         zip_ref.close()
         os.remove(file_path)
         return new_file
