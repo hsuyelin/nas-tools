@@ -10,7 +10,7 @@ SERVER_URI_FORMAT = '%s:%s/rpc'
 class PyAria2(object):
     _secret = None
 
-    def __init__(self, secret=None, host=DEFAULT_HOST, port=DEFAULT_PORT):
+    def __init__(self, secret=None, host=DEFAULT_HOST, port=DEFAULT_PORT, useJsonRpc=False):
         """
         PyAria2 constructor.
 
@@ -19,7 +19,9 @@ class PyAria2(object):
         port: integer, aria2 rpc port, default is 6800
         session: string, aria2 rpc session saving.
         """
+        service_name = 'jsonrpc' if useJsonRpc else 'rpc'
         server_uri = SERVER_URI_FORMAT % (host, port)
+        server_uri = server_uri.replace('/rpc', f'/{service_name}')
         self._secret = "token:%s" % (secret or "")
         self.server = xmlrpc.client.ServerProxy(server_uri, allow_none=True)
 

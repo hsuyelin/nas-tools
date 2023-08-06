@@ -707,6 +707,13 @@ class ModuleConf(object):
                     "title": "令牌",
                     "type": "text",
                     "placeholder": ""
+                },
+                "use_jsonRpc": {
+                    "id": "aria2_use_jsonRpc",
+                    "required": False,
+                    "title": "使用JSONRPC",
+                    "tooltip": "默认使用127.0.0.1:6800/rpc的形式，开启后将会使用127.0.0.1:6800/jsonrpc的形式",
+                    "type": "switch"
                 }
             }
         },
