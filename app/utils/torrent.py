@@ -3,10 +3,11 @@ import os.path
 import time
 import re
 import tempfile
-from urllib.parse import unquote
+import hashlib
+from urllib.parse import unquote, urlencode
 
 import libtorrent
-from bencode import bdecode
+from bencode import bencode, bdecode
 
 import log
 from app.utils import StringUtils
@@ -327,3 +328,98 @@ class Torrent:
         session.remove_torrent(handle, 1)
         log.info(f"【Downloader】转换后的种子路径：{file_path}")
         return file_path, ""
+
+    @staticmethod
+    def _write_binary_to_temp_file(binary_data):
+        """
+        种子内容转种子文件
+        :param binary_data: 种子内容
+        :return: 转换后种子路径
+        """
+        try:
+            temp_file = tempfile.NamedTemporaryFile(delete=False)
+            temp_file.write(binary_data)
+            temp_file.close()
+            return temp_file.name
+        except Exception as e:
+            log.error(f"【Downloader】种子内容无法写入临时文件")
+            return None
+
+    @staticmethod
+    def _parse_torrent_dict(torrent_data):
+        """
+        获取种子文件的信息
+        :param torrent_data: 种子内容的二进制数据
+        :return: 种子文件的信息
+        """
+        try:
+            torrent_dict = bdecode(torrent_data)
+            return torrent_dict
+        except Exception as e:
+            log.error(f"【Downloader】无法解析种子文件内容")
+            return None
+
+    @staticmethod
+    def _create_magnet_link(torrent_dict):
+        """
+        根据种子信息生成磁力链接
+        :param torrent_dict: 种子信息
+        :return: 磁力链接
+        """
+        if torrent_dict is None:
+            return None
+        
+        magnet_info = {}
+        
+        if 'info' in torrent_dict:
+            info_hash = hashlib.sha1(bencode(torrent_dict['info'])).hexdigest()
+            magnet_info['xt'] = 'urn:btih:' + info_hash
+        
+        if 'name' in torrent_dict['info']:
+            magnet_info['dn'] = torrent_dict['info']['name']
+        
+        if 'announce' in torrent_dict:
+            magnet_info['tr'] = torrent_dict['announce']
+        
+        if 'announce-list' in torrent_dict:
+            magnet_info['tr'] = [announce[0] for announce in torrent_dict['announce-list']]
+
+        magnet_link = 'magnet:?{}'.format(urlencode(magnet_info))
+        return magnet_link
+
+    @staticmethod
+    def binary_data_to_magnet_link(binary_data):
+        """
+        根据种子内容生成磁力链接
+        :param binary_data: 种子内容
+        :return: 磁力链接
+        """
+        temp_file_path = Torrent._write_binary_to_temp_file(binary_data)
+        if not temp_file_path:
+            return None
+        
+        with open(temp_file_path, 'rb') as torrent_file:
+            torrent_data = torrent_file.read()
+            torrent_dict = Torrent._parse_torrent_dict(torrent_data)
+            magnet_link = Torrent._create_magnet_link(torrent_dict)
+            Torrent._close_and_delete_file(temp_file_path)
+            return magnet_link
+
+    @staticmethod
+    def _close_and_delete_file(file_path):
+        """
+        清理临时生成的种子文件
+        :param file_path: 种子文件路径
+        :return: 是否删除成功
+        """
+        try:
+            with open(file_path, 'r+') as file:
+                file.close()
+        except:
+            pass
+
+        try:
+            os.remove(file_path)
+            return True
+        except Exception as e:
+            return False
