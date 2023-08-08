@@ -153,6 +153,8 @@ pt:
   download_order: site
   # 【搜索结果数量限制】：每个站点返回搜索结果的最大数量
   site_search_result_num: 100
+  # 【强制开启刷流】：一般情况需要新人在考核期摸索完PT规则才可以开启刷流，开启后将会允许无视该规则强制刷流
+  force_enable_brush: false
 
 # 【openai】
 openai:

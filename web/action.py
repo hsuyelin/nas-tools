@@ -100,6 +100,7 @@ class WebAction:
             "rss_detail": self.__rss_detail,
             "truncate_blacklist": self.truncate_blacklist,
             "truncate_rsshistory": self.truncate_rsshistory,
+            "brushtask_enable": self.__brushtask_enable, 
             "add_brushtask": self.__add_brushtask,
             "del_brushtask": self.__del_brushtask,
             "brushtask_detail": self.__brushtask_detail,
@@ -1936,6 +1937,14 @@ class WebAction:
         RssHelper().truncate_rss_history()
         Subscribe().truncate_rss_episodes()
         return {"code": 0}
+
+    @staticmethod
+    def __brushtask_enable():
+        """
+        刷流任务可用状态
+        """
+        isBeyondOneMonth = SiteUserInfo().is_min_join_date_beyond_one_month()
+        return {"code": 0, "isBeyondOneMonth": isBeyondOneMonth}
 
     @staticmethod
     def __add_brushtask(data):
@@ -4747,10 +4756,6 @@ class WebAction:
         """
         # 需要过滤的菜单
         ignore = []
-        # 查询最早加入PT站的时间, 如果不足一个月, 则隐藏刷流任务
-        first_pt_site = SiteUserInfo().get_pt_site_min_join_date()
-        if not first_pt_site or not StringUtils.is_one_month_ago(first_pt_site):
-            ignore.append('brushtask')
         # 获取可用菜单
         menus = current_user.get_usermenus(ignore=ignore)
         return {
