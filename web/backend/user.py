@@ -1,6 +1,8 @@
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash
 from operator import itemgetter
+import json
+from base64 import b64decode
 
 from app.helper import DbHelper
 from config import Config

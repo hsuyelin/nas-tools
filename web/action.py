@@ -436,11 +436,6 @@ class WebAction:
             else:
                 cfg['app']['proxies'] = {"https": None, "http": None}
             return cfg
-        # 索引器
-        if cfg_key == "jackett.indexers":
-            vals = cfg_value.split("\n")
-            cfg['jackett']['indexers'] = vals
-            return cfg
         # 最大支持三层赋值
         keys = cfg_key.split(".")
         if keys:
@@ -4279,7 +4274,7 @@ class WebAction:
         """
         获取索引器
         """
-        return {"code": 0, "indexers": Indexer().get_user_indexer_dict()}
+        return {"code": 0, "indexers": Indexer().get_indexer_dict()}
 
     @staticmethod
     def __get_download_dirs(data):

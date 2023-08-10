@@ -50,7 +50,7 @@ class Prowlarr(_IIndexClient):
             return False
         return True if self.get_indexers() else False
 
-    def get_indexers(self, check=True, indexer_id=None, public=True):
+    def get_indexers(self, check=True, indexer_id=None, public=True, plugins=True):
         """
         获取配置的prowlarr indexer
         :return: indexer 信息 [(indexerId, indexerName, url)]
