@@ -158,7 +158,7 @@ class Prowlarr(_IPluginModule):
             self._host = config.get("host")
             if self._host:
                 if not self._host.startswith('http'):
-                    self._host = "http://" + self.host
+                    self._host = "http://" + self._host
                 if self._host.endswith('/'):
                     self._host = self._host.rstrip('/')
             self._api_key = config.get("api_key")
@@ -209,6 +209,8 @@ class Prowlarr(_IPluginModule):
                                  "proxy": True,
                                  "parser": self.module_name})
                     for v in ret_indexers]
+            for indexer in indexers:
+                log.info(f"|>>>>>>>>>>>>>>>> prowlarr - line213 - {indexer.id} -- {indexer.name}")
             return indexers
         except Exception as e2:
             ExceptionUtils.exception_traceback(e2)
@@ -266,6 +268,7 @@ class Prowlarr(_IPluginModule):
                             'uploadvolumefactor': None,
                             'page_url': entry["guid"],
                             'imdbid': None}
+                log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>>>>> prowlarr - line269 temp_dict -> {tmp_dict}")
                 torrents.append(tmp_dict)
             return torrents
         except Exception as e2:

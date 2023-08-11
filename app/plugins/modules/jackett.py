@@ -169,11 +169,14 @@ class Jackett(_IPluginModule):
 
         if config:
             self._host = config.get("host")
+            log.info(f"|>>>>>>>>>>>>>>> jackett - line172 - {self._host}")
             if self._host:
                 if not self._host.startswith('http'):
-                    self._host = "http://" + self.host
+                    self._host = "http://" + self._host
+                    log.info(f"|>>>>>>>>>>>>>>> jackett - line172 - 没有以http开头: {self._host}")
                 if self._host.endswith('/'):
                     self._host = self._host.rstrip('/')
+                    log.info(f"|>>>>>>>>>>>>>>> jackett - line172 - 以/结尾: {self._host}")
             self._api_key = config.get("api_key")
             self._password = config.get("password")
             self._enable = self.get_status()
@@ -220,6 +223,8 @@ class Jackett(_IPluginModule):
                                  "proxy": True,
                                  "parser": self.module_name})
                     for v in ret.json()]
+            for indexer in indexers:
+                log.info(f"|>>>>>>>>>>>>>>>> jackett - line224 - {indexer.id} -- {indexer.name}")
             return indexers
         except Exception as e2:
             ExceptionUtils.exception_traceback(e2)
@@ -339,6 +344,7 @@ class Jackett(_IPluginModule):
                                 'uploadvolumefactor': uploadvolumefactor,
                                 'page_url': page_url,
                                 'imdbid': imdbid}
+                    log.info(f"|>>>>>>>>>>>>>>>>>>>> jackett - line344 - temp_dict -> {tmp_dict}")
                     torrents.append(tmp_dict)
                 except Exception as e:
                     ExceptionUtils.exception_traceback(e)
