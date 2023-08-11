@@ -47,14 +47,18 @@ class Indexer(object):
         获取当前索引器的索引站点
         """
         if not self._client:
+            log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line49 - client empty")
             return []
+        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line52 - 获取当前索引器的索引站点")
         return self._client.get_indexers(check=check, public=public, plugins=plugins)
 
     def get_indexer(self, url):
         """
         获取索引器的信息
         """
+        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line55 - 获取索引器的信息")
         if not self._client:
+            log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line59 - client empty")
             return None
         return self._client.get_indexer(url)
 
@@ -62,6 +66,7 @@ class Indexer(object):
         """
         获取用户已经选择的索引器字典
         """
+        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line65 - 获取用户已经选择的索引器字典")
         return [
             {
                 "id": index.id,
