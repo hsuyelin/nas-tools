@@ -1,6 +1,4 @@
 git
-python3-dev
-py3-pip
 tzdata
 zip
 curl
