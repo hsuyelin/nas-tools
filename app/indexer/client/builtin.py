@@ -256,9 +256,11 @@ class BuiltinIndexer(_IIndexClient):
         """
         根据站点ID搜索站点首页资源
         """
+        log.info(f"|>>>>>>>>>>>>>>. builtin.py - line259 - 根据站点ID搜索站点首页资源 - {url}")
         if not url:
             return []
         indexer = self.get_indexer(url)
+        log.info(f"|>>>>>>>>>>>>>>. builtin.py - line263 - 根据站点ID搜索站点首页资源 - {indexer.count}")
         if not indexer:
             return []
 

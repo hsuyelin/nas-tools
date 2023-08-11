@@ -98,6 +98,7 @@ class Indexer(object):
         :param page: 页码
         :param keyword: 搜索关键字
         """
+        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line101 - 获取内置索引器的资源列表")
         return self._client.list(url=url, page=page, keyword=keyword)
 
     def __get_client(self, ctype: [IndexerType, str], conf=None):
