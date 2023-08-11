@@ -243,13 +243,13 @@ class BuiltinIndexer(_IIndexClient):
                                               match_media=match_media,
                                               start_time=start_time)
 
-    def list(self, url, page=0, keyword=None):
+    def list(self, indexer_id, page=0, keyword=None):
         """
         根据站点ID搜索站点首页资源
         """
-        if not url:
+        if not indexer_id:
             return []
-        indexer = self.get_indexer(url)
+        indexer: IndexerConf = self.get_indexers(indexer_id=indexer_ids)
         if not indexer:
             return []
 

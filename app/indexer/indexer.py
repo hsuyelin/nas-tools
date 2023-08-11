@@ -91,14 +91,14 @@ class Indexer(object):
         """
         return [indexer.name for indexer in self.get_indexers(check=True)]
 
-    def list_resources(self, url, page=0, keyword=None):
+    def list_resources(self, indexer_id, page=0, keyword=None):
         """
         获取内置索引器的资源列表
         :param url: 站点URL
         :param page: 页码
         :param keyword: 搜索关键字
         """
-        return self._client.list(url=url, page=page, keyword=keyword)
+        return self._client.list(indexer_id=indexer_id, page=page, keyword=keyword)
 
     def __get_client(self, ctype: [IndexerType, str], conf=None):
         return self.__build_class(ctype=ctype, conf=conf)
