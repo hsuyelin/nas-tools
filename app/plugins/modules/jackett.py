@@ -169,14 +169,11 @@ class Jackett(_IPluginModule):
 
         if config:
             self._host = config.get("host")
-            log.info(f"|>>>>>>>>>>>>>>> jackett - line172 - {self._host}")
             if self._host:
                 if not self._host.startswith('http'):
                     self._host = "http://" + self._host
-                    log.info(f"|>>>>>>>>>>>>>>> jackett - line172 - 没有以http开头: {self._host}")
                 if self._host.endswith('/'):
                     self._host = self._host.rstrip('/')
-                    log.info(f"|>>>>>>>>>>>>>>> jackett - line172 - 以/结尾: {self._host}")
             self._api_key = config.get("api_key")
             self._password = config.get("password")
             self._enable = self.get_status()

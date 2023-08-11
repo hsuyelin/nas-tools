@@ -2801,7 +2801,7 @@ class WebAction:
 
     @staticmethod
     def list_site_resources(data):
-        resources = Indexer().list_resources(index_id=data.get("id"),
+        resources = Indexer().list_resources(url=data.get("site"),
                                              page=data.get("page"),
                                              keyword=data.get("keyword"))
         if not resources:
