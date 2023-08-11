@@ -212,7 +212,6 @@
     if (type !== "builtin") {
       params = input_select_GetVal(`modal-${type}`);
       params['test'] = test || false;
-      params['pt.search_indexer'] = type;
       // ajax_post("update_config", params, func);
       conf['conf'] = params
     } else {
@@ -221,7 +220,6 @@
         key: "UserIndexerSites",
         value: sites
       }
-      params['pt.search_indexer'] = type;
       conf['conf'] = params
       conf['db'] = db
       // ajax_post("set_system_config", params, func);
