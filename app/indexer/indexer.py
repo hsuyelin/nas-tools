@@ -29,6 +29,7 @@ class Indexer(object):
         self.progress = ProgressHelper()
         self.dbhelper = DbHelper()
         indexer = Config().get_config("pt").get('search_indexer') or 'builtin'
+        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line32 - {indexer}")
         self._client = self.__get_client(indexer)
         log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line33 - {self._client}")
         if self._client:
