@@ -22,7 +22,7 @@ class Indexer(object):
             'app.indexer.client',
             filter_func=lambda _, obj: hasattr(obj, 'client_id')
         )
-        log.debug(f"【Indexer】加载索引器：{self._indexer_schemas}")
+        log.info(f"【Indexer】加载索引器：{self._indexer_schemas}")
         self.init_config()
 
     def init_config(self):
@@ -30,10 +30,12 @@ class Indexer(object):
         self.dbhelper = DbHelper()
         indexer = Config().get_config("pt").get('search_indexer') or 'builtin'
         self._client = self.__get_client(indexer)
+        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line33 - {self._client}")
         if self._client:
             self._client_type = self._client.get_type()
 
     def __build_class(self, ctype, conf):
+        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line38 - {ctype} -- {conf}")
         for indexer_schema in self._indexer_schemas:
             try:
                 if indexer_schema.match(ctype):
