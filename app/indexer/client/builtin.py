@@ -249,7 +249,7 @@ class BuiltinIndexer(_IIndexClient):
         """
         if not indexer_id:
             return []
-        indexer: IndexerConf = self.get_indexers(indexer_id=indexer_ids)
+        indexer: IndexerConf = self.get_indexers(indexer_id=indexer_id)
         if not indexer:
             return []
 
