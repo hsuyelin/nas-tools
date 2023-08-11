@@ -247,7 +247,6 @@ class Prowlarr(_IPluginModule):
             if not ret or not ret.json():
                 return []
 
-            self.info(f"【{self.module_name}】search ret.json ======> {ret.json()}")
             ret_indexers = ret.json()
             if not ret or ret_indexers == [] or ret is None:
                 return []
