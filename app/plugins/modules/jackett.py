@@ -8,7 +8,6 @@ from app.utils import RequestUtils
 from app.helper import IndexerConf
 from app.utils import ExceptionUtils, DomUtils
 
-from app.helper import DbHelper
 from app.plugins.modules._base import _IPluginModule
 from config import Config
 
@@ -20,7 +19,7 @@ class Jackett(_IPluginModule):
     # 插件图标
     module_icon = "jackett.png"
     # 主题色
-    module_color = "#C90425"
+    module_color = "#141A21"
     # 插件版本
     module_version = "1.0"
     # 插件作者
@@ -36,7 +35,6 @@ class Jackett(_IPluginModule):
 
     # 私有属性
     _enable = False
-    _dbhelper = None
     _host = ""
     _api_key = ""
     _password = ""
@@ -115,6 +113,7 @@ class Jackett(_IPluginModule):
           <div class="table-responsive table-modal-body">
             <table class="table table-vcenter card-table table-hover table-striped">
               <thead>
+              {% if IndexersCount > 0 %}
               <tr>
                 <th>id</th>
                 <th>域名</th>
@@ -122,6 +121,11 @@ class Jackett(_IPluginModule):
                 <th>是否公开</th>
                 <th></th>
               </tr>
+              {% else %}
+              <tr>
+                <th align="center">Jackett测试失败</th>
+              </tr>
+              {% endif %}
               </thead>
               <tbody>
               {% if IndexersCount > 0 %}
@@ -134,9 +138,11 @@ class Jackett(_IPluginModule):
                   </tr>
                 {% endfor %}
               {% else %}
-                <tr>
-                  <td colspan="6" align="center">没有数据或者jackett配置有误</td>
-                  <td colspan="6" align="center">注意：(请先点击确定添加后，再回来测试)</td>
+                <tr id="indexer_None_1">
+                  <td align="center">没有数据或者Jackett配置有误</td>
+                </tr>
+                <tr id="indexer_None_2">
+                  <td align="center">注意：(请先点击确定添加后，再回来测试)</td>
                 </tr>
               {% endif %}
               </tbody>
@@ -161,9 +167,13 @@ class Jackett(_IPluginModule):
         if not config:
             return
 
-        self._dbhelper = DbHelper()
         if config:
             self._host = config.get("host")
+            if self._host:
+                if not self._host.startswith('http'):
+                    self._host = "http://" + self.host
+                if self._host.endswith('/'):
+                    self._host = self._host.rstrip('/')
             self._api_key = config.get("api_key")
             self._password = config.get("password")
             self._enable = self.get_status()
@@ -202,7 +212,7 @@ class Jackett(_IPluginModule):
             ret = RequestUtils().get_res(indexer_query_url)
             if not ret or not ret.json():
                 return []
-            return [IndexerConf({"id": v["id"],
+            indexers = [IndexerConf({"id": v["id"],
                                  "name": v["name"],
                                  "domain": f'{self._host}/api/v2.0/indexers/{v["id"]}/results/torznab/',
                                  "public": True if v['type'] == 'public' else False,
@@ -210,6 +220,7 @@ class Jackett(_IPluginModule):
                                  "proxy": True,
                                  "parser": self.module_name})
                     for v in ret.json()]
+            return indexers
         except Exception as e2:
             ExceptionUtils.exception_traceback(e2)
             return []
@@ -230,7 +241,6 @@ class Jackett(_IPluginModule):
 
         if len(result_array) == 0:
             self.warn(f"【{self.module_name}】{indexer.name} 未检索到数据")
-            # self.progress.update(ptype='search', text=f"{indexer.name} 未检索到数据")
             return []
         else:
             self.warn(f"【{self.module_name}】{indexer.name} 返回数据：{len(result_array)}")
@@ -266,10 +276,10 @@ class Jackett(_IPluginModule):
                 try:
                     # indexer id
                     indexer_id = DomUtils.tag_value(item, "jackettindexer", "id",
-                                                    default=DomUtils.tag_value(item, "prowlarrindexer", "id", ""))
+                                                    default=DomUtils.tag_value(item, "jackettindexer", "id", ""))
                     # indexer
                     indexer = DomUtils.tag_value(item, "jackettindexer",
-                                                 default=DomUtils.tag_value(item, "prowlarrindexer", default=""))
+                                                 default=DomUtils.tag_value(item, "jackettindexer", default=""))
 
                     # 标题
                     title = DomUtils.tag_value(item, "title", default="")

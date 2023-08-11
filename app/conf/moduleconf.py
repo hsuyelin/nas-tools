@@ -891,30 +891,6 @@ class ModuleConf(object):
 
     # 索引器
     INDEXER_CONF = {
-        "prowlarr": {
-            "name": "Prowlarr",
-            "img_url": "../static/img/indexer/prowlarr.png",
-            "background": "bg-orange",
-            "test_command": "app.indexer.client.prowlarr|Prowlarr",
-            "config": {
-                "host": {
-                    "id": "prowlarr.host",
-                    "required": True,
-                    "title": "Prowlarr地址",
-                    "tooltip": "Prowlarr访问地址和端口，如为https需加https://前缀。注意需要先在Prowlarr中添加搜刮器，同时勾选所有搜刮器后搜索一次，才能正常测试通过和使用",
-                    "type": "text",
-                    "placeholder": "http://127.0.0.1:9696"
-                },
-                "api_key": {
-                    "id": "prowlarr.api_key",
-                    "required": True,
-                    "title": "Api Key",
-                    "tooltip": "在Prowlarr->Settings->General->Security-> API Key中获取",
-                    "type": "text",
-                    "placeholder": ""
-                }
-            }
-        }
     }
 
     # 发现过滤器
