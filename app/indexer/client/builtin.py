@@ -101,12 +101,10 @@ class BuiltinIndexer(_IIndexClient):
         indexer_sites = SystemConfig().get(SystemConfigKey.UserIndexerSites) or []
         # 检查浏览器状态
         chrome_ok = ChromeHelper().get_status()
-        log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>> checked indexer_sites - line103 -> {indexer_sites}")
         # 私有站点
         for site in Sites().get_sites():
             url = site.get("signurl") or site.get("rssurl")
             cookie = site.get("cookie")
-            log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>> private - line108 -> {url} {cookie}")
             if not url or not cookie:
                 continue
             render = False if not chrome_ok else site.get("chrome")
@@ -122,19 +120,15 @@ class BuiltinIndexer(_IIndexClient):
                                                   render=render)
             if indexer:
                 if indexer_id and indexer.id == indexer_id:
-                    log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>> private - line124 -> {indexer.id}")
                     return indexer
                 if check and (not indexer_sites or indexer.id not in indexer_sites):
-                    log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>> private - line127 -> {check}")
                     continue
                 if indexer.domain not in _indexer_domains:
-                    log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>> private - line130 -> {indexer.domain}")
                     _indexer_domains.append(indexer.domain)
                     indexer.name = site.get("name")
 
                     ret_indexers.append(indexer)
 
-        log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>> public status - line136 -> {public} && {self._show_more_sites}")
         # 公开站点
         if public and self._show_more_sites:
             for indexer in IndexerHelper().get_public_indexers():
@@ -142,14 +136,11 @@ class BuiltinIndexer(_IIndexClient):
                     continue
                 if indexer_id and indexer.get("id") == indexer_id:
                     _indexer_id = indexer.get("id")
-                    log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>> public - line144 -> {_indexer_id}")
                     return IndexerConf(datas=indexer)
                 if check and (not indexer_sites or indexer.get("id") not in indexer_sites):
-                    log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>> public - line147 -> {check}")
                     continue
                 if indexer.get("domain") not in _indexer_domains:
                     _indexer_domain = indexer.get("domain")
-                    log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>> public - line151 -> {_indexer_domain}")
                     _indexer_domains.append(indexer.get("domain"))
                     ret_indexers.append(IndexerConf(datas=indexer))
         # 获取插件站点
@@ -158,7 +149,6 @@ class BuiltinIndexer(_IIndexClient):
                 if check and (not indexer_sites or indexer.id not in indexer_sites):
                     continue
                 if indexer and indexer.domain not in _indexer_domains:
-                    log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>> plugins - line161 -> {indexer.domain}")
                     _indexer_domains.append(indexer.domain)
                     ret_indexers.append(indexer)
 

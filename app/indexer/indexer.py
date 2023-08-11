@@ -29,14 +29,11 @@ class Indexer(object):
         self.progress = ProgressHelper()
         self.dbhelper = DbHelper()
         indexer = 'builtin'
-        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line32 - {indexer}")
         self._client = self.__get_client(indexer)
-        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line33 - {self._client}")
         if self._client:
             self._client_type = self._client.get_type()
 
     def __build_class(self, ctype, conf):
-        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line38 - {ctype} -- {conf}")
         for indexer_schema in self._indexer_schemas:
             try:
                 if indexer_schema.match(ctype):
@@ -50,18 +47,14 @@ class Indexer(object):
         获取当前索引器的索引站点
         """
         if not self._client:
-            log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line49 - client empty")
             return []
-        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line52 - 获取当前索引器的索引站点")
         return self._client.get_indexers(check=check, public=public, plugins=plugins)
 
     def get_indexer(self, url):
         """
         获取索引器的信息
         """
-        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line55 - 获取索引器的信息")
         if not self._client:
-            log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line59 - client empty")
             return None
         return self._client.get_indexer(url)
 
@@ -69,7 +62,6 @@ class Indexer(object):
         """
         获取用户已经选择的索引器字典
         """
-        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line65 - 获取用户已经选择的索引器字典")
         return [
             {
                 "id": index.id,
@@ -106,7 +98,6 @@ class Indexer(object):
         :param page: 页码
         :param keyword: 搜索关键字
         """
-        log.info(f"|>>>>>>>>>>>>>>>> indexer.py - line101 - 获取内置索引器的资源列表")
         return self._client.list(url=url, page=page, keyword=keyword)
 
     def __get_client(self, ctype: [IndexerType, str], conf=None):

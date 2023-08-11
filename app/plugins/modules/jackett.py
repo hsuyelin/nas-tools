@@ -223,8 +223,6 @@ class Jackett(_IPluginModule):
                                  "proxy": True,
                                  "parser": self.module_name})
                     for v in ret.json()]
-            for indexer in indexers:
-                log.info(f"|>>>>>>>>>>>>>>>> jackett - line224 - {indexer.id} -- {indexer.name}")
             return indexers
         except Exception as e2:
             ExceptionUtils.exception_traceback(e2)
@@ -344,7 +342,6 @@ class Jackett(_IPluginModule):
                                 'uploadvolumefactor': uploadvolumefactor,
                                 'page_url': page_url,
                                 'imdbid': imdbid}
-                    log.info(f"|>>>>>>>>>>>>>>>>>>>> jackett - line344 - temp_dict -> {tmp_dict}")
                     torrents.append(tmp_dict)
                 except Exception as e:
                     ExceptionUtils.exception_traceback(e)

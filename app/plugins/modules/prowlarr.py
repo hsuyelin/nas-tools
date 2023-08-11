@@ -209,8 +209,6 @@ class Prowlarr(_IPluginModule):
                                  "proxy": True,
                                  "parser": self.module_name})
                     for v in ret_indexers]
-            for indexer in indexers:
-                log.info(f"|>>>>>>>>>>>>>>>> prowlarr - line213 - {indexer.id} -- {indexer.name}")
             return indexers
         except Exception as e2:
             ExceptionUtils.exception_traceback(e2)
@@ -268,7 +266,6 @@ class Prowlarr(_IPluginModule):
                             'uploadvolumefactor': None,
                             'page_url': entry["guid"],
                             'imdbid': None}
-                log.info(f"|>>>>>>>>>>>>>>>>>>>>>>>>>>> prowlarr - line269 temp_dict -> {tmp_dict}")
                 torrents.append(tmp_dict)
             return torrents
         except Exception as e2:
