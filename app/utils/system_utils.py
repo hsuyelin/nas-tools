@@ -97,6 +97,14 @@ class SystemUtils:
         return True if platform.system() == 'Darwin' else False
 
     @staticmethod
+    def is_macos_intel():
+        return SystemUtils.is_macos() and (True if "x86_64" in SystemUtils.execute('uname -a') else False)
+
+    @staticmethod
+    def is_macos_arm():
+        return SystemUtils.is_macos() and not SystemUtils.is_macos_intel()
+
+    @staticmethod
     def is_lite_version():
         return True if SystemUtils.is_docker() \
                        and os.environ.get("NASTOOL_VERSION") == "lite" else False
@@ -107,6 +115,17 @@ class SystemUtils:
             return None
         else:
             return WEBDRIVER_PATH.get(SystemUtils.get_system().value)
+
+    @staticmethod
+    def chmod755(filePath):
+        if not os.path.exists(filePath):
+            return
+        if not SystemUtils.is_docker() \
+            and not SystemUtils.is_macos_intel() \
+            and not SystemUtils.is_macos_arm() \
+            and not SystemUtils.is_synology():
+            return
+        os.chmod(filePath, 0o755)
 
     @staticmethod
     def copy(src, dest):

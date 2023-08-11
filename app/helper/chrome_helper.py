@@ -64,9 +64,13 @@ class ChromeHelper(object):
         if not StringUtils.is_string_and_not_empty(latest_version):
             raise ValueError('【chromedriver】未获取到chromedriver最新版本')
         download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_win32.zip"
+        if SystemUtils.is_macos_intel():
+            download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_mac64.zip"
+        elif SystemUtils.is_macos_arm():
+            download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_mac_arm64.zip"
         log.info(f"chromedriver download url: {download_url}")
         response = requests.get(download_url)
-        file_path =  os.path.join(Config().get_temp_path(), 'chromedriver_win32.zip')
+        file_path =  os.path.join(Config().get_temp_path(), 'chromedriver.zip')
         log.info(f"chromedriver save path: {file_path}")
         if response.status_code == 200:
             with open(file_path, "wb") as file:
@@ -76,6 +80,8 @@ class ChromeHelper(object):
         zip_ref = zipfile.ZipFile(file_path, "r")
         contents = zip_ref.namelist()
         f_name = 'chromedriver.exe'
+        if SystemUtils.is_macos_intel() or SystemUtils.is_macos_arm():
+            f_name = 'chromedriver'
         if not f_name in contents:
             raise ValueError('【chromedriver】未获取到chromedriver文件')
         new_file = os.path.join(Config().get_config_path(), str(f_name))
@@ -84,6 +90,7 @@ class ChromeHelper(object):
         zip_ref.extractall(Config().get_config_path())
         zip_ref.close()
         os.remove(file_path)
+        SystemUtils.chmod755(new_file)
         return new_file
 
     @property
