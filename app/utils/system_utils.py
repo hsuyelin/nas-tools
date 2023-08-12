@@ -9,7 +9,8 @@ import psutil
 from app.utils.exception_utils import ExceptionUtils
 from app.utils.path_utils import PathUtils
 from app.utils.types import OsType
-from config import WEBDRIVER_PATH
+from app.utils.string_utils import StringUtils
+from config import WEBDRIVER_PATH, Config
 
 
 class SystemUtils:
@@ -105,6 +106,10 @@ class SystemUtils:
         return SystemUtils.is_macos() and not SystemUtils.is_macos_intel()
 
     @staticmethod
+    def is_linux():
+        return True if platform.system() == 'Linux' else False
+
+    @staticmethod
     def is_lite_version():
         return True if SystemUtils.is_docker() \
                        and os.environ.get("NASTOOL_VERSION") == "lite" else False
@@ -113,8 +118,21 @@ class SystemUtils:
     def get_webdriver_path():
         if SystemUtils.is_lite_version():
             return None
+        system_webdriver = WEBDRIVER_PATH.get(SystemUtils.get_system().value)
+        if StringUtils.is_string_and_not_empty(system_webdriver):
+            if os.path.exists(system_webdriver):
+                return system_webdriver
+            else:
+                return SystemUtils.get_download_webdriver_path()
         else:
-            return WEBDRIVER_PATH.get(SystemUtils.get_system().value)
+            return SystemUtils.get_download_webdriver_path()
+            
+    @staticmethod
+    def get_download_webdriver_path():
+        if SystemUtils.is_windows():
+            return os.path.join(Config().get_config_path(), "chromedriver.exe")
+        else:
+            return os.path.join(Config().get_config_path(), "chromedriver")
 
     @staticmethod
     def chmod755(filePath):

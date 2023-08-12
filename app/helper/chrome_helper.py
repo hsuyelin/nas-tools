@@ -68,6 +68,8 @@ class ChromeHelper(object):
             download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_mac64.zip"
         elif SystemUtils.is_macos_arm():
             download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_mac_arm64.zip"
+        else:
+            download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_linux64.zip"
         log.info(f"chromedriver download url: {download_url}")
         response = requests.get(download_url)
         file_path =  os.path.join(Config().get_temp_path(), 'chromedriver.zip')
@@ -80,7 +82,7 @@ class ChromeHelper(object):
         zip_ref = zipfile.ZipFile(file_path, "r")
         contents = zip_ref.namelist()
         f_name = 'chromedriver.exe'
-        if SystemUtils.is_macos_intel() or SystemUtils.is_macos_arm():
+        if not SystemUtils.is_windows():
             f_name = 'chromedriver'
         if not f_name in contents:
             raise ValueError('【chromedriver】未获取到chromedriver文件')
