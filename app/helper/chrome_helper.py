@@ -47,8 +47,10 @@ class ChromeHelper(object):
         global driver_executable_path
         try:
             driver_executable_path = ChromeDriverManager().install()
+            log.info(f"【chromedriver】使用内置驱动")
         except:
             try:
+                log.info(f"【chromedriver】内置驱动不存在，尝试下载最新驱动")
                 driver_executable_path = self.download_driver()
             except Exception as e:
                 ExceptionUtils.exception_traceback(e)
@@ -59,12 +61,10 @@ class ChromeHelper(object):
         下载ChromeDriver
         @return ChromeDriver文件路径:
         """
-        if SystemUtils.is_docker():
-            return 
         latest_release = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
         latest_version = requests.get(latest_release).text
         if not StringUtils.is_string_and_not_empty(latest_version):
-            raise ValueError('【chromedriver】未获取到chromedriver最新版本')
+            raise ValueError('【chromedriver】未获取到驱动最新版本')
         download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_win32.zip"
         if SystemUtils.is_macos_intel():
             download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_mac64.zip"
@@ -72,10 +72,10 @@ class ChromeHelper(object):
             download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_mac_arm64.zip"
         else:
             download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_linux64.zip"
-        log.info(f"chromedriver download url: {download_url}")
+        log.info(f"【ChromeDriver】最新驱动下载链接: {download_url}")
         response = requests.get(download_url)
         file_path =  os.path.join(Config().get_temp_path(), 'chromedriver.zip')
-        log.info(f"chromedriver save path: {file_path}")
+        log.info(f"【ChromeDriver】最新驱动下载保存路径: {file_path}")
         if response.status_code == 200:
             with open(file_path, "wb") as file:
                 file.write(response.content)
