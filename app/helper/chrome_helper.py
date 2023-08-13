@@ -144,7 +144,6 @@ class ChromeHelper(object):
         }
         options.add_argument('−−lang=zh-CN')
         options.add_experimental_option("prefs", prefs)
-        log.info(f"|>>>>>>>>>>>>>>>>>>>>>> {driver_executable_path} {self._executable_path}")
         chrome = ChromeWithPrefs(options=options, driver_executable_path=self._executable_path)
         chrome.set_page_load_timeout(30)
         return chrome
