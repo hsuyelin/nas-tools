@@ -1,9 +1,13 @@
 import requests
+from datetime import datetime, timedelta
+from threading import Event
 import xml.dom.minidom
 from jinja2 import Template
 import re
 
-import log
+import pytz
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 from app.utils import RequestUtils
 from app.helper import IndexerConf
@@ -36,11 +40,16 @@ class Prowlarr(_IPluginModule):
     auth_level = 1
 
     # 私有属性
+    eventmanager = None
+    _scheduler = None
     _enable = False
     _host = ""
     _api_key = ""
-    _show_more_sites = False
-    _sites = []
+    _onlyonce = False
+    _sites = None
+
+    # 退出事件
+    _event = Event()
 
     @staticmethod
     def get_fields():
@@ -78,12 +87,25 @@ class Prowlarr(_IPluginModule):
                     ],
                     [
                         {
-                            'title': '开启内建站点',
+                            'title': '更新周期',
                             'required': "",
-                            'tooltip': '开启后会在内建索引器展示内置的公开站点，不开启则只显示prowlarr的站点',
+                            'tooltip': '索引列表更新周期，支持5位cron表达式，默认每24小时运行一次',
+                            'type': 'text',
+                            'content': [
+                                {
+                                    'id': 'cron',
+                                    'placeholder': '0 0 */24 * *',
+                                }
+                            ]
+                        }
+                    ],
+                    [
+                        {
+                            'title': '立即运行一次',
+                            'required': "",
+                            'tooltip': '打开后立即运行一次获取索引器列表，否则需要等到预先设置的更新周期才会获取',
                             'type': 'switch',
-                            'id': 'show_more_sites',
-                            'default': True
+                            'id': 'onlyonce',
                         }
                     ]
                 ]
@@ -95,7 +117,8 @@ class Prowlarr(_IPluginModule):
         插件的额外页面，返回页面标题和页面内容
         :return: 标题，页面内容，确定按钮响应函数
         """
-        indexers = self.get_indexers()
+        if not isinstance(self._sites, list) or len(self._sites) <= 0:
+            return None, None, None
         template = """
           <div class="table-responsive table-modal-body">
             <table class="table table-vcenter card-table table-hover table-striped">
@@ -103,14 +126,10 @@ class Prowlarr(_IPluginModule):
               {% if IndexersCount > 0 %}
               <tr>
                 <th>id</th>
-                <th>域名</th>
+                <th>索引</th>
                 <th>是否内置</th>
                 <th>是否公开</th>
                 <th></th>
-              </tr>
-              {% else %}
-              <tr>
-                <th align="center">Prowlarr测试失败</th>
               </tr>
               {% endif %}
               </thead>
@@ -124,35 +143,15 @@ class Prowlarr(_IPluginModule):
                     <td>{{ Item.public }}</td>
                   </tr>
                 {% endfor %}
-              {% else %}
-                <tr id="indexer_None_1">
-                  <td align="center">没有数据或者Prowlarr配置有误</td>
-                </tr>
-                <tr id="indexer_None_2">
-                  <td align="center">注意：(请先点击确定添加后，再回来测试)</td>
-                </tr>
               {% endif %}
               </tbody>
             </table>
           </div>
         """
-        return "测试", Template(template).render(IndexersCount=len(indexers), Indexers=indexers), None
-
-    def get_status(self):
-        """
-        检查连通性
-        :return: True、False
-        """
-        if not self._api_key or not self._host:
-            return False
-        self._sites = self.get_indexers()
-        return True if self._sites else False
+        return "索引列表", Template(template).render(IndexersCount=len(self._sites), Indexers=self._sites), None
 
     def init_config(self, config=None):
         self.info(f"初始化配置{config}")
-
-        if not config:
-            return
 
         if config:
             self._host = config.get("host")
@@ -163,7 +162,46 @@ class Prowlarr(_IPluginModule):
                     self._host = self._host.rstrip('/')
             self._api_key = config.get("api_key")
             self._enable = self.get_status()
-            self.__update_config(showMoreSites=config.get("show_more_sites"))
+            self._onlyonce = config.get("onlyonce")
+            self._cron = config.get("cron")
+            if not StringUtils.is_string_and_not_empty(self._cron):
+                self._cron = "0 0 */24 * *"
+
+
+        # 停止现有任务
+        self.stop_service()
+
+        # 启动定时任务 & 立即运行一次
+        if self._onlyonce:
+            self._scheduler = BackgroundScheduler(timezone=Config().get_timezone())
+
+            if self._cron:
+                self.info(f"【{self.module_name}】 索引更新服务启动，周期：{self._cron}")
+                self._scheduler.add_job(self.get_status, CronTrigger.from_crontab(self._cron))
+
+            if self._onlyonce:
+                self.info(f"【{self.module_name}】开始获取索引器状态")
+                self._scheduler.add_job(self.get_status, 'date',
+                                        run_date=datetime.now(tz=pytz.timezone(Config().get_timezone())) + timedelta(
+                                            seconds=3))
+                # 关闭一次性开关
+                self._onlyonce = False
+                self.__update_config()
+
+            if self._cron or self._onlyonce:
+                # 启动服务
+                self._scheduler.print_jobs()
+                self._scheduler.start()
+
+    def get_status(self):
+        """
+        检查连通性
+        :return: True、False
+        """
+        if not self._api_key or not self._host:
+            return False
+        self._sites = self.get_indexers()
+        return True if isinstance(self._sites, list) and len(self._sites) > 0 else False
 
     def get_state(self):
         return self._enable
@@ -172,14 +210,27 @@ class Prowlarr(_IPluginModule):
         """
         退出插件
         """
-        pass
+        try:
+            if self._scheduler:
+                self._scheduler.remove_all_jobs()
+                if self._scheduler.running:
+                    self._event.set()
+                    self._scheduler.shutdown()
+                    self._event.clear()
+                self._scheduler = None
+        except Exception as e:
+            self.error(f"【{self.module_name}】停止插件错误: {str(e)}")
 
-    def __update_config(self, showMoreSites = False):
-        show_more_sites = Config().get_config("laboratory").get('show_more_sites')
-        if show_more_sites != showMoreSites:
-            cfg = Config().get_config()
-            cfg["laboratory"]["show_more_sites"] = showMoreSites
-            Config().save_config(cfg)
+    def __update_config(self):
+        """
+        更新优选插件配置
+        """
+        self.update_config({
+            "onlyonce": False,
+            "cron": self._cron,
+            "host": self._host,
+            "api_key": self._api_key
+        })
 
     def get_indexers(self, check=True, indexer_id=None, public=True, plugins=True):
         """
