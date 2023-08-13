@@ -26,7 +26,7 @@ class Jackett(_IPluginModule):
     # 主题色
     module_color = "#141A21"
     # 插件版本
-    module_version = "1.1"
+    module_version = "1.2"
     # 插件作者
     module_author = "mattoid"
     # 作者主页
@@ -255,15 +255,24 @@ class Jackett(_IPluginModule):
         :return: indexer 信息 [(indexerId, indexerName, url)]
         """
         #获取Cookie
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "User-Agent": Config().get_ua(),
+            "X-Api-Key": self._api_key,
+            "Accept": "application/json, text/javascript, */*; q=0.01"
+        }
         cookie = None
         session = requests.session()
-        res = RequestUtils(session=session).post_res(url=f"{self._host}/UI/Dashboard", data={"password": self._password},
+        res = RequestUtils(headers=headers, session=session).post_res(url=f"{self._host}/UI/Dashboard", data={"password": self._password},
                                                      params={"password": self._password})
         if res and session.cookies:
             cookie = session.cookies.get_dict()
         indexer_query_url = f"{self._host}/api/v2.0/indexers?configured=true"
         try:
-            ret = RequestUtils().get_res(indexer_query_url)
+            ret = RequestUtils(headers=headers, cookies=cookie).get_res(indexer_query_url)
+            if not RequestUtils.check_response_is_valid_json(ret):
+                self.info(f"【{self.module_name}】参数设置不正确，请检查所有的参数是否填写正确")
+                return []
             if not ret or not ret.json():
                 return []
             indexers = [IndexerConf({"id": v["id"],

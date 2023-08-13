@@ -175,3 +175,11 @@ class RequestUtils:
                 cookiesList.append(cookies)
             return cookiesList
         return cookie_dict
+
+    @staticmethod
+    def check_response_is_valid_json(response):
+        """
+        解析返回的内容是否是一段html
+        """
+        content_type = response.headers.get('Content-Type', '')
+        return 'application/json' in content_type

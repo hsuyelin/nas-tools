@@ -27,7 +27,7 @@ class Prowlarr(_IPluginModule):
     # 主题色
     module_color = "#7F4A28"
     # 插件版本
-    module_version = "1.1"
+    module_version = "1.2"
     # 插件作者
     module_author = "hsuyelin"
     # 作者主页
@@ -246,6 +246,9 @@ class Prowlarr(_IPluginModule):
         indexer_query_url = f"{self._host}/api/v1/indexerstats"
         try:
             ret = RequestUtils(headers=headers).get_res(indexer_query_url)
+            if not RequestUtils.check_response_is_valid_json(ret):
+                self.info(f"【{self.module_name}】参数设置不正确，请检查所有的参数是否填写正确")
+                return []
             if not ret or not ret.json():
                 return []
             ret_indexers = ret.json()["indexers"]
@@ -295,6 +298,10 @@ class Prowlarr(_IPluginModule):
             }
             api_url = f"{self._host}/api/v1/search?query={keyword}&indexerIds={indexerId}&type=search&limit=100&offset=0"
             ret = RequestUtils(headers=headers).get_res(api_url)
+            if not RequestUtils.check_response_is_valid_json(ret):
+                self.info(f"【{self.module_name}】参数设置不正确，请检查所有的参数是否填写正确")
+                return []
+
             if not ret or not ret.json():
                 return []
 
