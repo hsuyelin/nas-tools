@@ -59,6 +59,8 @@ class ChromeHelper(object):
         下载ChromeDriver
         @return ChromeDriver文件路径:
         """
+        if SystemUtils.is_docker():
+            return 
         latest_release = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
         latest_version = requests.get(latest_release).text
         if not StringUtils.is_string_and_not_empty(latest_version):
@@ -142,6 +144,7 @@ class ChromeHelper(object):
         }
         options.add_argument('−−lang=zh-CN')
         options.add_experimental_option("prefs", prefs)
+        log.info(f"|>>>>>>>>>>>>>>>>>>>>>> {driver_executable_path} {self._executable_path}")
         chrome = ChromeWithPrefs(options=options, driver_executable_path=self._executable_path)
         chrome.set_page_load_timeout(30)
         return chrome
