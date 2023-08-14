@@ -200,5 +200,5 @@ laboratory:
   show_more_sites: true
   # 【入库通知精简】：开启后入库通知推送消息会精简
   simplify_library_notification: false
-  # 【我的媒体库精简】
+  # 【我的媒体库精简】：开启后会仅显示正在观看（如果需要屏蔽正在观看内容，建议emby/jellyfin/plex控制）
   simplify_my_media_library: false
