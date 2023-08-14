@@ -42,7 +42,11 @@ class TorrentSpider(feapder.AirSpider):
             window_size=(1024, 800),
             executable_path=_webdriver_path,
             render_time=10,
-            custom_argument=["--ignore-certificate-errors"],
+            custom_argument=[
+                "--ignore-certificate-errors",
+                "--no-sandbox",
+                "--disable-dev-shm-usage"
+            ],
         )
     )
     # 是否搜索完成标志
@@ -116,6 +120,7 @@ class TorrentSpider(feapder.AirSpider):
         self.list = indexer.torrents.get('list', {})
         self.fields = indexer.torrents.get('fields')
         self.render = indexer.render
+        log.info(f"【Spider】浏览器仿真: {indexer.render}")
         self.domain = indexer.domain
         self.page = page
         if self.domain and not str(self.domain).endswith("/"):
