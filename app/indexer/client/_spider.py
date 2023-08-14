@@ -119,8 +119,7 @@ class TorrentSpider(feapder.AirSpider):
         self.category = indexer.category
         self.list = indexer.torrents.get('list', {})
         self.fields = indexer.torrents.get('fields')
-        # 搜索暂时禁用浏览器仿真
-        self.render = False
+        self.render = indexer.render
         self.domain = indexer.domain
         self.page = page
         if self.domain and not str(self.domain).endswith("/"):
@@ -255,7 +254,7 @@ class TorrentSpider(feapder.AirSpider):
         log.info(f"【Spider】开始请求：{searchurl}")
         yield feapder.Request(url=searchurl,
                               use_session=True,
-                              render=self.render)
+                              render=False)
 
     def download_midware(self, request):
         request.headers = {
