@@ -209,13 +209,13 @@ class FileTransfer:
         :param rmt_mode: RmtMode转移方式
         """
         # 字幕正则式
-        _zhcn_sub_re = r"([.\[(](((zh[-_])?(cn|ch[si]|sg|sc))|zho?" \
+        _zhcn_sub_re = r"([.\[(](((zh[-_])?(cn|ch[si]|sg|sc|SC|jpsc|JPSC|chs&jpn|CHS))|zho?" \
                        r"|chinese|(cn|ch[si]|sg|zho?|eng)[-_&](cn|ch[si]|sg|zho?|eng)" \
                        r"|简[体中]?)[.\])])" \
                        r"|([\u4e00-\u9fa5]{0,3}[中双][\u4e00-\u9fa5]{0,2}[字文语][\u4e00-\u9fa5]{0,3})" \
                        r"|简体|简中" \
                        r"|(?<![a-z0-9])gb(?![a-z0-9])"
-        _zhtw_sub_re = r"([.\[(](((zh[-_])?(hk|tw|cht|tc))" \
+        _zhtw_sub_re = r"([.\[(](((zh[-_])?(hk|tw|cht|tc|TC|jptc|JPTC|cht&jpn|CHT))" \
                        r"|繁[体中]?)[.\])])" \
                        r"|繁体中[文字]|中[文字]繁体|繁体" \
                        r"|(?<![a-z0-9])big5(?![a-z0-9])"
@@ -252,18 +252,18 @@ class FileTransfer:
                     new_file_type = ""
                     # 兼容jellyfin字幕识别(多重识别), emby则会识别最后一个后缀
                     if re.search(_zhcn_sub_re, file_item, re.I):
-                        new_file_type = ".chi.zh-cn"
+                        new_file_type = ".chs"
                     elif re.search(_zhtw_sub_re, file_item,
                                    re.I):
-                        new_file_type = ".zh-tw"
+                        new_file_type = ".cht"
                     elif re.search(_eng_sub_re, file_item, re.I):
                         new_file_type = ".eng"
                     # 通过对比字幕文件大小  尽量转移所有存在的字幕
                     file_ext = os.path.splitext(file_item)[-1]
                     new_sub_tag_dict = {
                         ".eng": ".英文",
-                        ".chi.zh-cn": ".简体中文",
-                        ".zh-tw": ".繁体中文"
+                        ".chs": ".简体中文",
+                        ".cht": ".繁体中文"
                     }
                     new_sub_tag_list = [
                         new_file_type if t == 0 else "%s%s(%s)" % (new_file_type,
