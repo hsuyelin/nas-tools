@@ -119,8 +119,8 @@ class TorrentSpider(feapder.AirSpider):
         self.category = indexer.category
         self.list = indexer.torrents.get('list', {})
         self.fields = indexer.torrents.get('fields')
-        self.render = indexer.render
-        log.info(f"【Spider】浏览器仿真: {indexer.render}")
+        # 搜索暂时禁用浏览器仿真
+        self.render = False
         self.domain = indexer.domain
         self.page = page
         if self.domain and not str(self.domain).endswith("/"):
