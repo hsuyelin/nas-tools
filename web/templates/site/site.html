@@ -852,9 +852,21 @@
     let sitetest_count_finished = 0;
     btn_obj.text("测试中...").attr("disabled", true);
 
-    async function testSiteWithDelay(siteid) {
+    async function testSiteWithDelay(siteid, isFirstIteration) {
       return new Promise(resolve => {
-        setTimeout(() => {
+        if (!isFirstIteration) {
+          setTimeout(() => {
+            test_one_site(siteid, ret => {
+              if (ret) {
+                sitetest_count_finished++;
+                if (sitetest_count_finished >= sitetest_count_totol) {
+                  btn_obj.text("重新测试").attr("disabled", false);
+                }
+              }
+              resolve();
+            });
+          }, 3000); // 3秒的延迟
+        } else {
           test_one_site(siteid, ret => {
             if (ret) {
               sitetest_count_finished++;
@@ -864,12 +876,12 @@
             }
             resolve();
           });
-        }, 3000); // 3秒的延迟
+        }
       });
     }
 
-    for (let siteid of siteids) {
-      await testSiteWithDelay(siteid); // 使用await等待Promise解决
+    for (let i = 0; i < siteids.length; i++) {
+      await testSiteWithDelay(siteids[i], i > 0);
     }
   });
 
