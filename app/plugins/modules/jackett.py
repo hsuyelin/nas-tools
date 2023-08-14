@@ -26,7 +26,7 @@ class Jackett(_IPluginModule):
     # 主题色
     module_color = "#141A21"
     # 插件版本
-    module_version = "1.2"
+    module_version = "1.3"
     # 插件作者
     module_author = "mattoid"
     # 作者主页
