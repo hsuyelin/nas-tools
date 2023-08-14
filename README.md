@@ -33,7 +33,7 @@ docker pull hsuyelin/nas-tools:latest
 仅支持python3.10版本，需要预安装cython（python3 -m pip install Cython），如发现缺少依赖包需额外安装：
 ```
 git clone -b master https://github.com/hsuyelin/nas-tools --recurse-submodule 
-python3 -m pip install -r requirements.txt
+python3 -m pip install --force-reinstall -r requirements.txt
 export NASTOOL_CONFIG="/xxx/config/config.yaml"
 nohup python3 run.py & 
 ```
