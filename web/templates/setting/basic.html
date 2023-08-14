@@ -734,6 +734,18 @@
                   </label>
                 </div>
               </div>
+              <div class="col-12 col-xl-3">
+                <div class="mb-3">
+                  <label class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="laboratory.simplify_my_media_library" {% if
+                      Config.laboratory and Config.laboratory.simplify_my_media_library %}checked{% endif %}>
+                    <span class="form-check-label">我的媒体库精简 <span class="form-help"
+                                                                            title="开启后我的媒体库仅会显示正在观看"
+                                                                            data-bs-toggle="tooltip">?</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
           <div class="card-footer">

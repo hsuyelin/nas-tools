@@ -265,6 +265,9 @@ def index():
     # 最近添加
     Latests = MediaServer().get_latest()
 
+    # 我的媒体库是否精简显示
+    mediaLibraryIsSimpleShow = Config().get_config("laboratory").get('simplify_my_media_library')
+
     return render_template("index.html",
                            ServerSucess=ServerSucess,
                            MediaCount={'MovieCount': MediaCounts.get("Movie"),
@@ -281,7 +284,8 @@ def index():
                            Librarys=Librarys,
                            LibrarySyncConf=LibrarySyncConf,
                            Resumes=Resumes,
-                           Latests=Latests
+                           Latests=Latests,
+                           mediaLibraryIsSimpleShow=mediaLibraryIsSimpleShow
                            )
 
 
