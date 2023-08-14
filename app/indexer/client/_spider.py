@@ -254,7 +254,7 @@ class TorrentSpider(feapder.AirSpider):
         log.info(f"【Spider】开始请求：{searchurl}")
         yield feapder.Request(url=searchurl,
                               use_session=True,
-                              render=False)
+                              render=self.render)
 
     def download_midware(self, request):
         request.headers = {

@@ -117,6 +117,7 @@ class ChromeHelper(object):
     def __get_browser(self):
         if not self.get_status():
             return None
+        SystemUtils.kill_webdriver()
         options = uc.ChromeOptions()
         options.add_argument('--disable-gpu')
         options.add_argument('--no-sandbox')
