@@ -270,10 +270,12 @@ class Jackett(_IPluginModule):
         indexer_query_url = f"{self._host}/api/v2.0/indexers?configured=true"
         try:
             ret = RequestUtils(headers=headers, cookies=cookie).get_res(indexer_query_url)
+            if not ret:
+                return []
             if not RequestUtils.check_response_is_valid_json(ret):
                 self.info(f"【{self.module_name}】参数设置不正确，请检查所有的参数是否填写正确")
                 return []
-            if not ret or not ret.json():
+            if not ret.json():
                 return []
             indexers = [IndexerConf({"id": v["id"],
                                  "name": v["name"],

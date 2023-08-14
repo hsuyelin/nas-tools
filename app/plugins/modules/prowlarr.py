@@ -246,10 +246,12 @@ class Prowlarr(_IPluginModule):
         indexer_query_url = f"{self._host}/api/v1/indexerstats"
         try:
             ret = RequestUtils(headers=headers).get_res(indexer_query_url)
+            if not ret:
+                return []
             if not RequestUtils.check_response_is_valid_json(ret):
                 self.info(f"【{self.module_name}】参数设置不正确，请检查所有的参数是否填写正确")
                 return []
-            if not ret or not ret.json():
+            if not ret.json():
                 return []
             ret_indexers = ret.json()["indexers"]
             if not ret or ret_indexers == [] or ret is None:
@@ -298,11 +300,12 @@ class Prowlarr(_IPluginModule):
             }
             api_url = f"{self._host}/api/v1/search?query={keyword}&indexerIds={indexerId}&type=search&limit=100&offset=0"
             ret = RequestUtils(headers=headers).get_res(api_url)
+            if not ret:
+                return []
             if not RequestUtils.check_response_is_valid_json(ret):
                 self.info(f"【{self.module_name}】参数设置不正确，请检查所有的参数是否填写正确")
                 return []
-
-            if not ret or not ret.json():
+            if not ret.json():
                 return []
 
             ret_indexers = ret.json()
