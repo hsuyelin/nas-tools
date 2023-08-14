@@ -255,18 +255,19 @@ def index():
     # 磁盘空间
     LibrarySpaces = WebAction().get_library_spacesize()
 
+    # 我的媒体库是否精简显示
+    mediaLibraryIsSimpleShow = Config().get_config("laboratory").get('simplify_my_media_library')
+
     # 媒体库
-    Librarys = MediaServer().get_libraries()
+    Librarys = [] if mediaLibraryIsSimpleShow else MediaServer().get_libraries()
     LibrarySyncConf = SystemConfig().get(SystemConfigKey.SyncLibrary) or []
 
     # 继续观看
     Resumes = MediaServer().get_resume()
 
     # 最近添加
-    Latests = MediaServer().get_latest()
+    Latests = [] if mediaLibraryIsSimpleShow else MediaServer().get_latest()
 
-    # 我的媒体库是否精简显示
-    mediaLibraryIsSimpleShow = Config().get_config("laboratory").get('simplify_my_media_library')
 
     return render_template("index.html",
                            ServerSucess=ServerSucess,
