@@ -103,7 +103,7 @@ class SystemUtils:
 
     @staticmethod
     def is_macos_arm():
-        return SystemUtils.is_macos() and not SystemUtils.is_macos_intel()
+        return SystemUtils.is_macos() and (True if "Apple" in SystemUtils.execute('sysctl machdep.cpu.brand_string') else False)
 
     @staticmethod
     def is_linux():
@@ -123,7 +123,11 @@ class SystemUtils:
         if StringUtils.is_string_and_not_empty(system_webdriver) and os.path.exists(system_webdriver):
             return system_webdriver
 
-        return SystemUtils.get_download_webdriver_path()
+        download_webdriver = SystemUtils.get_download_webdriver_path()
+        if StringUtils.is_string_and_not_empty(download_webdriver) and os.path.exists(download_webdriver):
+            return download_webdriver
+
+        return None
 
     @staticmethod
     def get_download_webdriver_path():

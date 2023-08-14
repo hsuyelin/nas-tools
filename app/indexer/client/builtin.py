@@ -120,10 +120,10 @@ class BuiltinIndexer(_IIndexClient):
                                                   render=render)
             if indexer:
                 if indexer_id and indexer.id == indexer_id:
-                    return indexer
+                    ret_indexers.append(indexer)
                 if check and (not indexer_sites or indexer.id not in indexer_sites):
                     continue
-                if indexer.domain not in _indexer_domains:
+                if indexer.domain not in _indexer_domains and not indexer_id:
                     _indexer_domains.append(indexer.domain)
                     indexer.name = site.get("name")
 
@@ -135,20 +135,21 @@ class BuiltinIndexer(_IIndexClient):
                 if not indexer.get("public"):
                     continue
                 if indexer_id and indexer.get("id") == indexer_id:
-                    _indexer_id = indexer.get("id")
-                    return IndexerConf(datas=indexer)
+                    ret_indexers.append(IndexerConf(datas=indexer))
                 if check and (not indexer_sites or indexer.get("id") not in indexer_sites):
                     continue
-                if indexer.get("domain") not in _indexer_domains:
+                if indexer.get("domain") not in _indexer_domains and not indexer_id:
                     _indexer_domain = indexer.get("domain")
                     _indexer_domains.append(indexer.get("domain"))
                     ret_indexers.append(IndexerConf(datas=indexer))
         # 获取插件站点
         if plugins and PluginsSpider().sites():
             for indexer in PluginsSpider().sites():
+                if indexer_id and indexer.id == indexer_id:
+                    ret_indexers.append(indexer)
                 if check and (not indexer_sites or indexer.id not in indexer_sites):
                     continue
-                if indexer and indexer.domain not in _indexer_domains:
+                if indexer and indexer.domain not in _indexer_domains and not indexer_id:
                     _indexer_domains.append(indexer.domain)
                     ret_indexers.append(indexer)
 
@@ -250,7 +251,6 @@ class BuiltinIndexer(_IIndexClient):
         if not indexer_id:
             return []
         _indexer: IndexerConf = self.get_indexers(indexer_id=indexer_id)
-        log.info(f"|>>>>>>>>>>>>>>>>>>>>> indexer_id={indexer_id} indexer={_indexer}")
         indexer = _indexer[0] if isinstance(_indexer, list) and len(_indexer) > 0 else _indexer
 
         if not indexer:
