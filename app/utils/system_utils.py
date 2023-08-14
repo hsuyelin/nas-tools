@@ -6,8 +6,6 @@ import subprocess
 
 import psutil
 
-import log
-
 from app.utils.exception_utils import ExceptionUtils
 from app.utils.path_utils import PathUtils
 from app.utils.types import OsType
@@ -116,13 +114,6 @@ class SystemUtils:
         return True if SystemUtils.is_docker() \
                        and os.environ.get("NASTOOL_VERSION") == "lite" else False
 
-    @staticmethod
-    def kill_webdriver():
-        if SystemUtils.is_lite_version() or not SystemUtils.is_docker():
-            return
-        SystemUtils.execute('pkill -f chromedriver')
-        log.debug(f"【ChromeHelper】终止chrome driver进程")
-        
     @staticmethod
     def get_webdriver_path():
         if SystemUtils.is_lite_version():
