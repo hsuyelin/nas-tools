@@ -26,7 +26,7 @@ class Jackett(_IPluginModule):
     # 主题色
     module_color = "#141A21"
     # 插件版本
-    module_version = "1.3"
+    module_version = "1.4"
     # 插件作者
     module_author = "mattoid"
     # 作者主页
@@ -142,7 +142,6 @@ class Jackett(_IPluginModule):
               <tr>
                 <th>id</th>
                 <th>索引</th>
-                <th>是否内置</th>
                 <th>是否公开</th>
                 <th></th>
               </tr>
@@ -154,7 +153,6 @@ class Jackett(_IPluginModule):
                   <tr id="indexer_{{ Item.id }}">
                     <td>{{ Item.id }}</td>
                     <td>{{ Item.domain }}</td>
-                    <td>{{ Item.builtin }}</td>
                     <td>{{ Item.public }}</td>
                   </tr>
                 {% endfor %}
