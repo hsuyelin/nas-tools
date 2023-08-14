@@ -250,6 +250,7 @@ class BuiltinIndexer(_IIndexClient):
         if not indexer_id:
             return []
         _indexer: IndexerConf = self.get_indexers(indexer_id=indexer_id)
+        log.info(f"|>>>>>>>>>>>>>>>>>>>>> indexer_id={indexer_id} indexer={_indexer}")
         indexer = _indexer[0] if isinstance(_indexer, list) and len(_indexer) > 0 else _indexer
 
         if not indexer:
