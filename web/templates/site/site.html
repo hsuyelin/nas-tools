@@ -851,15 +851,25 @@
     let sitetest_count_totol = siteids.length;
     let sitetest_count_finished = 0;
     btn_obj.text("测试中...").attr("disabled", true);
+
+    async function testSiteWithDelay(siteid) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          test_one_site(siteid, ret => {
+            if (ret) {
+              sitetest_count_finished++;
+              if (sitetest_count_finished >= sitetest_count_totol) {
+                btn_obj.text("重新测试").attr("disabled", false);
+              }
+            }
+            resolve();
+          });
+        }, 3000); // 3秒的延迟
+      });
+    }
+
     for (let siteid of siteids) {
-      test_one_site(siteid, ret=>{
-        if (ret) {
-          sitetest_count_finished++;
-          if (sitetest_count_finished >= sitetest_count_totol) {
-            btn_obj.text("重新测试").attr("disabled", false);
-          }
-        }
-      })
+      await testSiteWithDelay(siteid); // 使用await等待Promise解决
     }
   });
 
