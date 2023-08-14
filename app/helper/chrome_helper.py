@@ -105,7 +105,6 @@ class ChromeHelper(object):
             return self._chrome
 
     def get_status(self):
-        log.info(f"【ChromeHelper】驱动路径为: {self._executable_path}")
         if self._executable_path \
                 and not os.path.exists(self._executable_path):
             log.info(f"【ChromeHelper】驱动路径不存在")
@@ -113,7 +112,6 @@ class ChromeHelper(object):
         if not uc.find_chrome_executable():
             log.info(f"【ChromeHelper】undetected_chromedriver 未能匹配驱动")
             return False
-        log.info(f"【ChromeHelper】成功匹配驱动")
         return True
 
     def __get_browser(self):

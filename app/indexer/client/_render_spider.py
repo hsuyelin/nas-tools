@@ -8,6 +8,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as es
 from selenium.webdriver.support.wait import WebDriverWait
 
+import log
+
 from app.helper import ChromeHelper
 from app.indexer.client._spider import TorrentSpider
 from app.utils import ExceptionUtils
@@ -70,6 +72,7 @@ class RenderSpider(object):
                                 cookie=self._indexer.cookie,
                                 ua=self._indexer.ua,
                                 proxy=self._indexer.proxy):
+                log.info(f"【RenderSpider】未能成功打开浏览器页面")
                 return True, []
             cloudflare = chrome.pass_cloudflare()
             if not cloudflare:
