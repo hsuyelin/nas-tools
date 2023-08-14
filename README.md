@@ -20,6 +20,33 @@
 
 https://wiki.nastool.org
 
+## 安装
+### 1、Docker
+```
+docker pull hsuyelin/nas-tools:latest
+```
+教程见 [这里](https://raw.githubusercontent.com/hsuyelin/nas-tools/master/docker/readme.md) 。
+
+如无法连接Github，注意不要开启自动更新开关(NASTOOL_AUTO_UPDATE=false)，将NASTOOL_CN_UPDATE设置为true可使用国内源加速安装依赖。
+
+### 2、本地运行
+仅支持python3.10版本，需要预安装cython（python3 -m pip install Cython），如发现缺少依赖包需额外安装：
+```
+git clone -b master https://github.com/hsuyelin/nas-tools --recurse-submodule 
+python3 -m pip install -r requirements.txt
+export NASTOOL_CONFIG="/xxx/config/config.yaml"
+nohup python3 run.py & 
+```
+
+### 3、可执行文件运行
+仅支持python3.10版本，先从tag下载对应的可执行文件，打开终端，例如下载的是macos版本，文件名为：nastool_macos_v3.2.2：
+```bash
+mv nastool_macos_v3.2.2 nastools
+chmod +x nastools
+// macos 12以上需要去隐私-安全性，允许任意开发者
+./nastools（如果需要不在终端输出执行：./nastool &> /dev/null）
+```
+
 ## 官方免责
 
 1）本软件仅供学习交流使用，对用户的行为及内容毫不知情，使用本软件产生的任何责任需由使用者本人承担。  
