@@ -119,20 +119,7 @@ class SystemUtils:
         if SystemUtils.is_lite_version():
             return None
 
-        system_webdriver = WEBDRIVER_PATH.get(SystemUtils.get_system().value)
-        if StringUtils.is_string_and_not_empty(system_webdriver) and os.path.exists(system_webdriver):
-            return system_webdriver
-
-        download_webdriver = SystemUtils.get_download_webdriver_path()
-        if StringUtils.is_string_and_not_empty(download_webdriver) and os.path.exists(download_webdriver):
-            return download_webdriver
-
-        return None
-
-    @staticmethod
-    def get_download_webdriver_path():
-        webdriver_filename = "chromedriver.exe" if SystemUtils.is_windows() else "chromedriver"
-        return os.path.join(Config().get_config_path(), webdriver_filename)
+        return WEBDRIVER_PATH.get(SystemUtils.get_system().value)
 
     @staticmethod
     def chmod755(filePath):
