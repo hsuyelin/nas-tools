@@ -9,7 +9,7 @@ from app.utils.types import MediaType
 from config import RMT_MEDIAEXT
 
 
-def MetaInfo(title, subtitle=None, mtype=None):
+def MetaInfo(title, subtitle=None, mtype=None, filePath=None):
     """
     媒体整理入口，根据名称和副标题，判断是哪种类型的识别，返回对应对象
     :param title: 标题、种子名、文件名
