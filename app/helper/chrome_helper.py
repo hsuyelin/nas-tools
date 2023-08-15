@@ -42,60 +42,23 @@ class ChromeHelper(object):
     def init_driver(self):
         if self._executable_path:
             return
+
         if not uc.find_chrome_executable():
             return
+
         global driver_executable_path
         try:
-            driver_executable_path = ChromeDriverManager().install()
-            log.info(f"【chromedriver】使用内置驱动")
-        except:
-            try:
-                log.info(f"【chromedriver】内置驱动不存在，尝试下载最新驱动")
-                driver_executable_path = self.download_driver()
-            except Exception as e:
-                ExceptionUtils.exception_traceback(e)
-                self.quit()
-
-    def download_driver(self):
-        """
-        下载ChromeDriver
-        @return ChromeDriver文件路径:
-        """
-        latest_release = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
-        latest_version = requests.get(latest_release).text
-        if not StringUtils.is_string_and_not_empty(latest_version):
-            raise ValueError('【chromedriver】未获取到驱动最新版本')
-        download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_win32.zip"
-        if SystemUtils.is_macos_intel():
-            download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_mac64.zip"
-        elif SystemUtils.is_macos_arm():
-            download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_mac_arm64.zip"
-        else:
-            download_url = f"https://registry.npmmirror.com/-/binary/chromedriver/{latest_version}/chromedriver_linux64.zip"
-        log.info(f"【ChromeDriver】最新驱动下载链接: {download_url}")
-        response = requests.get(download_url)
-        file_path =  os.path.join(Config().get_temp_path(), 'chromedriver.zip')
-        log.info(f"【ChromeDriver】最新驱动下载保存路径: {file_path}")
-        if response.status_code == 200:
-            with open(file_path, "wb") as file:
-                file.write(response.content)
-        else:
-            raise ValueError('【chromedriver】文件下载失败')
-        zip_ref = zipfile.ZipFile(file_path, "r")
-        contents = zip_ref.namelist()
-        f_name = 'chromedriver.exe'
-        if not SystemUtils.is_windows():
-            f_name = 'chromedriver'
-        if not f_name in contents:
-            raise ValueError('【chromedriver】未获取到chromedriver文件')
-        new_file = os.path.join(Config().get_config_path(), str(f_name))
-        if os.path.exists(new_file):
-            os.remove(new_file)
-        zip_ref.extractall(Config().get_config_path())
-        zip_ref.close()
-        os.remove(file_path)
-        SystemUtils.chmod755(new_file)
-        return new_file
+            latest_release_url = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
+            latest_chromedriver_version = requests.get(latest_release).text
+            driver_executable_path = ChromeDriverManager().install(version=f'{latest_chromedriver_version}')
+            if os.path.exists(driver_executable_path):
+                log.info(f"【ChromeHelper】存在内置驱动: {driver_executable_path}")
+                self._executable_path = driver_executable_path
+            else:
+                raise ValueError('【ChromeHelper】未获取到驱动最新版本')
+        except Exception as err:
+             ExceptionUtils.exception_traceback(err)
+             log.error("【ChromeHelper】获取驱动发生错误：%s" % str(err))
 
     @property
     def browser(self):
