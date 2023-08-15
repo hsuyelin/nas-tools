@@ -1345,6 +1345,18 @@ class FileTransfer:
         """
         return self.dbhelper.delete_transfer_log_by_id(logid=logid)
 
+    def get_transfer_history_count(self):
+        """
+        转移历史记录总条数
+        """
+        return self.dbhelper.get_transfer_history_count()
+
+    def truncate_transfer_history_list(self):
+        """
+        清空转移历史记录
+        """
+        return self.dbhelper.truncate_transfer_history_list()
+
     def delete_transfer_unknown(self, tid):
         """
         删除未知转移记录
@@ -1362,6 +1374,18 @@ class FileTransfer:
         更新未知转移记录状态
         """
         return self.dbhelper.update_transfer_unknown_state(path=path)
+
+    def get_transfer_unknown_count(self):
+        """
+        手动转移历史记录总条数
+        """
+        return self.dbhelper.get_transfer_unknown_count()
+
+    def truncate_transfer_unknown_list(self):
+        """
+        清空手动转移历史记录
+        """
+        return self.dbhelper.truncate_transfer_unknown()
 
     def delete_transfer_blacklist(self, path):
         """

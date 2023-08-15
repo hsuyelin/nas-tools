@@ -166,8 +166,10 @@ class WebAction:
             "get_tv_rss_list": self.get_tv_rss_list,
             "get_rss_history": self.get_rss_history,
             "get_transfer_history": self.get_transfer_history,
+            "truncate_filetransfer_history": self.truncate_filetransfer_history,
             "get_unknown_list": self.get_unknown_list,
             "get_unknown_list_by_page": self.get_unknown_list_by_page,
+            "truncate_filetransfer_unknown": self.truncate_filetransfer_unknown,
             "get_customwords": self.get_customwords,
             "get_users": self.get_users,
             "get_filterrules": self.get_filterrules,
@@ -3802,6 +3804,22 @@ class WebAction:
         }
 
     @staticmethod
+    def truncate_filetransfer_history():
+        """
+        清空媒体整理历史记录
+        """
+        if FileTransfer().get_transfer_history_count() < 1:
+            return {
+                "code": 0,
+                "result": True
+            }
+        FileTransfer().truncate_transfer_history_list()
+        return {
+            "code": 0,
+            "result": True
+        }
+
+    @staticmethod
     def get_unknown_list():
         """
         查询所有未识别记录
@@ -3869,6 +3887,22 @@ class WebAction:
             "totalPage": TotalPage,
             "pageNum": PageNum,
             "currentPage": CurrentPage
+        }
+
+    @staticmethod
+    def truncate_filetransfer_unknown(): 
+        """
+        清空媒体手动整理历史记录
+        """
+        if FileTransfer().get_transfer_unknown_count() < 1:
+            return {
+                "code": 0,
+                "result": True
+            }
+        FileTransfer().truncate_transfer_unknown_list()
+        return {
+            "code": 0,
+            "result": True
         }
 
     @staticmethod

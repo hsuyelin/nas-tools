@@ -40,6 +40,14 @@
               </a>
             </div>
           </div>
+          <a href="javascript:truncate_history()"
+             class="btn btn-danger ms-auto d-none d-sm-inline-block">
+            {{ SVG.trash() }}
+            清空记录
+          </a>
+          <a href="javascript:truncate_history()" class="btn btn-danger d-sm-none btn-icon" >
+            {{ SVG.trash() }}
+          </a>
         </div>
       </div>
       <!-- Page title actions -->
@@ -247,6 +255,17 @@
     show_confirm_modal(`${name} 对应${msg}文件将被同步删除，是否确认？`, function () {
       hide_confirm_modal();
       ajax_post("delete_history", {"flag": flag, "logids": logids}, function (ret) {
+        window_history_refresh();
+      });
+    });
+  }
+
+  // 删除所有转移历史记录
+  function truncate_history() {
+    show_confirm_modal("该操作仅会清空所有转移记录，但不会删除源文件，是否确认？", function () {
+      hide_confirm_modal();
+      ajax_post("truncate_filetransfer_history", {}, function (ret) {
+        show_success_modal("清理所有转移记录成功");
         window_history_refresh();
       });
     });
