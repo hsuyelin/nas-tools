@@ -234,8 +234,8 @@ class SeleniumDriver(WebDriver, RemoteWebDriver):
             kwargs.update(executable_path=self._executable_path)
         elif self._auto_install_driver:
             latest_release_url = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
-            latest_chromedriver_version = requests.get(latest_release).text
-            kwargs.update(executable_path=ChromeDriverManager().install(version=f'{latest_chromedriver_version}'))
+            latest_chromedriver_version = requests.get(latest_release_url).text
+            kwargs.update(executable_path=ChromeDriverManager(version=f'{latest_chromedriver_version}').install())
 
         driver = webdriver.Chrome(options=chrome_options, **kwargs)
 
