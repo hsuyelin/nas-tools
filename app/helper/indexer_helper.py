@@ -47,6 +47,15 @@ class IndexerHelper:
         except Exception as err:
             return []
 
+    def get_indexer_info(self, url, public=False):
+        """
+        根据url获取指定indexer
+        """
+        for indexer in self._indexers:
+            if StringUtils.url_equal(indexer.get("domain"), url):
+                return indexer
+        return None
+
     def get_indexer(self,
                     url,
                     siteid=None,
