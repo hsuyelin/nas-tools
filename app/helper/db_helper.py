@@ -314,7 +314,13 @@ class DbHelper:
         """
         清空所有手动转移历史记录
         """
-        return self._db.query(TRANSFERUNKNOWN).delete()
+        unknown_paths = self.get_transfer_unknown_paths()
+        
+        if not unknown_paths:
+            return True
+        
+        results = [self.delete_transfer_unknown(item.ID) for item in unknown_paths if item.ID]
+        return all(results)
 
     def is_transfer_unknown_exists(self, path):
         """

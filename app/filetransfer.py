@@ -1385,7 +1385,7 @@ class FileTransfer:
         """
         清空手动转移历史记录
         """
-        return self.dbhelper.truncate_transfer_unknown()
+        return self.dbhelper.truncate_transfer_unknown_list()
 
     def delete_transfer_blacklist(self, path):
         """
