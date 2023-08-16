@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/dumb-init /bin/sh
 
 # 仅用于兼容v3.1.5及之前的docker镜像
 
