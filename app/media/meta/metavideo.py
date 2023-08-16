@@ -46,7 +46,7 @@ class MetaVideo(MetaBase):
                         r"|[248]K|\d{3,4}[PIX]+" \
                         r"|CD[\s.]*[1-9]|DVD[\s.]*[1-9]|DISK[\s.]*[1-9]|DISC[\s.]*[1-9]"
     _resources_pix_re = r"^[SBUHD]*(\d{3,4}[PI]+)|\d{3,4}X(\d{3,4})"
-    _resources_pix_re2 = r"(^[248]+K)"
+    _resources_pix_re2 = r"^(144p|288p|360p|480p|720p|1080p|2K|4K|8K)$"
     _video_encode_re = r"^[HX]26[45]$|^AVC$|^HEVC$|^VC\d?$|^MPEG\d?$|^Xvid$|^DivX$|^HDR\d*$"
     _audio_encode_re = r"^DTS\d?$|^DTSHD$|^DTSHDMA$|^Atmos$|^TrueHD\d?$|^AC3$|^\dAudios?$|^DDP\d?$|^DD\d?$|^LPCM\d?$|^AAC\d?$|^FLAC\d?$|^HD\d?$|^MA\d?$"
 
@@ -135,54 +135,6 @@ class MetaVideo(MetaBase):
         self.resource_team = ReleaseGroupsMatcher().match(title=original_title) or None
         # 自定义占位符
         self.customization = CustomizationMatcher().match(title=original_title) or None
-
-    def __complete_name(self, name, filepath):
-        """
-        根据输入的路径和文件名称完善视频的分辨率、视频编码、音频编码等信息
-        """
-        return name
-
-    def __get_resolution(self, video_info):
-        """
-        根据ffprobe获取到的视频信息，生成分辨率信息，480p/720p/1080p/4K
-        """
-        for stream in video_info.get("streams", []):
-            if stream.get("codec_type") == "video":
-                width = stream.get("width")
-                height = stream.get("height")
-                return width, height
-        return None, None
-
-    def __get_video_codec(self, video_info):
-        """
-        根据ffprobe获取到的视频信息，生成视频编码信息，hevc/h264/h265
-        """
-        for stream in video_info.get("streams", []):
-            if stream.get("codec_type") == "video":
-                codec_name = stream.get("codec_name")
-                return codec_name.upper()
-        return None
-
-    def __get_audio_codec(self, video_info):
-        """
-        根据ffprobe获取到的视频信息，生成音频编码心思，aac/flac/ape
-        """
-        for stream in video_info.get("streams", []):
-            if stream.get("codec_type") == "audio":
-                codec_name = stream.get("codec_name")
-                return codec_name.upper()
-        return None
-
-    def __is_dolby_vision(self, video_info):
-        """
-        根据ffprobe获取到的视频信息，判断是否是杜比视界
-        """
-        for stream in video_info.get("streams", []):
-            if stream.get("codec_type") == "video":
-                tags = stream.get("tags")
-                if tags and any("dolby" in tag.lower() for tag in tags.values()):
-                    return True
-        return False
 
     def __fix_name(self, name):
         if not name:

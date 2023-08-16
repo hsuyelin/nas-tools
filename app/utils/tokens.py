@@ -1,7 +1,7 @@
 import re
 
 from config import SPLIT_CHARS
-
+import log
 
 class Tokens:
     _text = ""
@@ -16,7 +16,7 @@ class Tokens:
     def load_text(self, text):
         splited_text = re.split(r'%s' % SPLIT_CHARS, text)
         for sub_text in splited_text:
-            if sub_text:
+            if sub_text and sub_text not in self._tokens:
                 self._tokens.append(sub_text)
 
     def cur(self):

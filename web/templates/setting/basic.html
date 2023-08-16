@@ -420,7 +420,20 @@
                     </label>
                   </div>
                 </div>
+            </div>
+            <div class="row">
+              <div class="col-lg">
+                <div class="mb-3">
+                  <label class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="media.ffmpeg_video_meta" {% if
+                      Config.media.ffmpeg_video_meta %}checked{% endif %}>
+                    <span class="form-check-label">获取视频元数据 <span class="form-help"
+                                                                        title="开启后，如果视频文件名不包含视频元数据，则会通过ffmpeg获取，将会大幅增加转移时间，低配置机器不建议开启"
+                                                                        data-bs-toggle="tooltip">?</span></span>
+                  </label>
+                </div>
               </div>
+            </div>
           </div>
           <div class="card-footer">
             <div class="row align-items-center">
