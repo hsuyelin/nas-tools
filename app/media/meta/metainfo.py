@@ -137,7 +137,7 @@ def __get_resolution(video_meta):
 
 def __calculate_resolution(height):
     """
-    根据视频分辨率的高信息，输出144p/288p/360p/480p/720p/1080p/2K/4K
+    根据视频分辨率的高信息，输出144p/288p/360p/480p/720p/960p/1080p/2K/4K
     """
     if height <= 144:
         return "144p"
@@ -201,7 +201,7 @@ def __get_video_codec(video_meta):
 
 def __get_audio_codec(video_meta):
     """
-    根据ffprobe获取到的视频信息，生成音频编码心思，AAC/FLAC/APE
+    根据ffprobe获取到的视频信息，生成音频编码信息，AAC/FLAC/APE
     """
     for stream in video_meta.get("streams", []):
         if stream.get("codec_type") == "audio":

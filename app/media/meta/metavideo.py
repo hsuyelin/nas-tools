@@ -46,7 +46,7 @@ class MetaVideo(MetaBase):
                         r"|[248]K|\d{3,4}[PIX]+" \
                         r"|CD[\s.]*[1-9]|DVD[\s.]*[1-9]|DISK[\s.]*[1-9]|DISC[\s.]*[1-9]"
     _resources_pix_re = r"^[SBUHD]*(\d{3,4}[PI]+)|\d{3,4}X(\d{3,4})"
-    _resources_pix_re2 = r"^(144p|288p|360p|480p|720p|1080p|2K|4K|8K)$"
+    _resources_pix_re2 = r"^(144p|288p|360p|480p|720p|960p|1080p|2K|4K|8K)$"
     _video_encode_re = r"^[HX]26[45]$|^AVC$|^HEVC$|^VC\d?$|^MPEG\d?$|^Xvid$|^DivX$|^HDR\d*$"
     _audio_encode_re = r"^DTS\d?$|^DTSHD$|^DTSHDMA$|^Atmos$|^TrueHD\d?$|^AC3$|^\dAudios?$|^DDP\d?$|^DD\d?$|^LPCM\d?$|^AAC\d?$|^FLAC\d?$|^HD\d?$|^MA\d?$"
 
