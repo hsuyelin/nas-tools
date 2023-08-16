@@ -6,6 +6,8 @@ ffmpeg
 fuse3
 git
 inotify-tools
+python3-dev
+py3-pip
 redis
 s6-overlay
 shadow
