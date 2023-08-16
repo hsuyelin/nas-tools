@@ -13,6 +13,7 @@ RUN apk add --no-cache --virtual .build-deps \
     && pip install --upgrade pip setuptools wheel \
     && pip install cython \
     && pip install -r https://raw.githubusercontent.com/hsuyelin/nas-tools/master/requirements.txt --ignore-installed --force-reinstall \
+    && ln -sf /usr/bin/python3 /usr/bin/python \
     && apk del --purge .build-deps \
     && rm -rf /tmp/* /root/.cache /var/cache/apk/*
 COPY --chmod=755 ./rootfs /
