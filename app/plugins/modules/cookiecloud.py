@@ -34,7 +34,7 @@ class CookieCloud(_IPluginModule):
     # 主题色
     module_color = "#77B3D4"
     # 插件版本
-    module_version = "1.0"
+    module_version = "1.1"
     # 插件作者
     module_author = "jxxghp"
     # 作者主页
