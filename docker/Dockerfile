@@ -7,13 +7,13 @@ RUN apk add --no-cache --virtual .build-deps \
         libxslt-dev \
     && apk add --no-cache $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/hsuyelin/nas-tools/master/package_list.txt)) \
     && curl https://rclone.org/install.sh | bash \
+    && ln -sf /usr/bin/python3 /usr/bin/python \
     && if [ "$(uname -m)" = "x86_64" ]; then ARCH=amd64; elif [ "$(uname -m)" = "aarch64" ]; then ARCH=arm64; fi \
     && curl https://dl.min.io/client/mc/release/linux-${ARCH}/mc --create-dirs -o /usr/bin/mc \
     && chmod +x /usr/bin/mc \
     && pip install --upgrade pip setuptools wheel \
     && pip install cython \
     && pip install -r https://raw.githubusercontent.com/hsuyelin/nas-tools/master/requirements.txt --ignore-installed --force-reinstall \
-    && ln -sf /usr/bin/python3 /usr/bin/python \
     && apk del --purge .build-deps \
     && rm -rf /tmp/* /root/.cache /var/cache/apk/*
 COPY --chmod=755 ./rootfs /
