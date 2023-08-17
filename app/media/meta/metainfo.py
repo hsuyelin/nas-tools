@@ -137,7 +137,7 @@ def __get_resolution(video_meta):
 
 def __calculate_resolution(height):
     """
-    根据视频分辨率的高信息，输出144p/288p/360p/480p/720p/960p/1080p/2K/4K
+    根据视频分辨率的高信息，输出144p/288p/360p/480p/576p/720p/960p/1080p/2K/4K
     """
     if height <= 144:
         return "144p"
@@ -147,7 +147,9 @@ def __calculate_resolution(height):
         return "360p"
     elif 360 < height <= 480:
         return "480p"
-    elif 480 < height <= 720:
+    elif 480 < height <= 576:
+        return "576p"
+    elif 576 < height <= 720:
         return "720p"
     elif 960 <= height < 1080:
         return "960p"
