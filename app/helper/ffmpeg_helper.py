@@ -7,6 +7,13 @@ from app.utils import SystemUtils
 class FfmpegHelper:
 
     @staticmethod
+    def is_ffmpeg_supported():
+        """
+        是否支持ffmpeg
+        """
+        return not SystemUtils.is_windows()
+
+    @staticmethod
     def get_thumb_image_from_video(video_path, image_path, frames="00:03:01"):
         """
         使用ffmpeg从视频文件中截取缩略图

@@ -28,7 +28,7 @@ from app.brushtask import BrushTask
 from app.conf import ModuleConf, SystemConfig
 from app.downloader import Downloader
 from app.filter import Filter
-from app.helper import SecurityHelper, MetaHelper, ChromeHelper, ThreadHelper
+from app.helper import SecurityHelper, MetaHelper, ChromeHelper, ThreadHelper, FfmpegHelper
 from app.indexer import Indexer
 from app.media.meta import MetaInfo
 from app.mediaserver import MediaServer
@@ -851,6 +851,7 @@ def basic():
     RmtModeDict = WebAction().get_rmt_modes()
     CustomScriptCfg = SystemConfig().get(SystemConfigKey.CustomScript)
     ScraperConf = SystemConfig().get(SystemConfigKey.UserScraperConf) or {}
+    support_ffmpeg = FfmpegHelper.is_ffmpeg_supported()
     return render_template("setting/basic.html",
                            Config=Config().get_config(),
                            Proxy=proxy,
@@ -859,7 +860,8 @@ def basic():
                            CurrentUser=current_user,
                            ScraperNfo=ScraperConf.get("scraper_nfo") or {},
                            ScraperPic=ScraperConf.get("scraper_pic") or {},
-                           TmdbDomains=TMDB_API_DOMAINS)
+                           TmdbDomains=TMDB_API_DOMAINS,
+                           support_ffmpeg=support_ffmpeg)
 
 
 # 自定义识别词设置页面

@@ -27,7 +27,7 @@ def MetaInfo(title, subtitle=None, mtype=None, filePath=None):
     org_title = title
     # 应用自定义识别词，获取识别词处理后名称
     rev_title, msg, used_info = WordsHelper().process(title)
-    if rev_title and _ffmpeg_video_meta_enable and filePath:
+    if rev_title and _ffmpeg_video_meta_enable and FfmpegHelper.is_ffmpeg_supported() and filePath:
         rev_title = __complete_rev_title(rev_title, filePath)
 
     if subtitle:
