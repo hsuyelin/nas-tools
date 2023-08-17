@@ -27,7 +27,7 @@ class Prowlarr(_IPluginModule):
     # 主题色
     module_color = "#7F4A28"
     # 插件版本
-    module_version = "1.4"
+    module_version = "1.5"
     # 插件作者
     module_author = "hsuyelin"
     # 作者主页
@@ -256,7 +256,7 @@ class Prowlarr(_IPluginModule):
                 return []
 
             indexers = [IndexerConf({"id": f'{v["indexerName"]}-prowlarr',
-                                 "name": v["indexerName"],
+                                 "name": f'{v["indexerName"]}(Prowlarr)',
                                  "domain": f'{self._host}/api/v1/indexer/{v["indexerId"]}',
                                  "public": True,
                                  "builtin": False,

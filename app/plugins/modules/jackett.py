@@ -26,7 +26,7 @@ class Jackett(_IPluginModule):
     # 主题色
     module_color = "#141A21"
     # 插件版本
-    module_version = "1.4"
+    module_version = "1.5"
     # 插件作者
     module_author = "mattoid"
     # 作者主页
@@ -275,8 +275,8 @@ class Jackett(_IPluginModule):
                 return []
             if not ret.json():
                 return []
-            indexers = [IndexerConf({"id": v["id"],
-                                 "name": v["name"],
+            indexers = [IndexerConf({"id": f'{v["id"]}-jackett',
+                                 "name": f'{v["name"]}(Jackett)',
                                  "domain": f'{self._host}/api/v2.0/indexers/{v["id"]}/results/torznab/',
                                  "public": True if v['type'] == 'public' else False,
                                  "builtin": False,
