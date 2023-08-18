@@ -1,29 +1,57 @@
----
-name: 问题模板
-about: 如发现Bug，请按此模板提交issues，不按模板提交的问题将直接关闭。提交问题务必描述清楚、附上日志，描述不清导致无法理解和分析的问题也可能会被直接关闭。
----
-
-## 你使用的 NAStool 是什么版本，什么环境？
-
-> NAStool 版本: vx.x.x
->
-> 环境: docker or windows or Synology
->
-
-## 你遇到什么问题了？
-
-> 描述一下你遇到的问题
-
-## 是否已经浏览过Issues、Wiki及TG公众号仍无法解决？
-
-> 请搜索Issues列表、查看wiki跟TG公众号的更新说明，已经解释过的问题不要重复提问
-
-
-## 你期望的结果
-
-> 描述以下你期望的结果
-
-## 给出程序界面截图、后台运行日志或配置文件
-
-> 如UI BUG请提供截图及配置文件截图
-> 其它问题提供后台日志，如为Docker请提供docker的日志
+name: 问题反馈
+description: File a bug report
+title: "[错误报告]: 请在此处简单描述你的问题"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请确认以下信息：
+        1. 请按此模板提交issues，不按模板提交的问题将直接关闭。
+        2. 如果你的问题可以直接在以往 issue 中找到，那么你的 issue 将会被直接关闭。
+        3. 提交问题务必描述清楚、附上日志，描述不清导致无法理解和分析的问题会被直接关闭。
+  - type: checkboxes
+    id: ensure
+    attributes:
+      label: 确认
+      description: 在提交 issue 之前，请确认你已经阅读并确认以下内容
+      options:
+        - label: 我的版本是最新版本，我的版本号与 [version](https://raw.githubusercontent.com/hsuyelin/nas-tools/master/version.py) 相同。
+          required: true
+        - label: 我已经 [issue](https://github.com/hsuyelin/nas-tools/issues) 中搜索过，确认我的问题没有被提出过。
+          required: true
+        - label: 我已经修改标题，将标题中的 描述 替换为我遇到的问题。
+          required: true
+  - type: input
+    id: version
+    attributes:
+      label: 当前程序版本
+      description: 遇到问题时程序所在的版本号
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: 问题类型
+      description: 你在以下哪个部分碰到了问题
+      options:
+        - 主程序运行问题
+        - 插件问题
+        - Docker或运行环境问题
+        - 其他问题
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 问题描述
+      description: 请详细描述你碰到的问题
+      placeholder: "问题描述"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 发生问题时系统日志和配置文件
+      description: 问题出现时，程序运行日志请复制到这里。
+      render: bash

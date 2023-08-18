@@ -1,18 +1,30 @@
----
-name: 功能需求模板
-about: 如有新功能需要需要提交，请按此模板创建issues
----
-
-## 你使用的 NAStool 是什么版本，什么环境？
-
-> NAStool 版本: vx.x.x
->
-> 环境: docker or windows or synology
-
-## 你想要新增或者改进什么功能？
-
-> 你想要新增或者改进什么功能？
-
-## 这个功能有什么可以参考的资料吗？
-
-> 这个功能有什么可以参考的资料吗？是否可以列举一些，不要引用同类但商业化软件的任何内容.
+name: 功能改进
+description: Feature Request
+title: "[Feature Request]: "
+labels: ["feature request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请说明你希望添加的功能。
+  - type: input
+    id: version
+    attributes:
+      label: 当前程序版本
+      description: 目前使用的程序版本
+    validations:
+      required: true
+  - type: textarea
+    id: feature-request
+    attributes:
+      label: 功能改进
+      description: 请详细描述需要改进或者添加的功能。
+      placeholder: "功能改进"
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: 参考资料
+      description: 可以列举一些参考资料，但是不要引用同类但商业化软件的任何内容。
+      placeholder: "参考资料"
