@@ -9,7 +9,7 @@ class HDArea(_ISiteSigninHandler):
     """
     
     # 匹配的站点Url，每一个实现类都需要设置为自己的站点Url
-    site_url = "hdarea.co"
+    site_url = "hdarea.club"
 
     # 签到成功
     _success_text = "此次签到您获得"
