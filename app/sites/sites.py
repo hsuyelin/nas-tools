@@ -361,3 +361,26 @@ class Sites:
                                                   ua=ua)
         self.init_config()
         return ret
+
+    def need_goto_user_detail_fetch(self, site_id):
+        """
+        检查站点是否需要去用户信息页面拉取用户详情
+        :param site_id: 站点ID
+        :return: 是否需要去用户信息页面
+        """
+        site_info = self.get_sites(siteid=site_id)
+        if not site_info:
+            return False, None
+        site_cookie = site_info.get("cookie")
+        if not site_cookie:
+            return False, None
+        ua = site_info.get("ua") or Config().get_ua()
+        site_url = StringUtils.get_base_url(site_info.get("signurl") or site_info.get("rssurl"))
+        if not site_url:
+            return False, None
+        
+        if "hhanclub" in site_url:
+            hhanclub_pattern = r'<a href="claim\.php\?uid=(\d+)">'
+            return True, hhanclub_pattern
+        else:
+            return False, None

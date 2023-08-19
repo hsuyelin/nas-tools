@@ -86,23 +86,44 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
             return
 
     def __parse_user_traffic_info(self, html_text):
+        html = etree.HTML(html_text)
         html_text = self._prepare_html_text(html_text)
         upload_match = re.search(r"[^总]上[传傳]量?[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+[KMGTPI]*B)", html_text,
                                  re.IGNORECASE)
         self.upload = StringUtils.num_filesize(upload_match.group(1).strip()) if upload_match else 0
+        if not self.upload:
+            upload_element = html.xpath('//span[text()="上传量："]/following-sibling::span[1]/text()')
+            if upload_element:
+                _upload = upload_element[0].strip() if upload_element else "0.00 KB"
+                self.upload = StringUtils.num_filesize(_upload.strip()) if _upload else 0
+                log.debug(f"【Sites】{self.site_name} line: 99 {self.upload}")
+
         download_match = re.search(r"[^总子影力]下[载載]量?[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+[KMGTPI]*B)", html_text,
                                    re.IGNORECASE)
         self.download = StringUtils.num_filesize(download_match.group(1).strip()) if download_match else 0
+        if not self.download:
+            download_element = html.xpath('//span[@class="font-bold"][contains(text(), "下载量：")]/following-sibling::span/text()')
+            if download_element:
+                _download = download_element[0].strip() if download_element else "0.00 KB"
+                self.download = StringUtils.num_filesize(_download.strip()) if _download else 0
+                log.debug(f"【Sites】{self.site_name} line: 109 {self.download}")
+
         ratio_match = re.search(r"分享率[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+)", html_text)
         # 计算分享率
         calc_ratio = 0.0 if self.download <= 0.0 else round(self.upload / self.download, 3)
         # 优先使用页面上的分享率
         self.ratio = StringUtils.str_float(ratio_match.group(1)) if (
                 ratio_match and ratio_match.group(1).strip()) else calc_ratio
+        if not self.ratio:
+            ratio_element = html.xpath('//span[@class="font-bold"][contains(text(), "分享率：")]/following-sibling::span/font/text()')
+            if ratio_element:
+                _ratio = ratio_element[0].strip() if ratio_element else "0"
+                self.ratio = StringUtils.str_float(_ratio) if StringUtils.str_float(_ratio) else 0.0
+                log.debug(f"【Sites】{self.site_name} line: 122 {self.ratio}")
+
         leeching_match = re.search(r"(Torrents leeching|下载中)[\u4E00-\u9FA5\D\s]+(\d+)[\s\S]+<", html_text)
         self.leeching = StringUtils.str_int(leeching_match.group(2)) if leeching_match and leeching_match.group(
             2).strip() else 0
-        html = etree.HTML(html_text)
         has_ucoin, self.bonus = self.__parse_ucoin(html)
         if has_ucoin:
             return
@@ -246,9 +267,10 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
         # 加入日期
         join_at_text = html.xpath(
             '//tr/td[text()="加入日期" or text()="注册日期" or *[text()="加入日期"]]/following-sibling::td[1]//text()'
-            '|//div/b[text()="加入日期"]/../text()')
+            '|//div/b[text()="加入日期"]/../text()|//span[text()="加入日期："]/following-sibling::span[1]/text()')
         if join_at_text:
             self.join_at = StringUtils.unify_datetime_str(join_at_text[0].split(' (')[0].strip())
+            log.info(f"【Sites】{self.site_name} line: 283 {self.join_at}")
 
         # 做种体积 & 做种数
         # seeding 页面获取不到的话，此处再获取一次
@@ -327,6 +349,12 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
                                       'following-sibling::td[1]/img[1]/@title')
         if user_levels_text:
             self.user_level = user_levels_text[0].strip()
+            return
+
+        user_levels_text = html.xpath('//span[text()="等级："]/following-sibling::img[1]/@title')
+        if user_levels_text:
+            self.user_level = user_levels_text[0].strip()
+            log.debug(f"【Sites】{self.site_name} line: 351 {self.user_level}")
             return
 
         user_levels_text = html.xpath('//tr/td[text()="等級" or text()="等级"]/'

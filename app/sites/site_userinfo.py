@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from multiprocessing.dummy import Pool as ThreadPool
 from threading import Lock
+import re
 
 import requests
 
@@ -63,6 +64,22 @@ class SiteUserInfo(object):
         # 站点流控
         if self.sites.check_ratelimit(site_id):
             return
+
+        need_goto_user_detail_fetch, user_detail_pattern = self.sites.need_goto_user_detail_fetch(site_id=site_id)
+        if need_goto_user_detail_fetch:
+            proxies = Config().get_proxies() if proxy else None
+            res = RequestUtils(cookies=site_cookie,
+                               session=session,
+                               headers=ua,
+                               proxies=proxies
+                               ).get_res(url=url)
+            if res and res.status_code == 200:
+                try:
+                    matches = re.findall(user_detail_pattern, res.text)
+                    if matches:
+                        url = url.rstrip("/") + f"/userdetails.php?id={matches[0]}"
+                except requests.exceptions.RequestException as e:
+                    pass
 
         # 检测环境，有浏览器内核的优先使用仿真签到
         chrome = ChromeHelper()
@@ -158,6 +175,23 @@ class SiteUserInfo(object):
         unread_msg_notify = site_info.get("unread_msg_notify")
         chrome = site_info.get("chrome")
         proxy = site_info.get("proxy")
+
+        need_goto_user_detail_fetch, user_detail_pattern = self.sites.need_goto_user_detail_fetch(site_id=site_id)
+        if need_goto_user_detail_fetch:
+            proxies = Config().get_proxies() if proxy else None
+            res = RequestUtils(cookies=site_cookie,
+                               session=requests.Session(),
+                               headers=ua,
+                               proxies=proxies
+                               ).get_res(url=site_url)
+            if res and res.status_code == 200:
+                try:
+                    matches = re.findall(user_detail_pattern, res.text)
+                    if matches:
+                        site_url = site_url.rstrip("/") + f"/userdetails.php?id={matches[0]}"
+                except requests.exceptions.RequestException as e:
+                    pass
+
         try:
             site_user_info = self.build(url=site_url,
                                         site_id=site_id,
