@@ -3,6 +3,8 @@ from datetime import datetime
 from multiprocessing.dummy import Pool as ThreadPool
 from threading import Lock
 import re
+import json
+from urllib.parse import urlparse, urlunparse
 
 import requests
 
@@ -64,22 +66,6 @@ class SiteUserInfo(object):
         # 站点流控
         if self.sites.check_ratelimit(site_id):
             return
-
-        need_goto_user_detail_fetch, user_detail_pattern = self.sites.need_goto_user_detail_fetch(site_id=site_id)
-        if need_goto_user_detail_fetch:
-            proxies = Config().get_proxies() if proxy else None
-            res = RequestUtils(cookies=site_cookie,
-                               session=session,
-                               headers=ua,
-                               proxies=proxies
-                               ).get_res(url=url)
-            if res and res.status_code == 200:
-                try:
-                    matches = re.findall(user_detail_pattern, res.text)
-                    if matches:
-                        url = url.rstrip("/") + f"/userdetails.php?id={matches[0]}"
-                except requests.exceptions.RequestException as e:
-                    pass
 
         # 检测环境，有浏览器内核的优先使用仿真签到
         chrome = ChromeHelper()
@@ -157,7 +143,11 @@ class SiteUserInfo(object):
         if not site_schema:
             log.error("【Sites】站点 %s 无法识别站点类型" % site_name)
             return None
-        return site_schema(site_name, url, site_cookie, html_text, session=session, ua=ua, emulate=emulate, proxy=proxy)
+
+        parsed_url = urlparse(url)
+        if parsed_url.netloc:
+            site_domain_url = urlunparse((parsed_url.scheme, parsed_url.netloc, "", "", "", ""))
+        return site_schema(site_name, site_domain_url, site_cookie, html_text, session=session, ua=ua, emulate=emulate, proxy=proxy)
 
     def __refresh_site_data(self, site_info):
         """
@@ -168,6 +158,7 @@ class SiteUserInfo(object):
         site_id = site_info.get("id")
         site_name = site_info.get("name")
         site_url = site_info.get("strict_url")
+        original_site_url = site_url
         if not site_url:
             return
         site_cookie = site_info.get("cookie")
@@ -214,8 +205,7 @@ class SiteUserInfo(object):
                 # 发送通知，存在未读消息
                 self.__notify_unread_msg(site_name, site_user_info, unread_msg_notify)
 
-                self._sites_data.update(
-                    {
+                _updated_sites_data = {
                         site_name: {
                             "upload": site_user_info.upload,
                             "username": site_user_info.username,
@@ -227,11 +217,13 @@ class SiteUserInfo(object):
                             "seeding_size": site_user_info.seeding_size,
                             "leeching": site_user_info.leeching,
                             "bonus": site_user_info.bonus,
-                            "url": site_url,
+                            "url": original_site_url,
                             "err_msg": site_user_info.err_msg,
                             "message_unread": site_user_info.message_unread
                         }
-                    })
+                    }
+
+                self._sites_data.update(_updated_sites_data)
 
                 return site_user_info
 

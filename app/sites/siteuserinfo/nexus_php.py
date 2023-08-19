@@ -96,7 +96,6 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
             if upload_element:
                 _upload = upload_element[0].strip() if upload_element else "0.00 KB"
                 self.upload = StringUtils.num_filesize(_upload.strip()) if _upload else 0
-                log.debug(f"【Sites】{self.site_name} line: 99 {self.upload}")
 
         download_match = re.search(r"[^总子影力]下[载載]量?[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+[KMGTPI]*B)", html_text,
                                    re.IGNORECASE)
@@ -106,7 +105,6 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
             if download_element:
                 _download = download_element[0].strip() if download_element else "0.00 KB"
                 self.download = StringUtils.num_filesize(_download.strip()) if _download else 0
-                log.debug(f"【Sites】{self.site_name} line: 109 {self.download}")
 
         ratio_match = re.search(r"分享率[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+)", html_text)
         # 计算分享率
@@ -119,7 +117,6 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
             if ratio_element:
                 _ratio = ratio_element[0].strip() if ratio_element else "0"
                 self.ratio = StringUtils.str_float(_ratio) if StringUtils.str_float(_ratio) else 0.0
-                log.debug(f"【Sites】{self.site_name} line: 122 {self.ratio}")
 
         leeching_match = re.search(r"(Torrents leeching|下载中)[\u4E00-\u9FA5\D\s]+(\d+)[\s\S]+<", html_text)
         self.leeching = StringUtils.str_int(leeching_match.group(2)) if leeching_match and leeching_match.group(
@@ -270,7 +267,6 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
             '|//div/b[text()="加入日期"]/../text()|//span[text()="加入日期："]/following-sibling::span[1]/text()')
         if join_at_text:
             self.join_at = StringUtils.unify_datetime_str(join_at_text[0].split(' (')[0].strip())
-            log.info(f"【Sites】{self.site_name} line: 283 {self.join_at}")
 
         # 做种体积 & 做种数
         # seeding 页面获取不到的话，此处再获取一次
@@ -353,8 +349,7 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
 
         user_levels_text = html.xpath('//span[text()="等级："]/following-sibling::img[1]/@title')
         if user_levels_text:
-            self.user_level = user_levels_text[0].strip()
-            log.debug(f"【Sites】{self.site_name} line: 351 {self.user_level}")
+            self.user_level = "VIP" if user_levels_text[0].strip() == "贵宾" else user_levels_text[0].strip() == "贵宾"
             return
 
         user_levels_text = html.xpath('//tr/td[text()="等級" or text()="等级"]/'
