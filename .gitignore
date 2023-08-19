@@ -12,3 +12,4 @@
 .python-version
 .vscode/
 Dockerfile-dev
+config/sites.json
