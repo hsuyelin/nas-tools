@@ -53,7 +53,6 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
         if message_labels:
             message_text = message_labels[0].xpath("string(.)")
 
-            log.debug(f"【Sites】{self.site_name} 消息原始信息 {message_text}")
             message_unread_match = re.findall(r"[^Date](信息箱\s*|\(|你有\xa0)(\d+)", message_text)
 
             if message_unread_match and len(message_unread_match[-1]) == 2:
@@ -90,21 +89,17 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
         html_text = self._prepare_html_text(html_text)
         upload_match = re.search(r"[^总]上[传傳]量?[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+[KMGTPI]*B)", html_text,
                                  re.IGNORECASE)
+        if not upload_match:
+            upload_match = re.search(r'<span class="font-bold">上[传傳]量?[:：]</span><span>([\d.]+ [A-Za-z]+)</span>', html_text)
         self.upload = StringUtils.num_filesize(upload_match.group(1).strip()) if upload_match else 0
-        if not self.upload:
-            upload_element = html.xpath('//span[text()="上传量："]/following-sibling::span[1]/text()')
-            if upload_element:
-                _upload = upload_element[0].strip() if upload_element else "0.00 KB"
-                self.upload = StringUtils.num_filesize(_upload.strip()) if _upload else 0
+        log.debug(f"【Sites】{self.site_name} 上传量: {self.upload}")
 
         download_match = re.search(r"[^总子影力]下[载載]量?[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+[KMGTPI]*B)", html_text,
                                    re.IGNORECASE)
+        if not download_match:
+            download_match = re.search(r'<span class="font-bold">下[载載]量?[:：]</span><span>([\d.]+ [A-Za-z]+)</span>', html_text)
         self.download = StringUtils.num_filesize(download_match.group(1).strip()) if download_match else 0
-        if not self.download:
-            download_element = html.xpath('//span[@class="font-bold"][contains(text(), "下载量：")]/following-sibling::span/text()')
-            if download_element:
-                _download = download_element[0].strip() if download_element else "0.00 KB"
-                self.download = StringUtils.num_filesize(_download.strip()) if _download else 0
+        log.debug(f"【Sites】{self.site_name} 下载: {self.download}")
 
         ratio_match = re.search(r"分享率[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+)", html_text)
         # 计算分享率
@@ -347,9 +342,10 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
             self.user_level = user_levels_text[0].strip()
             return
 
-        user_levels_text = html.xpath('//span[text()="等级："]/following-sibling::img[1]/@title')
+        user_levels_text = html.xpath('//span[@class="font-bold m-auto"]/following-sibling::img/@title')
         if user_levels_text:
-            self.user_level = "VIP" if user_levels_text[0].strip() == "贵宾" else user_levels_text[0].strip() == "贵宾"
+            self.user_level = user_levels_text[0].strip()
+            log.debug(f"【Sites】站点 {self.site_name} 等级: {self.user_level}")
             return
 
         user_levels_text = html.xpath('//tr/td[text()="等級" or text()="等级"]/'

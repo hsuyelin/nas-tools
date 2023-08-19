@@ -223,6 +223,9 @@ class SiteUserInfo(object):
                         }
                     }
 
+                _updated_sites_json = json.dumps(_updated_sites_data, indent=4)
+                log.debug(f"【Sites】站点 {site_name} 数据：{_updated_sites_json}")
+
                 self._sites_data.update(_updated_sites_data)
 
                 return site_user_info
