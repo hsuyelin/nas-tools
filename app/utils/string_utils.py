@@ -317,7 +317,7 @@ class StringUtils:
             return None
 
         pattern = re.compile(r"[*?\\/\"<>~|,，:：？]", flags=re.IGNORECASE)
-        cleaned_name = pattern.sub(clear_file_name_repalce_macth, name)
+        cleaned_name = pattern.sub(StringUtils.clear_file_name_repalce_macth(), name)
         return cleaned_name
 
     @staticmethod
