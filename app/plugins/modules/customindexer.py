@@ -18,7 +18,7 @@ class Customindexer(_IPluginModule):
     # 主题色
     module_color = "#00ADEF"
     # 插件版本
-    module_version = "1.3"
+    module_version = "1.4"
     # 插件作者
     module_author = "mattoid"
     # 作者主页
@@ -226,7 +226,6 @@ class Customindexer(_IPluginModule):
 
 
     def init_config(self, config=None):
-        self.info(f"初始化{config}")
         site = config.get("site")
         indexer = config.get("indexer")
 
