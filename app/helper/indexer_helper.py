@@ -33,7 +33,6 @@ class IndexerHelper:
             ExceptionUtils.exception_traceback(err)
 
     def get_all_indexers(self):
-        self.init_config()
         return self._indexers
 
     def get_public_indexers(self):
@@ -70,7 +69,6 @@ class IndexerHelper:
                     render=None,
                     language=None,
                     pri=None):
-        self.init_config()
         if not url:
             return None
         _all_indexers = self._indexers + self._private_indexers
