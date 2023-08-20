@@ -292,32 +292,23 @@ class StringUtils:
         return f"{scheme}://{netloc}"
 
     @staticmethod
-    def clear_file_name_repalce_macth(match):
-        replacement_dict = {
-            '*': '',
-            '?': '',
-            '？': '',
-            '\\': '',
-            '/': '',
-            '"': '',
-            '<': '',
-            '>': '',
-            '~': '',
-            '|': '',
-            ',': '',
-            '，': '',
-            ':': '-',
-            '：': '-'
-        }
-        return replacement_dict[match.group()]
-
-    @staticmethod
     def clear_file_name(name):
+        """
+        去除文件中的特殊字符
+        """
         if not name:
             return None
 
-        pattern = re.compile(r"[*?\\/\"<>~|,，:：？]", flags=re.IGNORECASE)
-        cleaned_name = pattern.sub(StringUtils.clear_file_name_repalce_macth(), name)
+        replacement_dict = {
+            r"[*?\\/\"<>~|,，？]": "",
+            r"[\s]+": " ",
+        }
+
+        cleaned_name = name
+        for pattern, replacement in replacement_dict.items():
+            cleaned_name = re.sub(pattern, replacement, cleaned_name, flags=re.IGNORECASE).strip()
+
+        cleaned_name = cleaned_name.replace(":", "-").replace("：", "-")
         return cleaned_name
 
     @staticmethod
