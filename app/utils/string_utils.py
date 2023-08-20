@@ -295,7 +295,13 @@ class StringUtils:
     def clear_file_name(name):
         if not name:
             return None
-        return re.sub(r"[*?\\/\"<>~|]", "", name, flags=re.IGNORECASE).replace(":", "：")
+        replacement_dict = {
+            r"[*?\\/\"<>~|]": "",
+            r"[\,\，]": " ",
+            r"[:：]": "-"
+        }
+
+        return re.sub("|".join(replacement_dict.keys()), lambda x: replacement_dict[x.group()], name, flags=re.IGNORECASE)
 
     @staticmethod
     def get_keyword_from_string(content):
