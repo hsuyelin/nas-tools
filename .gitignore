@@ -13,3 +13,4 @@
 .vscode/
 Dockerfile-dev
 config/sites.json
+config/xpath_test.py
