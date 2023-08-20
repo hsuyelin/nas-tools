@@ -292,16 +292,33 @@ class StringUtils:
         return f"{scheme}://{netloc}"
 
     @staticmethod
+    def clear_file_name_repalce_macth(match):
+        replacement_dict = {
+            '*': '',
+            '?': '',
+            '？': '',
+            '\\': '',
+            '/': '',
+            '"': '',
+            '<': '',
+            '>': '',
+            '~': '',
+            '|': '',
+            ',': '',
+            '，': '',
+            ':': '-',
+            '：': '-'
+        }
+        return replacement_dict[match.group()]
+
+    @staticmethod
     def clear_file_name(name):
         if not name:
             return None
-        replacement_dict = {
-            r"[*?\\/\"<>~|]": "",
-            r"[\,\，]": " ",
-            r"[:：]": "-"
-        }
 
-        return re.sub("|".join(replacement_dict.keys()), lambda x: replacement_dict[x.group()], name, flags=re.IGNORECASE)
+        pattern = re.compile(r"[*?\\/\"<>~|,，:：？]", flags=re.IGNORECASE)
+        cleaned_name = pattern.sub(clear_file_name_repalce_macth, name)
+        return cleaned_name
 
     @staticmethod
     def get_keyword_from_string(content):
