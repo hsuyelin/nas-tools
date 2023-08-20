@@ -25,6 +25,7 @@ class IndexerHelper:
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
 
+        self._indexers.clear()
         try:
             for inexer in DbHelper().get_indexer_custom_site():
                 self._indexers.append(json.loads(inexer.INDEXER))
