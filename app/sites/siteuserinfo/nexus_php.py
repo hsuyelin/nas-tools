@@ -89,19 +89,19 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
         html_text = self._prepare_html_text(html_text)
         upload_match = re.search(r"[^总]上[传傳]量?[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+[KMGTPI]*B)", html_text,
                                  re.IGNORECASE)
-        if not upload_match:
+        if not upload_match or upload_match.group(1) == 0.0:
             upload_match = re.search(r'<span class="font-bold">上[传傳]量?[:：]</span><span>([\d.]+ [A-Za-z]+)</span>', html_text)
         self.upload = StringUtils.num_filesize(upload_match.group(1).strip()) if upload_match else 0
-        log.debug(f"【Sites】{self.site_name} 上传量: {self.upload}")
 
         download_match = re.search(r"[^总子影力]下[载載]量?[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+[KMGTPI]*B)", html_text,
                                    re.IGNORECASE)
-        if not download_match:
+        if not download_match or download_match.group(1) == 0.0:
             download_match = re.search(r'<span class="font-bold">下[载載]量?[:：]</span><span>([\d.]+ [A-Za-z]+)</span>', html_text)
         self.download = StringUtils.num_filesize(download_match.group(1).strip()) if download_match else 0
-        log.debug(f"【Sites】{self.site_name} 下载: {self.download}")
 
         ratio_match = re.search(r"分享率[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+)", html_text)
+        if "hhanclub" in self.site_url.lower():
+            ratio_match = re.search(r"分享率][:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+)",html.xpath('//*[@id="user-info-panel"]/div[2]/div[1]/div[1]/div/text()')[0])
         # 计算分享率
         calc_ratio = 0.0 if self.download <= 0.0 else round(self.upload / self.download, 3)
         # 优先使用页面上的分享率
@@ -262,6 +262,28 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
             '|//div/b[text()="加入日期"]/../text()|//span[text()="加入日期："]/following-sibling::span[1]/text()')
         if join_at_text:
             self.join_at = StringUtils.unify_datetime_str(join_at_text[0].split(' (')[0].strip())
+
+        upload_match = re.search(r"[^总]上[传傳]量?[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+[KMGTPI]*B)", html_text,
+                                 re.IGNORECASE)
+        if not upload_match or upload_match.group(1) == 0.0:
+            upload_match = re.search(r'<span class="font-bold">上[传傳]量?[:：]</span><span>([\d.]+ [A-Za-z]+)</span>', html_text)
+        self.upload = StringUtils.num_filesize(upload_match.group(1).strip()) if upload_match else 0
+
+        download_match = re.search(r"[^总子影力]下[载載]量?[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+[KMGTPI]*B)", html_text,
+                                   re.IGNORECASE)
+        if not download_match or download_match.group(1) == 0.0:
+            download_match = re.search(r'<span class="font-bold">下[载載]量?[:：]</span><span>([\d.]+ [A-Za-z]+)</span>', html_text)
+        self.download = StringUtils.num_filesize(download_match.group(1).strip()) if download_match else 0
+
+        if "hhanclub" in self.site_url.lower():
+            ratio_match = re.search(r"分享率][:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+)",html.xpath('//*[@id="user-info-panel"]/div[2]/div[1]/div[1]/div/text()')[0])
+            calc_ratio = 0.0 if self.download <= 0.0 else round(self.upload / self.download, 3)
+            self.ratio = StringUtils.str_float(ratio_match.group(1)) if (ratio_match and ratio_match.group(1).strip()) else calc_ratio
+            if not self.ratio:
+                ratio_element = html.xpath('//span[@class="font-bold"][contains(text(), "分享率：")]/following-sibling::span/font/text()')
+                if ratio_element:
+                    _ratio = ratio_element[0].strip() if ratio_element else "0"
+                    self.ratio = StringUtils.str_float(_ratio) if StringUtils.str_float(_ratio) else 0.0
 
         # 做种体积 & 做种数
         # seeding 页面获取不到的话，此处再获取一次
