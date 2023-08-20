@@ -1,6 +1,7 @@
 from os.path import join
 import json
 from base64 import b64decode
+import threading
 
 import log
 from app.utils import StringUtils, ExceptionUtils
@@ -11,47 +12,88 @@ from config import Config
 @singleton
 class IndexerHelper:
 
-    _private_indexers = []
-    _indexers = []
+    _lock = None
+    _builtiIndexers = None
+    _custom_indexers = None
+    _all_indexers = None
+    _public_indexers = None
 
     def __init__(self):
+        self._lock = threading.Lock()
         self.init_config()
 
     def init_config(self):
+        custom_indexers = self.get_custom_indexers()
+        if isinstance(custom_indexers, list):
+            self._custom_indexers = self.get_custom_indexers()
+        elif isinstance(custom_indexers, dict):
+            self._custom_indexers = [custom_indexers]
+        else:
+            self._custom_indexers = []
+
+        if self._builtiIndexers:
+            return
+
+        builtiIndexers = self.get_builtin_indexers()
+        if not isinstance(builtiIndexers, list):
+            self._builtiIndexers = []
+        elif isinstance(builtiIndexers, dict):
+            self._builtiIndexers = [builtiIndexers]
+        else:
+            self._builtiIndexers = builtiIndexers
+
+    def get_builtin_indexers(self):
+        """
+        获取所有内置站点
+        """
         try:
             with open(join(Config().get_inner_config_path(), "sites.dat"), "r") as f:
                 _indexers_json = b64decode(f.read())
-                self._private_indexers = json.loads(_indexers_json).get("indexer")
+                return json.loads(_indexers_json).get("indexer")
         except Exception as err:
-            ExceptionUtils.exception_traceback(err)
+            log.error(f"【Indexers】获取所有内置站点失败：{str(err)}")
+            return []
 
-        self._indexers.clear()
+    def get_custom_indexers(self):
+        """
+        获取自定义站点
+        """
         try:
             for inexer in DbHelper().get_indexer_custom_site():
-                self._indexers.append(json.loads(inexer.INDEXER))
+                _indexers_json = json.loads(inexer.INDEXER)
+                return _indexers_json
         except Exception as err:
-            ExceptionUtils.exception_traceback(err)
+            log.error(f"【Indexers】获取自定义站点失败：{str(err)}")
+            return []
 
-    def get_all_indexers(self):
-        return self._indexers
+    def init_all_indexers(self):
+        """
+        获取所有内置站点+自定义站点
+        """
+        with self._lock:
+            self.init_config()
+            self._all_indexers = self._builtiIndexers + self._custom_indexers
 
     def get_public_indexers(self):
         """
-        获取内置公开站点
+        获取公开站点(包含自定义站点)
         """
-        try:
-            with open(join(Config().get_inner_config_path(), "sites.dat"), "r") as f:
-                _indexers_json = b64decode(f.read())
-                _indexer_list = json.loads(_indexers_json).get("indexer")
-                return [item for item in _indexer_list if item['public'] is True]
-        except Exception as err:
-            return []
+        with self._lock:
+            self.init_config()
+            self._public_indexers = []
+            if self._builtiIndexers:
+                self._public_indexers += self._builtiIndexers
+            if self._custom_indexers:
+                self._public_indexers += self._custom_indexers
+            self._public_indexers = [item for item in self._public_indexers if item.get("public") is True]
+        return self._public_indexers
 
     def get_indexer_info(self, url, public=False):
         """
         根据url获取指定indexer
         """
-        for indexer in self._indexers:
+        self.init_all_indexers()
+        for indexer in self._all_indexers:
             if StringUtils.url_equal(indexer.get("domain"), url):
                 return indexer
         return None
@@ -71,11 +113,13 @@ class IndexerHelper:
                     pri=None):
         if not url:
             return None
-        _all_indexers = self._indexers + self._private_indexers
-        for indexer in _all_indexers:
-            indexer_domain = indexer.get("domain")
+        self.init_all_indexers()
+        if not self._all_indexers:
+            return None
+        for indexer in self._all_indexers:
             if not indexer.get("domain"):
                 continue
+            indexer_domain = indexer.get("domain")
             if StringUtils.url_equal(indexer.get("domain"), url):
                 return IndexerConf(datas=indexer,
                                    siteid=siteid,
