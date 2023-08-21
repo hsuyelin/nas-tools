@@ -22,7 +22,19 @@ class IndexerHelper:
         self._lock = threading.Lock()
         self.init_config()
 
+    def stop_service(self):
+        """
+        清空缓存
+        """
+        self._builtiIndexers = None
+        self._custom_indexers = None
+        self._all_indexers = None
+        self._public_indexers = None
+
     def init_config(self):
+        """
+        初始化相关配置
+        """
         custom_indexers = self.get_custom_indexers()
         if isinstance(custom_indexers, list):
             self._custom_indexers = self.get_custom_indexers()

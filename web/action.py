@@ -325,6 +325,8 @@ class WebAction:
         Downloader().stop_service()
         # 关闭插件
         PluginManager().stop_service()
+        # 清空索引器缓存
+        IndexerHelper().stop_service()
 
     @staticmethod
     def start_service():
