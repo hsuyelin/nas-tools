@@ -646,7 +646,9 @@ class TorrentSpider(feapder.AirSpider):
         try:
             # 获取站点文本
             html_text = response.extract()
-            html_text = self.clean_all_sites_free(html_text)
+            # 临时方案：憨憨周年庆，站点元素经常变动，等稳定了删除此代码
+            if "hhanclub" in self.domain.lower():
+                html_text = self.clean_all_sites_free(html_text)
             if not html_text:
                 self.is_error = True
                 self.is_complete = True
