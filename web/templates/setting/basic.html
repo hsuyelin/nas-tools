@@ -436,6 +436,19 @@
               </div>
             </div>
             {% endif %}
+            <div class="row">
+              <div class="col-lg">
+                <div class="mb-3">
+                  <label class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="media.filename_prefer_barre" {% if
+                      Config.media.filename_prefer_barre %}checked{% endif %}>
+                    <span class="form-check-label">使用横杠替换冒号 <span class="form-help"
+                                                                        title="开启后，文件名中的中英文冒号将替换为横杠"
+                                                                        data-bs-toggle="tooltip">?</span></span>
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="card-footer">
             <div class="row align-items-center">

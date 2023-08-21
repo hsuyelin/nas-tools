@@ -11,6 +11,7 @@ import dateutil.parser
 
 from app.utils.exception_utils import ExceptionUtils
 from app.utils.types import MediaType
+from config import Config
 
 
 class StringUtils:
@@ -308,7 +309,12 @@ class StringUtils:
         for pattern, replacement in replacement_dict.items():
             cleaned_name = re.sub(pattern, replacement, cleaned_name, flags=re.IGNORECASE).strip()
 
-        cleaned_name = cleaned_name.replace(":", "-").replace("：", "-")
+        media = Config().get_config('media')
+        filename_prefer_barre = media.get("filename_prefer_barre", False) or False
+        if filename_prefer_barre:
+            cleaned_name = cleaned_name.replace(":", " - ").replace("：", " - ")
+        else:
+            cleaned_name = cleaned_name.replace(":", "：")
         return cleaned_name
 
     @staticmethod
