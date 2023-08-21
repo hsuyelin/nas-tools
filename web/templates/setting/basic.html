@@ -421,8 +421,8 @@
                   </div>
                 </div>
             </div>
-            {% if support_ffmpeg %}
             <div class="row">
+              {% if support_ffmpeg %}
               <div class="col-lg">
                 <div class="mb-3">
                   <label class="form-check form-switch">
@@ -434,9 +434,7 @@
                   </label>
                 </div>
               </div>
-            </div>
-            {% endif %}
-            <div class="row">
+              {% endif %}
               <div class="col-lg">
                 <div class="mb-3">
                   <label class="form-check form-switch">
@@ -446,6 +444,11 @@
                                                                         title="开启后，文件名中的中英文冒号将替换为横杠"
                                                                         data-bs-toggle="tooltip">?</span></span>
                   </label>
+                </div>
+              </div>
+              <div class="col-lg">
+                <div class="mb-3" style="display:none;">
+                  <h1>占位元素 </h1>
                 </div>
               </div>
             </div>
