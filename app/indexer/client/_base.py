@@ -146,7 +146,41 @@ class _IIndexClient(metaclass=ABCMeta):
                 # 不过滤
                 media_info = meta_info
             else:
-                media_info = self.media.merge_media_info(meta_info, match_media)
+                # 0-识别并模糊匹配；1-识别并精确匹配
+                if meta_info.imdb_id \
+                        and match_media.imdb_id \
+                        and str(meta_info.imdb_id) == str(match_media.imdb_id):
+                    # IMDBID匹配，合并媒体数据
+                    media_info = self.media.merge_media_info(meta_info, match_media)
+                else:
+                    # 查询缓存
+                    cache_info = self.media.get_cache_info(meta_info)
+                    if match_media \
+                            and str(cache_info.get("id")) == str(match_media.tmdb_id):
+                        # 缓存匹配，合并媒体数据
+                        media_info = self.media.merge_media_info(meta_info, match_media)
+                    else:
+                        # 重新识别
+                        media_info = self.media.get_media_info(title=torrent_name, subtitle=description, chinese=False)
+                        if not media_info:
+                            log.warn(f"【{self.client_name}】{torrent_name} 识别媒体信息出错！")
+                            index_error += 1
+                            continue
+                        elif not media_info.tmdb_info:
+                            log.info(
+                                f"【{self.client_name}】{torrent_name} 识别为 {media_info.get_name()} 未匹配到媒体信息")
+                            index_match_fail += 1
+                            continue
+                        # TMDBID是否匹配
+                        if str(media_info.tmdb_id) != str(match_media.tmdb_id):
+                            log.info(
+                                f"【{self.client_name}】{torrent_name} 识别为 "
+                                f"{media_info.type.value}/{media_info.get_title_string()}/{media_info.tmdb_id} "
+                                f"与 {match_media.type.value}/{match_media.get_title_string()}/{match_media.tmdb_id} 不匹配")
+                            index_match_fail += 1
+                            continue
+                        # 合并媒体数据
+                        media_info = self.media.merge_media_info(media_info, match_media)
                 # 过滤类型
                 if filter_args.get("type"):
                     if (filter_args.get("type") == MediaType.TV and media_info.type == MediaType.MOVIE) \
