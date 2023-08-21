@@ -70,10 +70,13 @@ class IndexerHelper:
         """
         获取自定义站点
         """
+        _indexers = []
         try:
             for inexer in DbHelper().get_indexer_custom_site():
-                _indexers_json = json.loads(inexer.INDEXER)
-                return _indexers_json
+                _indexer_json = json.loads(inexer.INDEXER)
+                if _indexer_json:
+                    _indexers.append(_indexer_json)
+            return _indexers
         except Exception as err:
             log.error(f"【Indexers】获取自定义站点失败：{str(err)}")
             return []
