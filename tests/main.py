@@ -29,5 +29,11 @@ def main():
     name = "Super.？Mario.Bros.Movie,.：The.2023.4K.UHD.Blu-ray.REMUX.H265.10bit.Dolby.Vision.TrueHD.Atmos.mkv"
     print(TestUtils.clear_file_name(name))
 
+    html1 = """
+    <h1 style="margin-top:15px;margin-buttom:-10px;color:#f29d38;font-size:20px;text-align:center;font-weight:bold;font-family:'Microsoft YaHei'">全站 [Free] 生效中！时间：2023-08-18 00:00:00 ~ 2023-08-24 23:59:59</h1>
+    <h1 style="margin-top:15px;margin-buttom:-10px;color:#f29d38;font-size:20px;text-align:center;font-weight:bold;font-family:'Microsoft YaHei'">全站生效中！时间：2023-08-18 00:00:00 ~ 2023-08-24 23:59:59</h1>
+    """
+    print(TestUtils.clean_all_sites_free(html1))
+
 if __name__ == "__main__":
     main()

@@ -54,3 +54,13 @@ class TestUtils:
             matching_tables.append(table_element.get('class'))
         
         return matching_tables
+
+    @staticmethod
+    def clean_all_sites_free(html):
+        # 匹配字符串 "全站 [Free] 生效中"，不区分大小写
+        pattern = re.compile(r'<h1.*?>.*?全站\s+\[Free\]\s+生效中.*?</h1>', re.IGNORECASE)
+
+        # 使用 re.sub 进行替换
+        cleaned_html = re.sub(pattern, '', html)
+
+        return cleaned_html
