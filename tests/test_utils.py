@@ -1,5 +1,8 @@
 from lxml import etree
 import re
+from guessit import api
+from guessit.jsonutils import GuessitEncoder
+import json
 
 class TestUtils:
 
@@ -64,3 +67,11 @@ class TestUtils:
         cleaned_html = re.sub(pattern, '', html)
 
         return cleaned_html
+
+    @staticmethod
+    def guess_movie_info(filename):
+        if filename:
+            guess = api.guessit(filename)
+            print(json.dumps(guess, cls=GuessitEncoder, ensure_ascii=False))
+        else:
+            return ""
