@@ -92,7 +92,7 @@
 <div class="modal modal-blur fade" id="modal-downloader" tabindex="-1" role="dialog" aria-hidden="true"
      data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
-    <div class="modal-content-minWidth">
+    <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="downloader_modal_title">新增下载器</h5>
         <input type="hidden" id="downloader_id">
@@ -116,12 +116,15 @@
             </div>
           </div>
         </div>
-        <div class="form-selectgroup-boxes row mb-3">
+        <div class="form-selectgroup-boxes mb-3">
           <label class="form-label required">类型 <span class="form-help" data-bs-toggle="tooltip"
                                                         data-bs-original-title="QB版本要求>=4.3.9，TR版本要求>=3.0，其它版本可能存在适配问题">?</span></label>
           {% for Id, Attr in DownloaderConf.items() %}
+              {% if loop.index%2 == 1 %}
+                  <div class="row">
+              {% endif %}
             <div class="col-lg">
-              <div class="mb-1">
+              <div class="mb-3">
                 <label class="form-selectgroup-item" for="type_{{ Id }}">
                   <input type="radio" name="downloader_type" id="type_{{ Id }}" value="{{ Id }}"
                          class="form-selectgroup-input" checked>
@@ -138,6 +141,9 @@
                 </label>
               </div>
             </div>
+          {% if loop.last or loop.index%2 == 0 %}
+              </div>
+          {% endif %}
           {% endfor %}
         </div>
         {% for Id, Attr in DownloaderConf.items() %}
