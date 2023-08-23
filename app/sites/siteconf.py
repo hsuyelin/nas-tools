@@ -8,7 +8,7 @@ from functools import lru_cache
 
 from lxml import etree
 
-from app.helper import ChromeHelper
+from app.helper import ChromeHelper, IndexerHelper
 from app.utils import ExceptionUtils, StringUtils, RequestUtils
 from app.utils.commons import singleton
 from config import Config
@@ -82,12 +82,7 @@ class SiteConf:
         self.init_config()
 
     def init_config(self):
-        try:
-            with open(os.path.join(Config().get_inner_config_path(), "sites.dat"), "r") as f:
-                _indexers_json = base64.b64decode(f.read())
-                self._RSS_SITE_GRAP_CONF = json.loads(_indexers_json).get("conf")
-        except Exception as err:
-            ExceptionUtils.exception_traceback(err)
+        self._RSS_SITE_GRAP_CONF = IndexerHelper().get_rss_site_graps()
 
     def get_checkin_conf(self):
         return self._SITE_CHECKIN_XPATH
