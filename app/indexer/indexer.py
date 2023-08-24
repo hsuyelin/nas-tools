@@ -183,4 +183,4 @@ class Indexer(object):
         """
         获取索引器统计信息
         """
-        return self.dbhelper.get_indexer_statistics()
+        return self.dbhelper.get_indexer_statistics(self._client.get_client_id())
