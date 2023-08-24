@@ -159,7 +159,9 @@ class Config(object):
     def get_config(self, node=None):
         if not node:
             return self._config
-        return self._config.get(node, {})
+        if isinstance(self._config, dict):
+            return self._config.get(node, {})
+        return None
 
     def save_config(self, new_cfg):
         self._config = new_cfg
