@@ -672,6 +672,84 @@ class ModuleConf(object):
                     "placeholder": "password"
                 }
             }
+        },
+        "aria2": {
+            "name": "Aria2",
+            "img_url": "../static/img/downloader/aria2.png",
+            "color": "#B30100",
+            "monitor_enable": True,
+            "config": {
+                "host": {
+                    "id": "aria2_host",
+                    "required": True,
+                    "title": "IP地址",
+                    "tooltip": "配置IP地址，如为https则需要增加https://前缀",
+                    "type": "text",
+                    "placeholder": "127.0.0.1"
+                },
+                "port": {
+                    "id": "aria2_port",
+                    "required": True,
+                    "title": "端口",
+                    "type": "text",
+                    "placeholder": "6800"
+                },
+                "secret": {
+                    "id": "aria2_secret",
+                    "required": True,
+                    "title": "令牌",
+                    "type": "text",
+                    "placeholder": ""
+                }
+            }
+        },
+        "pan115": {
+            "name": "115网盘",
+            "img_url": "../static/img/downloader/115.jpg",
+            "background": "bg-azure",
+            "test_command": "app.downloader.client.pan115|Pan115",
+            "config": {
+                "cookie": {
+                    "id": "pan115_cookie",
+                    "required": True,
+                    "title": "Cookie",
+                    "tooltip": "115网盘Cookie，通过115网盘网页端抓取Cookie",
+                    "type": "text",
+                    "placeholder": "USERSESSIONID=xxx;115_lang=zh;UID=xxx;CID=xxx;SEID=xxx"
+                }
+            }
+        },
+        "pikpak": {
+            "name": "PikPak",
+            "img_url": "../static/img/downloader/pikpak.png",
+            "background": "bg-indigo",
+            "test_command": "app.downloader.client.pikpak|PikPak",
+            "config": {
+                "username": {
+                    "id": "pikpak_username",
+                    "required": True,
+                    "title": "账号",
+                    "tooltip": "PikPak的账号一般是手机号或者邮箱",
+                    "type": "text",
+                    "placeholder": ""
+                },
+                "password": {
+                    "id": "pikpak_password",
+                    "required": True,
+                    "title": "密码",
+                    "tooltip": "密码",
+                    "type": "password",
+                    "placeholder": ""
+                },
+                "proxy": {
+                    "id": "pikpak_proxy",
+                    "required": False,
+                    "title": "代理",
+                    "tooltip": "如果需要代理才能访问pikpak可以在此处填入代理地址",
+                    "type": "text",
+                    "placeholder": "127.0.0.1:7890"
+                }
+            }
         }
     }
 
