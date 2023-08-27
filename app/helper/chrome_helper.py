@@ -4,11 +4,13 @@ import tempfile
 from functools import reduce
 from threading import Lock
 
+import requests
 import undetected_chromedriver as uc
 from webdriver_manager.chrome import ChromeDriverManager
 
+import log
 import app.helper.cloudflare_helper as CloudflareHelper
-from app.utils import SystemUtils, RequestUtils
+from app.utils import SystemUtils, RequestUtils, ExceptionUtils
 from config import Config
 
 lock = Lock()
@@ -41,7 +43,18 @@ class ChromeHelper(object):
         if not uc.find_chrome_executable():
             return
         global driver_executable_path
-        driver_executable_path = ChromeDriverManager().install()
+        try:
+            latest_release_url = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
+            latest_chromedriver_version = requests.get(latest_release_url).text
+            if latest_chromedriver_version:
+                driver_executable_path = ChromeDriverManager(version=f'{latest_chromedriver_version}').install()
+            if os.path.exists(driver_executable_path):
+                log.info(f"【ChromeHelper】存在内置驱动: {driver_executable_path}")
+                self._executable_path = driver_executable_path
+            else:
+                raise ValueError('【ChromeHelper】未获取到驱动最新版本')
+        except Exception as err:
+             ExceptionUtils.exception_traceback(err)
 
     @property
     def browser(self):
