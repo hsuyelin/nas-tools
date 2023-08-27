@@ -39,8 +39,8 @@ class alias(object):
 
 def aliased(aliased_class):
     """
-    Decorator function that *must* be used in combination with @alias
-    decorator. This class will make the magic happen!
+    Decorator function that *must* be used in combination with @alias decorator. This
+    class will make the magic happen!
 
     @aliased classes will have their aliased method (via @alias) actually aliased.
     This method simply iterates over the member attributes of 'aliased_class'
@@ -83,8 +83,7 @@ def login_required(func):
     @wraps(func)
     def wrapper(client, *args, **kwargs):
         """
-        Attempt API call; 403 is returned if the login is expired or the user
-        is banned.
+        Attempt API call; 403 is returned if the login is expired or the user is banned.
 
         Attempt a login and if successful try the API call a final time.
         """
@@ -102,12 +101,11 @@ def handle_hashes(func):
     """
     Normalize torrent hash arguments.
 
-    Initial implementations of this client used 'hash' and 'hashes' as
-    function arguments for torrent hashes. Since 'hash' collides with an
-    internal python name, all arguments were updated to 'torrent_hash'
-    or 'torrent_hashes'. Since both versions of argument names remain
-    respected, this decorator normalizes torrent hash arguments into
-    either 'torrent_hash' or 'torrent_hashes'.
+    Initial implementations of this client used 'hash' and 'hashes' as function
+    arguments for torrent hashes. Since 'hash' collides with an internal python name,
+    all arguments were updated to 'torrent_hash' or 'torrent_hashes'. Since both
+    versions of argument names remain respected, this decorator normalizes torrent hash
+    arguments into either 'torrent_hash' or 'torrent_hashes'.
     """
 
     @wraps(func)
@@ -131,8 +129,7 @@ def check_for_raise(client, error_message):
 
 def endpoint_introduced(version_introduced, endpoint):
     """
-    Prevent hitting an endpoint if the connected qBittorrent version doesn't
-    support it.
+    Prevent hitting an endpoint if the connected qBittorrent version doesn't support it.
 
     :param version_introduced: version endpoint was made available
     :param endpoint: API endpoint (e.g. /torrents/categories)
@@ -161,8 +158,8 @@ def endpoint_introduced(version_introduced, endpoint):
 
 def version_removed(version_obsoleted, endpoint):
     """
-    Prevent hitting an endpoint that was removed in a version older than the
-    connected qBittorrent.
+    Prevent hitting an endpoint that was removed in a version older than the connected
+    qBittorrent.
 
     :param version_obsoleted: the Web API version the endpoint was removed
     :param endpoint: name of the removed endpoint

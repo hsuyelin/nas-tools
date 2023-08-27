@@ -213,6 +213,7 @@ class Torrent(Container):
 
     @property
     def hashString(self) -> str:
+        """Torrent info hash string, can also be used as Torrent ID"""
         return self.fields["hashString"]
 
     @property

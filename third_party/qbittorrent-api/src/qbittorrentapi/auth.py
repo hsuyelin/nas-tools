@@ -4,7 +4,6 @@ from qbittorrentapi import Version
 from qbittorrentapi.decorators import login_required
 from qbittorrentapi.definitions import APINames
 from qbittorrentapi.definitions import ClientCache
-from qbittorrentapi.exceptions import HTTP403Error
 from qbittorrentapi.exceptions import LoginFailed
 from qbittorrentapi.exceptions import UnsupportedQbittorrentVersion
 from qbittorrentapi.request import Request
@@ -71,11 +70,11 @@ class AuthAPIMixIn(Request):
         There isn't a reliable way to know if an existing session is still valid
         without attempting to use it. qBittorrent invalidates cookies when they expire.
 
-        :returns: True/False if current auth cookie is accepted by qBittorrent.
+        :returns: True/False if current authorization cookie is accepted by qBittorrent
         """
         try:
             self._post(_name=APINames.Application, _method="version")
-        except HTTP403Error:
+        except Exception:
             return False
         else:
             return True
@@ -122,8 +121,8 @@ class AuthAPIMixIn(Request):
     @property
     def _SID(self):
         """
-        Authorization session cookie from qBittorrent using default cookie name
-        `SID`. Backwards compatible for :meth:`~AuthAPIMixIn._session_cookie`.
+        Authorization session cookie from qBittorrent using default cookie name `SID`.
+        Backwards compatible for :meth:`~AuthAPIMixIn._session_cookie`.
 
         :return: Auth cookie value from qBittorrent or None if one isn't already acquired
         """
@@ -144,3 +143,10 @@ class AuthAPIMixIn(Request):
     def auth_log_out(self, **kwargs):
         """End session with qBittorrent."""
         self._post(_name=APINames.Authorization, _method="logout", **kwargs)
+
+    def __enter__(self):
+        self.auth_log_in()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.auth_log_out()

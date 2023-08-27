@@ -60,8 +60,8 @@ def v(version):
 
 class Version(object):
     """
-    Allows introspection for whether this Client supports different versions of
-    the qBittorrent application and its Web API.
+    Allows introspection for whether this Client supports different versions of the
+    qBittorrent application and its Web API.
 
     Note that if a version is not listed as "supported" here, many (if
     not all) methods are likely to function properly since the Web API
@@ -89,8 +89,8 @@ class Version(object):
     @classmethod
     def is_app_version_supported(cls, app_version):
         """
-        Returns whether a version of the qBittorrent application is fully
-        supported by this API client.
+        Returns whether a version of the qBittorrent application is fully supported by
+        this API client.
 
         :param app_version: version of qBittorrent application such as v4.4.0
         :return: ``True`` or ``False`` for whether version is supported
@@ -103,8 +103,8 @@ class Version(object):
     @classmethod
     def is_api_version_supported(cls, api_version):
         """
-        Returns whether a version of the qBittorrent Web API is fully supported
-        by this API client.
+        Returns whether a version of the qBittorrent Web API is fully supported by this
+        API client.
 
         :param api_version: version of qBittorrent Web API version such as ``2.8.4``
         :return: ``True`` or ``False`` for whether version is supported
@@ -116,8 +116,8 @@ class Version(object):
 
     @classmethod
     def latest_supported_app_version(cls):
-        """Returns the most recent version of qBittorrent application that is
-        fully supported."""
+        """Returns the most recent version of qBittorrent application that is fully
+        supported."""
         return MOST_RECENT_SUPPORTED_APP_VERSION
 
     @classmethod

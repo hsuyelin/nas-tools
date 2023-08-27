@@ -1,19 +1,21 @@
 import os.path
+import re
 import time
 from xml.dom import minidom
 
+import zhconv
 from requests.exceptions import RequestException
 
 import log
 from app.conf import SystemConfig, ModuleConf
 from app.helper import FfmpegHelper
+from app.media import Media
 from app.media.douban import DouBan
 from app.media.meta import MetaInfo
+from app.utils import DomUtils, RequestUtils, ExceptionUtils, NfoReader, SystemUtils, StringUtils
 from app.utils.commons import retry
-from config import Config, RMT_MEDIAEXT
-from app.utils import DomUtils, RequestUtils, ExceptionUtils, NfoReader, SystemUtils
 from app.utils.types import MediaType, SystemConfigKey, RmtMode
-from app.media import Media
+from config import Config, RMT_MEDIAEXT
 
 
 class Scraper:
@@ -188,7 +190,7 @@ class Scraper:
                 xactor = DomUtils.add_node(doc, root, "actor")
                 DomUtils.add_node(doc, xactor, "name", actor.get("name") or "")
                 DomUtils.add_node(doc, xactor, "type", "Actor")
-                DomUtils.add_node(doc, xactor, "role", actor.get("role") or "")
+                DomUtils.add_node(doc, xactor, "role", actor.get("character") or actor.get("role") or "")
                 DomUtils.add_node(doc, xactor, "order", actor.get("order") if actor.get("order") is not None else "")
                 DomUtils.add_node(doc, xactor, "tmdbid", actor.get("id") or "")
                 DomUtils.add_node(doc, xactor, "thumb", actor.get('image'))
@@ -200,6 +202,14 @@ class Scraper:
                 DomUtils.add_node(doc, root, "genre", genre.get("name") or "")
             # 评分
             DomUtils.add_node(doc, root, "rating", tmdbinfo.get("vote_average") or "0")
+            # 评级
+            if tmdbinfo.get("releases") and tmdbinfo.get("releases").get("countries"):
+                releases = [i for i in tmdbinfo.get("releases").get("countries") if
+                            i.get("certification") and i.get("certification").strip()]
+                # 国内没有分级，所以沿用美国的分级
+                us_release = next((c for c in releases if c.get("iso_3166_1") == "US"), None)
+                if us_release:
+                    DomUtils.add_node(doc, root, "mpaa", us_release.get("certification") or "")
         return doc
 
     def __gen_movie_nfo_file(self,
@@ -668,43 +678,63 @@ class Scraper:
 
     def __gen_people_chinese_info(self, directors, actors, doubaninfo):
         """
-        匹配豆瓣演职人员中文名
+        匹配演职人员中文名
         """
-        if doubaninfo:
-            # 导演
-            if directors:
-                douban_directors = doubaninfo.get("directors") or []
+        # 导演
+        if directors:
+            douban_directors = []
+            if doubaninfo and doubaninfo.get("directors"):
+                douban_directors = doubaninfo.get("directors")
                 # douban英文名姓和名分开匹配，（豆瓣中名前姓后，TMDB中不确定）
                 for director in douban_directors:
                     if director.get("latin_name"):
                         director["names"] = director.get("latin_name", "").lower().split(" ")
                     else:
                         director["names"] = director.get("name", "").lower().split(" ")
-                for director in directors:
+            for director in directors:
+                flag = False
+                if douban_directors:
                     douban_director = self.__match_people_in_douban(director, douban_directors)
                     if douban_director:
                         director["name"] = douban_director.get("name")
+                        flag = True
                     else:
                         log.info("【Scraper】豆瓣该影片或剧集无导演 %s 信息" % director.get("name"))
-            # 演员
-            if actors:
-                douban_actors = doubaninfo.get("actors") or []
+                if not flag:
+                    flag, name = self.__get_chinese_name(director)
+                    if flag:
+                        director["name"] = name
+                    else:
+                        log.info("【Scraper】tmdb该影片或剧集无导演中文 %s 信息" % director.get("name"))
+
+        # 演员
+        if actors:
+            douban_actors = []
+            if doubaninfo and doubaninfo.get("directors"):
+                douban_actors = doubaninfo.get("actors")
                 # douban英文名姓和名分开匹配，（豆瓣中名前姓后，TMDB中不确定）
                 for actor in douban_actors:
                     if actor.get("latin_name"):
                         actor["names"] = actor.get("latin_name", "").lower().split(" ")
                     else:
                         actor["names"] = actor.get("name", "").lower().split(" ")
-                for actor in actors:
+            for actor in actors:
+                flag = False
+                if douban_actors:
                     douban_actor = self.__match_people_in_douban(actor, douban_actors)
                     if douban_actor:
                         actor["name"] = douban_actor.get("name")
+                        flag = True
                         if douban_actor.get("character") != "演员":
                             actor["character"] = douban_actor.get("character")[2:]
                     else:
                         log.info("【Scraper】豆瓣该影片或剧集无演员 %s 信息" % actor.get("name"))
-        else:
-            log.info("【Scraper】豆瓣无该影片或剧集信息")
+                if not flag:
+                    flag, name = self.__get_chinese_name(actor)
+                    if flag:
+                        actor["name"] = name
+                    else:
+                        log.info("【Scraper】tmdb该影片或剧集无演员中文 %s 信息" % actor.get("name"))
         return directors, actors
 
     def __match_people_in_douban(self, people, peoples_douban):
@@ -722,3 +752,18 @@ class Scraper:
                 if latin_match_res or (people_douban.get("name") == people_aka_name):
                     return people_douban
         return None
+
+    def __get_chinese_name(self, people):
+        """
+        获取人员在tmdb上的中文名称
+        :param people 人员
+        """
+        people_aka_names = self.media.get_tmdbperson_aka_names(people.get("id")) or []
+        people_aka_names.append(people.get("name"))
+        for people_aka_name in people_aka_names:
+            if not StringUtils.is_chinese_word(string=people_aka_name):
+                continue
+            if StringUtils.is_chinese_word(string=people_aka_name, mode=3):
+                people_aka_name = zhconv.convert(people_aka_name, "zh-cn")
+            return True, re.sub(pattern="\s+", repl="", string=people_aka_name)
+        return False, None

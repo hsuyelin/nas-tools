@@ -42,11 +42,7 @@ class TorrentSpider(feapder.AirSpider):
             window_size=(1024, 800),
             executable_path=_webdriver_path,
             render_time=10,
-            custom_argument=[
-                "--ignore-certificate-errors",
-                "--no-sandbox",
-                "--disable-dev-shm-usage"
-            ],
+            custom_argument=["--ignore-certificate-errors"],
         )
     )
     # 是否搜索完成标志
@@ -219,7 +215,7 @@ class TorrentSpider(feapder.AirSpider):
                             })
                         else:
                             params.update({
-                                "%s" % cat.get("id"): 1
+                                "cat%s" % cat.get("id"): 1
                             })
                 searchurl = self.domain + torrentspath + "?" + urlencode(params)
             else:
@@ -254,7 +250,7 @@ class TorrentSpider(feapder.AirSpider):
         log.info(f"【Spider】开始请求：{searchurl}")
         yield feapder.Request(url=searchurl,
                               use_session=True,
-                              render=False)
+                              render=self.render)
 
     def download_midware(self, request):
         request.headers = {
@@ -630,15 +626,6 @@ class TorrentSpider(feapder.AirSpider):
             items = items[0]
         return items
 
-    def clean_all_sites_free(self, html):
-        # 匹配字符串 "全站 [Free] 生效中"，不区分大小写
-        pattern = re.compile(r'<h1.*?>.*?全站\s+\[Free\]\s+生效中.*?</h1>', re.IGNORECASE)
-
-        # 使用 re.sub 进行替换
-        cleaned_html = re.sub(pattern, '', html)
-
-        return cleaned_html
-
     def parse(self, request, response):
         """
         解析整个页面
@@ -646,9 +633,6 @@ class TorrentSpider(feapder.AirSpider):
         try:
             # 获取站点文本
             html_text = response.extract()
-            # 临时方案：憨憨周年庆，站点元素经常变动，等稳定了删除此代码
-            if html_text and "hhanclub" in self.domain.lower():
-                html_text = self.clean_all_sites_free(html_text)
             if not html_text:
                 self.is_error = True
                 self.is_complete = True

@@ -1,3 +1,4 @@
+import copy
 import datetime
 import hashlib
 import json
@@ -144,30 +145,30 @@ class DiskSpaceSaver(_IPluginModule):
 
         # 依次处理每个目录
         for path in path_list:
-            self.info(f"磁盘空间释放 开始处理目录：{path}")
+            self.info(f"开始处理目录：{path}")
             # 如果目录不存在， 则不处理
             if not os.path.exists(path):
-                self.info(f"磁盘空间释放 目录不存在，不进行处理")
+                self.info(f"目录不存在，不进行处理")
                 continue
 
             # 如果目录不是文件夹， 则不处理
             if not os.path.isdir(path):
-                self.info(f"磁盘空间释放 目录不是文件夹，不进行处理")
+                self.info(f"目录不是文件夹，不进行处理")
                 continue
 
             # 如果目录不是绝对路径， 则不处理
             if not os.path.isabs(path):
-                self.info(f"磁盘空间释放 目录不是绝对路径，不进行处理")
+                self.info(f"目录不是绝对路径，不进行处理")
                 continue
 
             _last_result = self.load_last_result(result_path)
-            self.info(f"磁盘空间释放 加载上次处理结果，共有 {len(_last_result['file_info'])} 个文件。")
+            self.info(f"加载上次处理结果，共有 {len(_last_result['file_info'])} 个文件。")
             _duplicates = self.find_duplicates(path, ext_list, int(file_size), _last_result, fast)
-            self.info(f"磁盘空间释放 找到 {len(_duplicates)} 个重复文件。")
+            self.info(f"找到 {len(_duplicates)} 个重复文件。")
             self.process_duplicates(_duplicates, dry_run)
-            self.info(f"磁盘空间释放 处理完毕。")
+            self.info(f"处理完毕。")
             self.save_last_result(result_path, _last_result)
-            self.info(f"磁盘空间释放 保存处理结果。")
+            self.info(f"保存处理结果。")
 
     def get_state(self):
         return False
@@ -179,7 +180,7 @@ class DiskSpaceSaver(_IPluginModule):
         pass
 
     @staticmethod
-    def get_sha1(file_path, buffer_size=128 * 1024, fast=False):
+    def get_sha1(file_path, buffer_size=1024 * 1024, fast=False):
         """
         计算文件的 SHA1 值, fast 为 True 时读取文件前中后buffer_size大小的数据计算SHA1值
         """
@@ -220,11 +221,13 @@ class DiskSpaceSaver(_IPluginModule):
             for filename in filenames:
                 file_path = os.path.join(dirpath, filename)
                 file_ext = os.path.splitext(file_path)[1]
-                file_size = os.path.getsize(file_path)
+                file_stat = os.stat(file_path)
+                file_size = file_stat.st_size
+                file_ino = f"{file_stat.st_dev}_{file_stat.st_ino}"
                 if file_ext.lower() not in _ext_list:
                     continue
 
-                if os.path.getsize(file_path) < _file_size * 1024 * 1024:
+                if file_size < _file_size * 1024 * 1024:
                     continue
                 file_mtime = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
                 if file_group_by_size.get(file_size) is None:
@@ -232,19 +235,36 @@ class DiskSpaceSaver(_IPluginModule):
 
                 file_group_by_size[file_size].append(
                     {'filePath': file_path, 'fileExt': file_ext, 'fileSize': file_size,
-                     'fileModifyTime': str(file_mtime)})
+                     'fileModifyTime': str(file_mtime), 'fileIno': file_ino, 'sameIno': False})
 
         # 循环 file_group_by_size
         for file_size, file_list in file_group_by_size.items():
             # 如果文件数量大于1，进行sha1计算
             if len(file_list) <= 1:
                 # 没有大小一样的 不需要处理
-                self.debug(f'磁盘空间释放 {file_list[0]["filePath"]} 大小相同的文件数量为1，无需计算sha1')
+                self.debug(f'{file_list[0]["filePath"]} 大小相同的文件数量为1，无需计算sha1')
                 continue
+
+            file_list = copy.deepcopy(file_list)
+            # file_list中fileIno相同的文件，只保留一个
+            for file_info in file_list:
+                if file_info['sameIno']:
+                    continue
+                file_ino = file_info['fileIno']
+                for info in file_list:
+                    if file_ino == info['fileIno'] and file_info['filePath'] != info['filePath']:
+                        info['sameIno'] = True
+            file_list = [file_info for file_info in file_list if not file_info['sameIno']]
+            # 如果文件数量大于1，进行sha1计算
+            if len(file_list) <= 1:
+                # 没有大小一样的 不需要处理
+                self.debug(f'{file_list[0]["filePath"]} 排除硬链接后大小相同的文件数量为1，无需计算sha1')
+                continue
+
             for file_info in file_list:
                 file_path = file_info['filePath']
-                file_mtime = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
-                file_size = os.path.getsize(file_path)
+                file_mtime = file_info['fileModifyTime']
+                file_size = file_info['fileSize']
                 sha1 = None
 
                 # 查找是否存在相同路径的文件
@@ -253,12 +273,12 @@ class DiskSpaceSaver(_IPluginModule):
                         # 如果文件大小和修改时间都一致，则直接使用之前计算的 sha1 值
                         if file_size == info['fileSize'] and str(file_mtime) == info['fileModifyTime']:
                             self.info(
-                                f'磁盘空间释放 文件 {file_path} 的大小和修改时间与上次处理结果一致，直接使用上次处理结果')
+                                f'文件 {file_path} 的大小和修改时间与上次处理结果一致，直接使用上次处理结果')
                             sha1 = info['fileSha1']
                         break
 
                 if sha1 is None:
-                    self.info(f'磁盘空间释放 计算文件 {file_path} 的 SHA1 值')
+                    self.info(f'计算文件 {file_path} 的 SHA1 值')
                     sha1 = self.get_sha1(file_path, fast=fast)
                     file_info = {'filePath': file_path,
                                  'fileSize': file_size,
@@ -284,10 +304,10 @@ class DiskSpaceSaver(_IPluginModule):
                     stat_compare = os.stat(file_path)
                     if stat_first.st_dev == stat_compare.st_dev:
                         if stat_first.st_ino == stat_compare.st_ino:
-                            self.info(f'磁盘空间释放 文件 {files[0]} 和 {file_path} 是同一个文件，无需处理')
+                            self.info(f'文件 {files[0]} 和 {file_path} 是同一个文件，无需处理')
                         else:
                             if dry_run:
-                                self.info(f'磁盘空间释放 文件 {files[0]} 和 {file_path} 是重复文件，dry_run中，不做处理')
+                                self.info(f'文件 {files[0]} 和 {file_path} 是重复文件，dry_run中，不做处理')
                                 continue
                             # 使用try catch
                             try:
@@ -297,15 +317,15 @@ class DiskSpaceSaver(_IPluginModule):
                                 os.link(files[0], file_path)
                                 # 删除备份文件
                                 os.remove(file_path + '.bak')
-                                self.info(f'磁盘空间释放 文件 {files[0]} 和 {file_path} 是重复文件，已用硬链接替换')
+                                self.info(f'文件 {files[0]} 和 {file_path} 是重复文件，已用硬链接替换')
                             except Exception as err:
                                 print(str(err))
                                 # 如果硬链接失败，则将备份文件改回原文件名
                                 os.rename(file_path + '.bak', file_path)
-                                self.info(f'磁盘空间释放 文件 {files[0]} 和 {file_path} 是重复文件，'
+                                self.info(f'文件 {files[0]} 和 {file_path} 是重复文件，'
                                           '硬链接替换失败，已恢复原文件')
                     else:
-                        self.info(f'磁盘空间释放 文件 {files[0]} 和 {file_path} 不在同一个磁盘，无法用硬链接替换')
+                        self.info(f'文件 {files[0]} 和 {file_path} 不在同一个磁盘，无法用硬链接替换')
                         continue
 
     @staticmethod

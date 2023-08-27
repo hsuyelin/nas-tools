@@ -24,18 +24,22 @@ target-version = "py37"
 max-complexity = 15
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-norecursedirs = "dist build .tox scripts"
+addopts = """
+  --doctest-modules
+  -v
+"""
 filterwarnings = [
     "error",
     # this'll need to be addressed eventually...
     "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
     "ignore:Deprecated call to `pkg_resources.declare_namespace:DeprecationWarning",
 ]
-addopts = """
-  --doctest-modules
-  -v
-"""
+markers = [
+    "skipif_before_api_version(api_version): skips test for current api version",
+    "skipif_after_api_version(api_version): skips test for current api version",
+]
+norecursedirs = "dist build .tox scripts"
+testpaths = ["tests"]
 
 [tool.coverage.run]
 parallel = true

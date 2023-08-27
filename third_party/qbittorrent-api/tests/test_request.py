@@ -25,7 +25,7 @@ from qbittorrentapi.request import Request
 from qbittorrentapi.torrents import TorrentDictionary
 from qbittorrentapi.torrents import TorrentInfoList
 from tests.conftest import IS_QBT_DEV
-from tests.conftest import mkpath
+from tests.utils import mkpath
 
 
 def test_method_name(client, app_version):
@@ -119,75 +119,75 @@ def _enable_disable_https(client, use_https):
     if use_https:
         client.app.preferences = {
             "use_https": True,
-            "web_ui_https_cert_path": mkpath("/tmp", "resources", "server.crt"),
-            "web_ui_https_key_path": mkpath("/tmp", "resources", "server.key"),
+            "web_ui_https_cert_path": mkpath("/tmp", "_resources", "server.crt"),
+            "web_ui_https_key_path": mkpath("/tmp", "_resources", "server.key"),
         }
     else:
         client.app.preferences = {"use_https": False}
 
 
+@pytest.mark.skipif_before_api_version("2.2.1")
 @pytest.mark.parametrize("use_https", (True, False))
-def test_force_user_scheme(client, app_version, api_version, use_https):
-    if v(api_version) >= v("2.2.1"):
-        default_host = environ["QBITTORRENTAPI_HOST"]
+def test_force_user_scheme(client, app_version, use_https):
+    default_host = environ["QBITTORRENTAPI_HOST"]
 
-        _enable_disable_https(client, use_https)
+    _enable_disable_https(client, use_https)
 
-        client = Client(
-            host="http://" + default_host,
-            VERIFY_WEBUI_CERTIFICATE=False,
-            FORCE_SCHEME_FROM_HOST=True,
-            REQUESTS_ARGS={"timeout": 3},
-        )
-        if use_https:
-            with pytest.raises(exceptions.APIConnectionError):
-                assert client.app.version == app_version
-        else:
+    client = Client(
+        host="http://" + default_host,
+        VERIFY_WEBUI_CERTIFICATE=False,
+        FORCE_SCHEME_FROM_HOST=True,
+        REQUESTS_ARGS={"timeout": 3},
+    )
+    if use_https:
+        with pytest.raises(exceptions.APIConnectionError):
             assert client.app.version == app_version
+    else:
+        assert client.app.version == app_version
+    assert client._API_BASE_URL.startswith("http://")
+
+    client = Client(
+        host=default_host,
+        VERIFY_WEBUI_CERTIFICATE=False,
+        FORCE_SCHEME_FROM_HOST=True,
+        REQUESTS_ARGS={"timeout": 3},
+    )
+    assert client.app.version == app_version
+    if use_https:
+        assert client._API_BASE_URL.startswith("https://")
+    else:
         assert client._API_BASE_URL.startswith("http://")
 
-        client = Client(
-            host=default_host,
-            VERIFY_WEBUI_CERTIFICATE=False,
-            FORCE_SCHEME_FROM_HOST=True,
-            REQUESTS_ARGS={"timeout": 3},
-        )
-        assert client.app.version == app_version
-        if use_https:
-            assert client._API_BASE_URL.startswith("https://")
-        else:
-            assert client._API_BASE_URL.startswith("http://")
-
-        client = Client(
-            host="https://" + default_host,
-            VERIFY_WEBUI_CERTIFICATE=False,
-            FORCE_SCHEME_FROM_HOST=True,
-            REQUESTS_ARGS={"timeout": 3},
-        )
-        if not use_https:
-            with pytest.raises(exceptions.APIConnectionError):
-                assert client.app.version == app_version
-        else:
-            assert client.app.version == app_version
-        assert client._API_BASE_URL.startswith("https://")
-
-
-@pytest.mark.parametrize("scheme", ("http://", "https://"))
-def test_both_https_http_not_working(client, app_version, api_version, scheme):
-    if v(api_version) >= v("2.2.1"):
-        default_host = environ["QBITTORRENTAPI_HOST"]
-        _enable_disable_https(client, use_https=True)
-
-        # rerun with verify=True
-        test_client = Client(
-            host=scheme + default_host,
-            REQUESTS_ARGS={"timeout": 3},
-        )
+    client = Client(
+        host="https://" + default_host,
+        VERIFY_WEBUI_CERTIFICATE=False,
+        FORCE_SCHEME_FROM_HOST=True,
+        REQUESTS_ARGS={"timeout": 3},
+    )
+    if not use_https:
         with pytest.raises(exceptions.APIConnectionError):
-            assert test_client.app.version == app_version
-        assert test_client._API_BASE_URL.startswith("https://")
+            assert client.app.version == app_version
+    else:
+        assert client.app.version == app_version
+    assert client._API_BASE_URL.startswith("https://")
 
-        _enable_disable_https(client, use_https=False)
+
+@pytest.mark.skipif_before_api_version("2.2.1")
+@pytest.mark.parametrize("scheme", ("http://", "https://"))
+def test_both_https_http_not_working(client, app_version, scheme):
+    default_host = environ["QBITTORRENTAPI_HOST"]
+    _enable_disable_https(client, use_https=True)
+
+    # rerun with verify=True
+    test_client = Client(
+        host=scheme + default_host,
+        REQUESTS_ARGS={"timeout": 3},
+    )
+    with pytest.raises(exceptions.APIConnectionError):
+        assert test_client.app.version == app_version
+    assert test_client._API_BASE_URL.startswith("https://")
+
+    _enable_disable_https(client, use_https=False)
 
 
 def test_legacy_env_vars():
@@ -352,7 +352,7 @@ def test_response_unsupported(client):
         client._get(_name=APINames.Application, _method="version", response_class=float)
 
 
-def test_simple_response(client, orig_torrent):
+def test_simple_response(client):
     torrent = client.torrents_info()[0]
     assert isinstance(torrent, TorrentDictionary)
     torrent = client.torrents_info(SIMPLE_RESPONSE=True)[0]
@@ -408,9 +408,10 @@ def test_request_extra_headers():
     assert r.request.headers["X-MY-HEADER"] == "zxcv"
 
 
+@pytest.mark.skipif_before_api_version("2.2.1")
 def test_requests_timeout(api_version):
     # timeouts are weird on python 2...just skip it...
-    if sys.version_info[0] < 3 or v(api_version) < v("2.2.1"):
+    if sys.version_info[0] < 3:
         return
 
     class MyTimeoutError(Exception):
@@ -441,16 +442,16 @@ def test_requests_timeout(api_version):
                 raise MyTimeoutError
 
 
-def test_request_extra_params(client, orig_torrent_hash):
-    """extra params can be sent directly to qBittorrent but there aren't any
-    real use-cases so force it."""
+def test_request_extra_params(client, orig_torrent):
+    """Extra params can be sent directly to qBittorrent but there aren't any real use-
+    cases so force it."""
     json_response = client._post(
-        APINames.Torrents, "info", hashes=orig_torrent_hash
+        APINames.Torrents, "info", hashes=orig_torrent.hash
     ).json()
     torrent = TorrentInfoList(json_response, client)[0]
     assert isinstance(torrent, TorrentDictionary)
     json_response = client._get(
-        APINames.Torrents, "info", hashes=orig_torrent_hash
+        APINames.Torrents, "info", hashes=orig_torrent.hash
     ).json()
     torrent = TorrentInfoList(json_response, client)[0]
     assert isinstance(torrent, TorrentDictionary)
@@ -529,14 +530,14 @@ def test_api_connection_error():
         Client(host="localhost:8081").auth_log_in(_retries=3)
 
 
-def test_http400(client, app_version, orig_torrent_hash):
+def test_http400(client, app_version, orig_torrent):
     with pytest.raises(exceptions.MissingRequiredParameters400Error):
-        client.torrents_file_priority(hash=orig_torrent_hash)
+        client.torrents_file_priority(hash=orig_torrent.hash)
 
     if v(app_version) >= v("4.1.6"):
         with pytest.raises(exceptions.InvalidRequest400Error) as exc_info:
             client.torrents_file_priority(
-                hash=orig_torrent_hash, file_ids="asdf", priority="asdf"
+                hash=orig_torrent.hash, file_ids="asdf", priority="asdf"
             )
         assert exc_info.value.http_status_code == 400
 
@@ -658,5 +659,5 @@ def test_verbose_logging(caplog):
 def test_stack_printing(capsys):
     client = Client(PRINT_STACK_FOR_EACH_REQUEST=True, VERIFY_WEBUI_CERTIFICATE=False)
     client.app_version()
-    captured = capsys.readouterr()
-    assert "print_stack()" in captured.err
+
+    assert "print_stack()" in capsys.readouterr().err

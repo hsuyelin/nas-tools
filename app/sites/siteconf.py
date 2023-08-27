@@ -1,21 +1,19 @@
-import os
-import pickle
-import base64
-import json
 import random
 import time
 from functools import lru_cache
 
 from lxml import etree
 
-from app.helper import ChromeHelper, IndexerHelper
+from app.helper import ChromeHelper
 from app.utils import ExceptionUtils, StringUtils, RequestUtils
 from app.utils.commons import singleton
 from config import Config
+from web.backend.user import User
 
 
 @singleton
 class SiteConf:
+    user = None
     # 站点签到支持的识别XPATH
     _SITE_CHECKIN_XPATH = [
         '//a[@id="signed"]',
@@ -75,14 +73,11 @@ class SiteConf:
         ]
     }
 
-    # 促销/HR的匹配XPATH
-    _RSS_SITE_GRAP_CONF = {}
-
     def __init__(self):
         self.init_config()
 
     def init_config(self):
-        self._RSS_SITE_GRAP_CONF = IndexerHelper().get_rss_site_graps()
+        self.user = User()
 
     def get_checkin_conf(self):
         return self._SITE_CHECKIN_XPATH
@@ -95,8 +90,8 @@ class SiteConf:
 
     def get_grap_conf(self, url=None):
         if not url:
-            return self._RSS_SITE_GRAP_CONF
-        for k, v in self._RSS_SITE_GRAP_CONF.items():
+            return self.user.get_brush_conf()
+        for k, v in self.user.get_brush_conf().items():
             if StringUtils.url_equal(k, url):
                 return v
         return {}

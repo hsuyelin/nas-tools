@@ -48,12 +48,22 @@ class TestAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)
 
         result = authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 2)
 
     def test_installation_store_cached_legacy(self):
@@ -71,12 +81,22 @@ class TestAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)
 
         result = authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)  # cached
 
     def test_installation_store_bot_only(self):
@@ -95,12 +115,22 @@ class TestAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)
 
         result = authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 2)
 
     def test_installation_store_cached_bot_only(self):
@@ -120,12 +150,22 @@ class TestAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)
 
         result = authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)  # cached
 
     def test_installation_store(self):
@@ -138,12 +178,22 @@ class TestAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token == "xoxp-valid"
+        assert result.user_id == "W99999"
+        assert result.user == "some-user"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)
 
         result = authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token == "xoxp-valid"
+        assert result.user_id == "W99999"
+        assert result.user == "some-user"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 2)
 
     def test_installation_store_cached(self):
@@ -160,12 +210,22 @@ class TestAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token == "xoxp-valid"
+        assert result.user_id == "W99999"
+        assert result.user == "some-user"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)
 
         result = authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token == "xoxp-valid"
+        assert result.user_id == "W99999"
+        assert result.user == "some-user"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)  # cached
 
     def test_fetch_different_user_token(self):
@@ -178,6 +238,11 @@ class TestAuthorize:
         assert result.bot_user_id == "W23456789"
         assert result.bot_token == "xoxb-valid"
         assert result.user_token == "xoxp-valid"
+        assert result.user_id == "W99999"
+        assert result.user == "some-user"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)
 
     def test_fetch_different_user_token_with_rotation(self):
@@ -209,6 +274,11 @@ class TestAuthorize:
         assert result.bot_user_id == "W23456789"
         assert result.bot_token == "xoxb-valid-refreshed"
         assert result.user_token == "xoxp-valid-refreshed"
+        assert result.user_id == "W99999"
+        assert result.user == "some-user"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)
 
     def test_remove_latest_user_token_if_it_is_not_relevant(self):
@@ -221,6 +291,11 @@ class TestAuthorize:
         assert result.bot_user_id == "W23456789"
         assert result.bot_token == "xoxb-valid"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)
 
     def test_rotate_only_bot_token(self):
@@ -252,6 +327,11 @@ class TestAuthorize:
         assert result.bot_user_id == "W23456789"
         assert result.bot_token == "xoxb-valid-refreshed"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         assert_auth_test_count(self, 1)
 
 

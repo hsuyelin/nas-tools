@@ -1,3 +1,4 @@
+import html
 from logging import Logger
 from typing import Optional
 from typing import Union
@@ -32,7 +33,7 @@ class CallbackResponseBuilder:
         debug_message = f"Handling an OAuth callback success (request: {request.query})"
         self._logger.debug(debug_message)
 
-        html = self._redirect_uri_page_renderer.render_success_page(
+        page_content = self._redirect_uri_page_renderer.render_success_page(
             app_id=installation.app_id,
             team_id=installation.team_id,
             is_enterprise_install=installation.is_enterprise_install,
@@ -44,7 +45,7 @@ class CallbackResponseBuilder:
                 "Content-Type": "text/html; charset=utf-8",
                 "Set-Cookie": self._state_utils.build_set_cookie_for_deletion(),
             },
-            body=html,
+            body=page_content,
         )
 
     def _build_callback_failure_response(  # type: ignore
@@ -60,14 +61,13 @@ class CallbackResponseBuilder:
         # Adding a bit more details to the error code to help installers understand what's happening.
         # This modification in the HTML page works only when developers use this built-in failure handler.
         detailed_error = build_detailed_error(reason)
-        html = self._redirect_uri_page_renderer.render_failure_page(detailed_error)
         return BoltResponse(
             status=status,
             headers={
                 "Content-Type": "text/html; charset=utf-8",
                 "Set-Cookie": self._state_utils.build_set_cookie_for_deletion(),
             },
-            body=html,
+            body=self._redirect_uri_page_renderer.render_failure_page(detailed_error),
         )
 
 
@@ -85,7 +85,7 @@ body {{
 </head>
 <body>
 <h2>Slack App Installation</h2>
-<p><a href="{url}"><img alt=""Add to Slack"" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a></p>
+<p><a href="{html.escape(url)}"><img alt=""Add to Slack"" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a></p>
 </body>
 </html>
 """  # noqa: E501
@@ -142,4 +142,4 @@ def build_detailed_error(reason: str) -> str:
     elif reason == "storage_error":
         return f"{reason}: The app's server encountered an issue. Contact the app developer."
     else:
-        return f"{reason}: This error code is returned from Slack. Refer to the documents for details."
+        return f"{html.escape(reason)}: This error code is returned from Slack. Refer to the documents for details."

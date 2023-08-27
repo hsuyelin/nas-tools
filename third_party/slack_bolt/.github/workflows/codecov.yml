@@ -1,3 +1,4 @@
+# TODO: This CI job hangs as of April 2023
 name: Run codecov
 
 on:
@@ -23,19 +24,19 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python setup.py install
-          pip install -U pip
-          pip install -e ".[async]"
-          pip install -e ".[adapter]"
-          pip install -e ".[testing]"
-          pip install -e ".[adapter_testing]"
-      - name: Run all tests for codecov
-        run: |
-          pytest --cov=./slack_bolt/ --cov-report=xml
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: true
-          verbose: true
+#      - name: Install dependencies
+#        run: |
+#          python setup.py install
+#          pip install -U pip
+#          pip install -e ".[async]"
+#          pip install -e ".[adapter]"
+#          pip install -e ".[testing]"
+#          pip install -e ".[adapter_testing]"
+#      - name: Run all tests for codecov
+#        run: |
+#          pytest --cov=./slack_bolt/ --cov-report=xml
+#      - name: Upload coverage to Codecov
+#        uses: codecov/codecov-action@v3
+#        with:
+#          fail_ci_if_error: true
+#          verbose: true

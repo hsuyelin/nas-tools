@@ -189,8 +189,8 @@ class SearchAPIMixIn(AppAPIMixIn):
     @login_required
     def search_start(self, pattern=None, plugins=None, category=None, **kwargs):
         """
-        Start a search. Python must be installed. Host may limit number of
-        concurrent searches.
+        Start a search. Python must be installed. Host may limit number of concurrent
+        searches.
 
         :raises Conflict409Error:
 
@@ -234,7 +234,7 @@ class SearchAPIMixIn(AppAPIMixIn):
 
         :raises NotFound404Error:
 
-        :param search_id: ID of search to get status; leave emtpy for status of all jobs
+        :param search_id: ID of search to get status; leave empty for status of all jobs
         :return: :class:`SearchStatusesList` - `<https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-search-status>`_
         """  # noqa: E501
         params = {"id": search_id}

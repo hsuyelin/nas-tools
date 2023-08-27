@@ -5,7 +5,9 @@ from qbittorrentapi.app import BuildInfoDictionary
 from qbittorrentapi.auth import AuthAPIMixIn
 from qbittorrentapi.client import Client
 from qbittorrentapi.definitions import APINames
+from qbittorrentapi.definitions import TorrentState
 from qbittorrentapi.definitions import TorrentStates
+from qbittorrentapi.definitions import TrackerStatus
 from qbittorrentapi.exceptions import APIConnectionError
 from qbittorrentapi.exceptions import APIError
 from qbittorrentapi.exceptions import Conflict409Error
@@ -138,9 +140,11 @@ __all__ = (
     "TorrentPropertiesDictionary",
     "TorrentsAddPeersDictionary",
     "TorrentsAPIMixIn",
+    "TorrentState",
     "TorrentStates",
     "Tracker",
     "TrackersList",
+    "TrackerStatus",
     "TransferAPIMixIn",
     "TransferInfoDictionary",
     "Unauthorized401Error",

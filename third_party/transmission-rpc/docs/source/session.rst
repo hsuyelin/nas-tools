@@ -9,6 +9,12 @@ Session
     :undoc-members:
     :exclude-members: __new__, __init__
 
+.. autoclass:: SessionStats
+    :inherited-members: get
+    :members:
+    :undoc-members:
+    :exclude-members: __new__, __init__
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

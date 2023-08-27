@@ -588,15 +588,18 @@ be used.</dd>
                         # This should not be an intentional handling in usual use cases.
                         resp = BoltResponse(status=404, body={&#34;error&#34;: &#34;no next() calls in middleware&#34;})
                         if self._raise_error_for_unhandled_request is True:
-                            self._listener_runner.listener_error_handler.handle(
-                                error=BoltUnhandledRequestError(
+                            try:
+                                raise BoltUnhandledRequestError(
                                     request=req,
                                     current_response=resp,
                                     last_global_middleware_name=middleware.name,
-                                ),
-                                request=req,
-                                response=resp,
-                            )
+                                )
+                            except BoltUnhandledRequestError as e:
+                                self._listener_runner.listener_error_handler.handle(
+                                    error=e,
+                                    request=req,
+                                    response=resp,
+                                )
                             return resp
                         self._framework_logger.warning(warning_unhandled_by_global_middleware(middleware.name, req))
                         return resp
@@ -639,14 +642,17 @@ be used.</dd>
             if resp is None:
                 resp = BoltResponse(status=404, body={&#34;error&#34;: &#34;unhandled request&#34;})
             if self._raise_error_for_unhandled_request is True:
-                self._listener_runner.listener_error_handler.handle(
-                    error=BoltUnhandledRequestError(
+                try:
+                    raise BoltUnhandledRequestError(
                         request=req,
                         current_response=resp,
-                    ),
-                    request=req,
-                    response=resp,
-                )
+                    )
+                except BoltUnhandledRequestError as e:
+                    self._listener_runner.listener_error_handler.handle(
+                        error=e,
+                        request=req,
+                        response=resp,
+                    )
                 return resp
             return self._handle_unmatched_requests(req, resp)
         except Exception as error:
@@ -1867,15 +1873,18 @@ Refer to <a href="https://api.slack.com/dialogs">https://api.slack.com/dialogs</
                     # This should not be an intentional handling in usual use cases.
                     resp = BoltResponse(status=404, body={&#34;error&#34;: &#34;no next() calls in middleware&#34;})
                     if self._raise_error_for_unhandled_request is True:
-                        self._listener_runner.listener_error_handler.handle(
-                            error=BoltUnhandledRequestError(
+                        try:
+                            raise BoltUnhandledRequestError(
                                 request=req,
                                 current_response=resp,
                                 last_global_middleware_name=middleware.name,
-                            ),
-                            request=req,
-                            response=resp,
-                        )
+                            )
+                        except BoltUnhandledRequestError as e:
+                            self._listener_runner.listener_error_handler.handle(
+                                error=e,
+                                request=req,
+                                response=resp,
+                            )
                         return resp
                     self._framework_logger.warning(warning_unhandled_by_global_middleware(middleware.name, req))
                     return resp
@@ -1918,14 +1927,17 @@ Refer to <a href="https://api.slack.com/dialogs">https://api.slack.com/dialogs</
         if resp is None:
             resp = BoltResponse(status=404, body={&#34;error&#34;: &#34;unhandled request&#34;})
         if self._raise_error_for_unhandled_request is True:
-            self._listener_runner.listener_error_handler.handle(
-                error=BoltUnhandledRequestError(
+            try:
+                raise BoltUnhandledRequestError(
                     request=req,
                     current_response=resp,
-                ),
-                request=req,
-                response=resp,
-            )
+                )
+            except BoltUnhandledRequestError as e:
+                self._listener_runner.listener_error_handler.handle(
+                    error=e,
+                    request=req,
+                    response=resp,
+                )
             return resp
         return self._handle_unmatched_requests(req, resp)
     except Exception as error:

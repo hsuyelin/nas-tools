@@ -1,15 +1,12 @@
 from os import environ
-from time import sleep
 
 import pytest
 
-from qbittorrentapi import APIConnectionError
+from tests.utils import check
 
 
+@pytest.mark.skipif(environ.get("CI") != "true", reason="not in CI")
 def test_shutdown(client):
-    if environ.get("CI") == "true":
-        client.app.shutdown()
-        with pytest.raises(APIConnectionError):
-            for _ in range(100):
-                client.app_version()
-                sleep(0.1)
+    client.app.shutdown()
+    with pytest.raises(AssertionError, match="qBittorrent crashed..."):
+        check(lambda: client.app_version(), "")

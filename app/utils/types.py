@@ -151,6 +151,8 @@ class SystemConfigKey(Enum):
     CookieCloud = "CookieCloud"
     # 自定义JS/CSS
     CustomScript = "CustomScript"
+    # 用户认证参数
+    UserSiteAuthParams = "UserSiteAuthParams"
     # 默认下载器
     DefaultDownloader = "DefaultDownloader"
     # 默认下载设置

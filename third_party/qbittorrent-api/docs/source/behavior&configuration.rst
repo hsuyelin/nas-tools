@@ -1,26 +1,15 @@
 Behavior & Configuration
 ================================
 
-Untrusted WebUI Certificate
-***************************
-* qBittorrent allows you to configure HTTPS with an untrusted certificate; this commonly includes self-signed certificates.
-* When using such a certificate, instantiate Client with ``VERIFY_WEBUI_CERTIFICATE=False`` or set environment variable ``QBITTORRENTAPI_DO_NOT_VERIFY_WEBUI_CERTIFICATE`` to a non-null value.
-* Failure to do this for will cause connections to qBittorrent to fail.
-* As a word of caution, doing this actually does turn off certificate verification. Therefore, for instance, potential man-in-the-middle attacks will not be detected and reported (since the error is suppressed). However, the connection will remain encrypted.
-
-.. code:: python
-
-    qbt_client = Client(..., VERIFY_WEBUI_CERTIFICATE=False}
-
 Host, Username and Password
 ***************************
-* The authentication credentials can be provided when instantiating ``Client``:
+* The authentication credentials can be provided when instantiating :class:`~qbittorrentapi.client.Client`:
 
 .. code:: python
 
     qbt_client = Client(host="localhost:8080", username='...', password='...')
 
-* The credentials can also be specified after ``Client`` is created but calling ``auth_log_in()`` is not strictly necessary to authenticate the client; this will happen automatically for any API request.
+* The credentials can also be specified after :class:`~qbittorrentapi.client.Client` is created but calling :meth:`~qbittorrentapi.auth.AuthAPIMixIn.auth_log_in` is not strictly necessary to authenticate the client; this will happen automatically for any API request.
 
 .. code:: python
 
@@ -32,13 +21,38 @@ Host, Username and Password
   * ``QBITTORRENTAPI_USERNAME``
   * ``QBITTORRENTAPI_PASSWORD``
 
+qBittorrent Session Management
+******************************
+* Any time a connection is established with qBittorrent, it instantiates a session to manage authentication for all subsequent API requests.
+* This client will transparently manage sessions by ensuring the client is always logged in in-line with any API request including requesting a new session upon expiration of an existing session.
+* However, each new :class:`~qbittorrentapi.client.Client` instantiation will create a new session in qBittorrent.
+* Therefore, if many :class:`~qbittorrentapi.client.Client` instances will be created be sure to call :class:`~qbittorrentapi.auth.AuthAPIMixIn.auth_log_out` for each instance or use a context manager.
+* Otherwise, qBittorrent may experience abnormally high memory usage.
+
+.. code:: python
+
+    with qbittorrentapi.Client(**conn_info) as qbt_client:
+        if qbt_client.torrents_add(urls="...") != "Ok.":
+            raise Exception("Failed to add torrent.")
+
+Untrusted WebUI Certificate
+***************************
+* qBittorrent allows you to configure HTTPS with an untrusted certificate; this commonly includes self-signed certificates.
+* When using such a certificate, instantiate Client with ``VERIFY_WEBUI_CERTIFICATE=False`` or set environment variable ``QBITTORRENTAPI_DO_NOT_VERIFY_WEBUI_CERTIFICATE`` to a non-null value.
+* Failure to do this for will cause connections to qBittorrent to fail.
+* As a word of caution, doing this actually does turn off certificate verification. Therefore, for instance, potential man-in-the-middle attacks will not be detected and reported (since the error is suppressed). However, the connection will remain encrypted.
+
+.. code:: python
+
+    qbt_client = Client(..., VERIFY_WEBUI_CERTIFICATE=False}
+
 Requests Configuration
 **********************
 * The `Requests <https://requests.readthedocs.io/en/latest/>`_ package is used to issue HTTP requests to qBittorrent to facilitate this API.
-* Much of ``Requests`` configuration for making HTTP calls can be controlled with parameters passed along with the request payload.
+* Much of `Requests` configuration for making HTTP requests can be controlled with parameters passed along with the request payload.
 * For instance, HTTP Basic Authorization credentials can be provided via ``auth``, timeouts via ``timeout``, or Cookies via ``cookies``. See `Requests documentation <https://requests.readthedocs.io/en/latest/api/#requests.request>`_ for full details.
 * These parameters are exposed here in two ways; the examples below tell ``Requests`` to use a connect timeout of 3.1 seconds and a read timeout of 30 seconds.
-* When you instantiate ``Client``, you can specify the parameters to use in all HTTP requests to qBittorrent:
+* When you instantiate :class:`~qbittorrentapi.client.Client`, you can specify the parameters to use in all HTTP requests to qBittorrent:
 
 .. code:: python
 
@@ -52,7 +66,7 @@ Requests Configuration
 
 Additional HTTP Headers
 ***********************
-* For consistency, HTTP Headers can be specified using the method above; for backwards compatability, the methods below are supported as well.
+* For consistency, HTTP Headers can be specified using the method above; for backwards compatibility, the methods below are supported as well.
 * Either way, these additional headers will be incorporated (using clobbering) into the rest of the headers to be sent.
 * To send a custom HTTP header in all requests made from an instantiated client, declare them during instantiation:
 
@@ -69,7 +83,7 @@ Additional HTTP Headers
 Unimplemented API Endpoints
 ***************************
 * Since the qBittorrent Web API has evolved over time, some endpoints may not be available from the qBittorrent host.
-* By default, if a call is made to endpoint that doesn't exist for the version of the qBittorrent host (e.g., the Search endpoints were introduced in Web API v2.1.1), there's a debug logger output and None is returned.
+* By default, if a request is made to endpoint that doesn't exist for the version of the qBittorrent host (e.g., the Search endpoints were introduced in Web API v2.1.1), there's a debug logger output and None is returned.
 * To raise ``NotImplementedError`` instead, instantiate Client with:
 
 .. code:: python

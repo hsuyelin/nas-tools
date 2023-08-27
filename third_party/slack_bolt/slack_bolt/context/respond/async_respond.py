@@ -1,4 +1,4 @@
-from typing import Optional, Union, Sequence
+from typing import Optional, Union, Sequence, Dict, Any
 from ssl import SSLContext
 
 from slack_sdk.models.attachments import Attachment
@@ -35,6 +35,7 @@ class AsyncRespond:
         unfurl_links: Optional[bool] = None,
         unfurl_media: Optional[bool] = None,
         thread_ts: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> WebhookResponse:
         if self.response_url is not None:
             client = AsyncWebhookClient(
@@ -54,6 +55,7 @@ class AsyncRespond:
                     unfurl_links=unfurl_links,
                     unfurl_media=unfurl_media,
                     thread_ts=thread_ts,
+                    metadata=metadata,
                 )
                 return await client.send_dict(message)
             elif isinstance(text_or_whole_response, dict):

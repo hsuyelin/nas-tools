@@ -1,0 +1,81 @@
+name: Update pre-commit
+
+#######
+# Updates pre-commit's hooks, runs pre-commit, and commits all changes into a PR.
+#######
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  pull-requests: write
+
+env:
+  BRANCH_NAME: "autoupdates/pre-commit"
+  FORCE_COLOR: "1"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  pre-commit-update:
+    name: Update Pre-commit config
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.PAT }}
+
+      - name: Configure git
+        run: |
+          git config user.email "nobody@example.org"
+          git config user.name "pre-commit updates"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4.6.0
+        with:
+          python-version: 3.X
+
+      - name: Install pre-commit
+        run: python -m pip install .[dev]
+
+      - name: Update pre-commit hooks
+        run: |
+          pre-commit autoupdate
+          pre-commit install-hooks
+
+      - name: Run pre-commit
+        # pre-commit returns non-zero when files are changed and fails the job
+        continue-on-error: true
+        run: pre-commit run --all-files
+
+      - name: PR Needed?
+        id: pr
+        run: |
+          if [[ $(git status --porcelain) ]]; then
+            echo "needed=true" >> ${GITHUB_OUTPUT}
+          else
+            echo "needed=false" >> ${GITHUB_OUTPUT}
+          fi
+
+      - name: Create Pull Request
+        id: created-pr
+        if: steps.pr.outputs.needed == 'true'
+        uses: peter-evans/create-pull-request@v5.0.1
+        with:
+          token: ${{ secrets.PAT }}
+          title: "Auto-update `pre-commit` hooks"
+          branch: ${{ env.BRANCH_NAME }}
+          commit-message: "Auto-updated `pre-commit` hooks."
+          committer: "pre-commit updater <noreply@example.org>"
+          author: "pre-commit updater <noreply@example.org>"
+          body: "Updated `pre-commit` hooks to their latest versions and ran updated hooks against the repo."
+          labels: "dependencies"

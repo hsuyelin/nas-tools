@@ -40,13 +40,13 @@ Installation
 
 .. code:: console
 
-    pip install qbittorrent-api
+    python -m pip install qbittorrent-api
 
 * Install a specific release (e.g. ``v2022.8.34``):
 
 .. code:: console
 
-    pip install git+https://github.com/rmartin16/qbittorrent-api.git@v2022.8.34#egg=qbittorrent-api
+    python -m pip install qbittorrent-api==2022.8.34
 
 * Install direct from ``main``:
 
@@ -61,47 +61,59 @@ Getting Started
 ---------------
 .. code:: python
 
-   import qbittorrentapi
+    import qbittorrentapi
 
-   # instantiate a Client using the appropriate WebUI configuration
-   qbt_client = qbittorrentapi.Client(
-       host='localhost',
-       port=8080,
-       username='admin',
-       password='adminadmin'
+    # instantiate a Client using the appropriate WebUI configuration
+    conn_info = dict(
+        host="localhost",
+        port=8080,
+        username="admin",
+        password="adminadmin",
     )
+    qbt_client = qbittorrentapi.Client(**conn_info)
 
-   # the Client will automatically acquire/maintain a logged in state in line with any request.
-   # therefore, this is not necessary; however, you many want to test the provided login credentials.
-   try:
-       qbt_client.auth_log_in()
-   except qbittorrentapi.LoginFailed as e:
-       print(e)
+    # the Client will automatically acquire/maintain a logged-in state
+    # in line with any request. therefore, this is not strictly necessary;
+    # however, you may want to test the provided login credentials.
+    try:
+        qbt_client.auth_log_in()
+    except qbittorrentapi.LoginFailed as e:
+        print(e)
 
-   # display qBittorrent info
-   print(f'qBittorrent: {qbt_client.app.version}')
-   print(f'qBittorrent Web API: {qbt_client.app.web_api_version}')
-   for k,v in qbt_client.app.build_info.items(): print(f'{k}: {v}')
+    # if the Client will not be long-lived or many Clients may be created
+    # in a relatively short amount of time, be sure to log out:
+    qbt_client.auth_log_out()
 
-   # retrieve and show all torrents
-   for torrent in qbt_client.torrents_info():
-       print(f'{torrent.hash[-6:]}: {torrent.name} ({torrent.state})')
+    # or use a context manager:
+    with qbittorrentapi.Client(**conn_info) as qbt_client:
+        if qbt_client.torrents_add(urls="...") != "Ok.":
+            raise Exception("Failed to add torrent.")
 
-   # pause all torrents
-   qbt_client.torrents.pause.all()
+    # display qBittorrent info
+    print(f"qBittorrent: {qbt_client.app.version}")
+    print(f"qBittorrent Web API: {qbt_client.app.web_api_version}")
+    for k, v in qbt_client.app.build_info.items():
+        print(f"{k}: {v}")
+
+    # retrieve and show all torrents
+    for torrent in qbt_client.torrents_info():
+        print(f"{torrent.hash[-6:]}: {torrent.name} ({torrent.state})")
+
+    # pause all torrents
+    qbt_client.torrents.pause.all()
 
 Usage
 -----
 First, the Web API endpoints are organized in to eight namespaces.
 
-* Authentication (auth)
-* Application (app)
-* Log (log)
-* Sync (sync)
-* Transfer (transfer)
-* Torrent Management (torrents)
-* RSS (rss)
-* Search (search)
+* Authentication (``auth``)
+* Application (``app``)
+* Log (``log``)
+* Sync (``sync``)
+* Transfer (``transfer``)
+* Torrent Management (``torrents``)
+* RSS (``rss``)
+* Search (``search``)
 
 Second, this client has two modes of interaction with the qBittorrent Web API.
 

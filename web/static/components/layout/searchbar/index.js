@@ -155,8 +155,7 @@ export class LayoutSearchbar extends CustomElement {
                     <div class="dropdown-divider"></div>
                     ${["Docker", "Synology"].includes(this.layout_systemflag)
                     ? html`
-                      <a href="javascript:restart()" class="dropdown-item">重启</a>
-                      <a href="javascript:update()" class="dropdown-item">更新</a>`
+                      <a href="javascript:restart()" class="dropdown-item">重启</a>`
                     : nothing }
                   `
                 : nothing }
@@ -164,7 +163,7 @@ export class LayoutSearchbar extends CustomElement {
                   注销 <span class="text-muted mx-3">${this.layout_username}</span>
                 </a>
                 <div class="dropdown-divider"></div>
-                <a href="https://wiki.nastool.cn" target="_blank" class="dropdown-item">帮助中心</a>
+                <a href="https://wiki.nastool.org" target="_blank" class="dropdown-item">帮助中心</a>
               </div>
             </div>
           </div>

@@ -6,9 +6,10 @@ from qbittorrentapi._attrdict import AttrDict
 from qbittorrentapi.definitions import Dictionary
 from qbittorrentapi.definitions import List
 from qbittorrentapi.definitions import ListEntry
-from qbittorrentapi.definitions import TorrentStates
+from qbittorrentapi.definitions import TorrentState
+from qbittorrentapi.definitions import TrackerStatus
 
-all_states = (
+torrent_all_states = [
     "error",
     "missingFiles",
     "uploading",
@@ -29,9 +30,9 @@ all_states = (
     "checkingResumeData",
     "moving",
     "unknown",
-)
+]
 
-downloading_states = (
+torrent_downloading_states = [
     "downloading",
     "metaDL",
     "forcedMetaDL",
@@ -40,74 +41,107 @@ downloading_states = (
     "pausedDL",
     "queuedDL",
     "forcedDL",
-)
+]
 
-uploading_states = ("uploading", "stalledUP", "checkingUP", "queuedUP", "forcedUP")
+torrent_uploading_states = [
+    "uploading",
+    "stalledUP",
+    "checkingUP",
+    "queuedUP",
+    "forcedUP",
+]
 
-complete_states = (
+torrent_complete_states = [
     "uploading",
     "stalledUP",
     "checkingUP",
     "pausedUP",
     "queuedUP",
     "forcedUP",
-)
+]
 
-checking_states = ("checkingUP", "checkingDL", "checkingResumeData")
+torrent_checking_states = ["checkingUP", "checkingDL", "checkingResumeData"]
 
-errored_states = ("missingFiles", "error")
+torrent_errored_states = ["missingFiles", "error"]
 
-paused_states = ("pausedUP", "pausedDL")
+torrent_paused_states = ["pausedUP", "pausedDL"]
 
 
 def test_torrent_states_exists():
-    assert isinstance(TorrentStates("unknown"), Enum)
+    assert isinstance(TorrentState("unknown"), Enum)
 
 
-@pytest.mark.parametrize("state", all_states)
+@pytest.mark.parametrize("state", torrent_all_states)
 def test_all_states(state):
-    assert TorrentStates(state) in TorrentStates
+    assert TorrentState(state) in TorrentState
 
 
-@pytest.mark.parametrize("state", downloading_states)
+@pytest.mark.parametrize("state", torrent_downloading_states)
 def test_downloading_states(state):
-    assert TorrentStates(state).is_downloading
+    assert TorrentState(state).is_downloading
 
 
-@pytest.mark.parametrize("state", uploading_states)
+@pytest.mark.parametrize("state", torrent_uploading_states)
 def test_uploading_states(state):
-    assert TorrentStates(state).is_uploading
+    assert TorrentState(state).is_uploading
 
 
-@pytest.mark.parametrize("state", complete_states)
+@pytest.mark.parametrize("state", torrent_complete_states)
 def test_completing_states(state):
-    assert TorrentStates(state).is_complete
+    assert TorrentState(state).is_complete
 
 
-@pytest.mark.parametrize("state", checking_states)
+@pytest.mark.parametrize("state", torrent_checking_states)
 def test_checking_states(state):
-    assert TorrentStates(state).is_checking
+    assert TorrentState(state).is_checking
 
 
-@pytest.mark.parametrize("state", errored_states)
+@pytest.mark.parametrize("state", torrent_errored_states)
 def test_errored_states(state):
-    assert TorrentStates(state).is_errored
+    assert TorrentState(state).is_errored
 
 
-@pytest.mark.parametrize("state", paused_states)
+@pytest.mark.parametrize("state", torrent_paused_states)
 def test_paused_states(state):
-    assert TorrentStates(state).is_paused
+    assert TorrentState(state).is_paused
+
+
+@pytest.mark.parametrize("status", [0, 1, 2, 3, 4])
+def test_tracker_statuses_exist(status):
+    assert isinstance(TrackerStatus(status), Enum)
+
+
+@pytest.mark.parametrize(
+    "status, display_value",
+    [
+        (0, "Disabled"),
+        (1, "Not contacted"),
+        (2, "Working"),
+        (3, "Updating"),
+        (4, "Not working"),
+    ],
+)
+def test_tracker_status_display(status, display_value):
+    assert TrackerStatus(status).display == display_value
 
 
 def test_testing_groups():
-    assert set(all_states) == {s.value for s in iter(TorrentStates)}
-    assert set(downloading_states) == {
-        s.value for s in TorrentStates if s.is_downloading
+    assert set(torrent_all_states) == {s.value for s in iter(TorrentState)}
+    assert set(torrent_downloading_states) == {
+        s.value for s in TorrentState if s.is_downloading
     }
-    assert set(uploading_states) == {s.value for s in TorrentStates if s.is_uploading}
-    assert set(complete_states) == {s.value for s in TorrentStates if s.is_complete}
-    assert set(checking_states) == {s.value for s in TorrentStates if s.is_checking}
-    assert set(errored_states) == {s.value for s in TorrentStates if s.is_errored}
+    assert set(torrent_uploading_states) == {
+        s.value for s in TorrentState if s.is_uploading
+    }
+    assert set(torrent_complete_states) == {
+        s.value for s in TorrentState if s.is_complete
+    }
+    assert set(torrent_checking_states) == {
+        s.value for s in TorrentState if s.is_checking
+    }
+    assert set(torrent_errored_states) == {
+        s.value for s in TorrentState if s.is_errored
+    }
 
 
 def test_dictionary():

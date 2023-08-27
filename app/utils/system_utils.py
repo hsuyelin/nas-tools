@@ -9,8 +9,7 @@ import psutil
 from app.utils.exception_utils import ExceptionUtils
 from app.utils.path_utils import PathUtils
 from app.utils.types import OsType
-from app.utils.string_utils import StringUtils
-from config import WEBDRIVER_PATH, Config
+from config import WEBDRIVER_PATH
 
 
 class SystemUtils:
@@ -98,18 +97,6 @@ class SystemUtils:
         return True if platform.system() == 'Darwin' else False
 
     @staticmethod
-    def is_macos_intel():
-        return SystemUtils.is_macos() and (True if "x86_64" in SystemUtils.execute('uname -a') else False)
-
-    @staticmethod
-    def is_macos_arm():
-        return SystemUtils.is_macos() and (True if "Apple" in SystemUtils.execute('sysctl machdep.cpu.brand_string') else False)
-
-    @staticmethod
-    def is_linux():
-        return True if platform.system() == 'Linux' else False
-
-    @staticmethod
     def is_lite_version():
         return True if SystemUtils.is_docker() \
                        and os.environ.get("NASTOOL_VERSION") == "lite" else False
@@ -118,19 +105,8 @@ class SystemUtils:
     def get_webdriver_path():
         if SystemUtils.is_lite_version():
             return None
-
-        return WEBDRIVER_PATH.get(SystemUtils.get_system().value)
-
-    @staticmethod
-    def chmod755(filePath):
-        if not os.path.exists(filePath):
-            return
-        if not SystemUtils.is_docker() \
-            and not SystemUtils.is_macos_intel() \
-            and not SystemUtils.is_macos_arm() \
-            and not SystemUtils.is_synology():
-            return
-        os.chmod(filePath, 0o755)
+        else:
+            return WEBDRIVER_PATH.get(SystemUtils.get_system().value)
 
     @staticmethod
     def copy(src, dest):

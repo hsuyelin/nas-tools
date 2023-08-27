@@ -51,7 +51,10 @@ class BoltUnhandledRequestError(BoltError):
         self.request = request
         self.body = request.body if request is not None else {}
         self.current_response = current_response
-        self.last_global_middleware_name = last_global_middleware_name</code></pre>
+        self.last_global_middleware_name = last_global_middleware_name
+
+    def __str__(self) -&gt; str:
+        return &#34;unhandled request error&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -112,7 +115,10 @@ class BoltUnhandledRequestError(BoltError):
         self.request = request
         self.body = request.body if request is not None else {}
         self.current_response = current_response
-        self.last_global_middleware_name = last_global_middleware_name</code></pre>
+        self.last_global_middleware_name = last_global_middleware_name
+
+    def __str__(self) -&gt; str:
+        return &#34;unhandled request error&#34;</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">

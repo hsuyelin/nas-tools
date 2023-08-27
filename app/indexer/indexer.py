@@ -22,13 +22,13 @@ class Indexer(object):
             'app.indexer.client',
             filter_func=lambda _, obj: hasattr(obj, 'client_id')
         )
-        log.info(f"【Indexer】加载索引器：{self._indexer_schemas}")
+        log.debug(f"【Indexer】加载索引器：{self._indexer_schemas}")
         self.init_config()
 
     def init_config(self):
         self.progress = ProgressHelper()
         self.dbhelper = DbHelper()
-        indexer = 'builtin'
+        indexer = Config().get_config("pt").get('search_indexer') or 'builtin'
         self._client = self.__get_client(indexer)
         if self._client:
             self._client_type = self._client.get_type()
@@ -42,13 +42,13 @@ class Indexer(object):
                 ExceptionUtils.exception_traceback(e)
         return None
 
-    def get_indexers(self, check=False, public=True, plugins=True):
+    def get_indexers(self, check=False):
         """
         获取当前索引器的索引站点
         """
         if not self._client:
             return []
-        return self._client.get_indexers(check=check, public=public, plugins=plugins)
+        return self._client.get_indexers(check=check)
 
     def get_indexer(self, url):
         """
@@ -58,7 +58,7 @@ class Indexer(object):
             return None
         return self._client.get_indexer(url)
 
-    def get_indexer_dict(self, check=True, public=True, plugins=True):
+    def get_indexer_dict(self, check=True):
         """
         获取用户已经选择的索引器字典
         """
@@ -68,7 +68,7 @@ class Indexer(object):
                 "name": index.name,
                 "domain": StringUtils.get_url_domain(index.domain),
                 "public": index.public,
-            } for index in self.get_indexers(check=check, public=public, plugins=plugins)
+            } for index in self.get_indexers(check=check)
         ]
 
     def get_indexer_hash_dict(self):
@@ -91,14 +91,14 @@ class Indexer(object):
         """
         return [indexer.name for indexer in self.get_indexers(check=True)]
 
-    def list_resources(self, indexer_id, page=0, keyword=None):
+    def list_resources(self, url, page=0, keyword=None):
         """
         获取内置索引器的资源列表
         :param url: 站点URL
         :param page: 页码
         :param keyword: 搜索关键字
         """
-        return self._client.list(indexer_id=indexer_id, page=page, keyword=keyword)
+        return self._client.list(url=url, page=page, keyword=keyword)
 
     def __get_client(self, ctype: [IndexerType, str], conf=None):
         return self.__build_class(ctype=ctype, conf=conf)
@@ -183,4 +183,4 @@ class Indexer(object):
         """
         获取索引器统计信息
         """
-        return self.dbhelper.get_indexer_statistics(self._client.get_client_id())
+        return self.dbhelper.get_indexer_statistics()

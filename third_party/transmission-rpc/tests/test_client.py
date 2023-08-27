@@ -154,13 +154,6 @@ def test_real_add_torrent_http(tr_client: Client):
     assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
 
 
-def test_real_add_torrent_not_endswith_torrent(tr_client: Client):
-    # The shorten url is ref to
-    # "https://github.com/Trim21/transmission-rpc/raw/master/tests/fixtures/iso.torrent"
-    tr_client.add_torrent("https://git.io/JJUVt")
-    assert len(tr_client.get_torrents()) == 1, "transmission should has at least 1 task"
-
-
 def test_real_stop(tr_client: Client, fake_hash_factory):
     info_hash = fake_hash_factory()
     url = hash_to_magnet(info_hash)

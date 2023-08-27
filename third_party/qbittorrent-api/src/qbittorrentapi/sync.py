@@ -18,7 +18,7 @@ class SyncTorrentPeersDictionary(Dictionary):
 
 class Sync(ClientCache):
     """
-    Alows interaction with the ``Sync`` API endpoints.
+    Allows interaction with the ``Sync`` API endpoints.
 
     Usage:
         >>> from qbittorrentapi import Client

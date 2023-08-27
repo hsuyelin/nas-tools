@@ -967,7 +967,7 @@
             <span class="dropzone-msg-desc">点击或者拖动种子文件到此处</span>
           </div>
         </form>
-        <textarea class="form-control mt-2" id="torrent_urls" rows="8" placeholder="https://xxxx或magnet:?xt=xxxx，换行添加多个链接" aria-label=""></textarea>
+        <textarea class="form-control mt-2" id="torrent_urls" rows="8" placeholder="https://xxxx，换行添加多个链接" aria-label=""></textarea>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">取消</button>
@@ -1120,6 +1120,51 @@
     </div>
   </div>
 </div>
+<!-- 用户认证 -->
+<div class="modal modal-blur fade" id="modal-user-auth" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">用户认证</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="mb-3">
+            <label class="form-label">合作站点</label>
+            <select type="text" class="form-select" id="user_auth_site" onchange="switch_cooperation_sites(this)">
+              {% for SiteId, SiteAttr in CooperationSites.items() %}
+                <option value="{{ SiteId }}" data-custom-properties="&lt;span class=&quot;avatar avatar-xs&quot; style=&quot;background-image: url({{ SiteAttr.icon }})&quot;&gt;&lt;/span&gt;">{{ SiteAttr.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        {% for SiteId, SiteAttr in CooperationSites.items() %}
+        <div class="row user_auth_params" id="user_auth_{{ SiteId }}_params" style="{% if loop.index0 != 0 %}display:none{% endif %}">
+          {% for ParamId, ParamAttr in SiteAttr.params.items() %}
+          {% if ParamAttr.name %}
+          <div class="col-12 col-lg">
+            <div class="mb-3">
+              <label class="form-label">{{ ParamAttr.name }} <span class="form-help"
+                                                               title="{{ ParamAttr.tooltip }}"
+                                                               data-bs-toggle="tooltip">?</span></label>
+              <input type="{{ ParamAttr.type }}" id="{{ SiteId }}_{{ ParamId }}" class="form-control" placeholder="{{ ParamAttr.placeholder }}">
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="user_auth_btn" title="认证" onclick="user_auth()">
+          认证
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 <cmd-dialog theme="light"></cmd-dialog>
 <!-- 载入tabler组件 -->
 <script src="../static/js/tabler/tabler.min.js"></script>
@@ -1155,6 +1200,14 @@
         }
     });
 
+    // 浏览器关闭事件
+    window.addEventListener("beforeunload", function() {
+      // 关闭连接
+      stop_message();
+      stop_logging();
+      stop_progress();
+    });
+
     // tooltip点击事件处理，阻止冒泡到上级元素，避免比如`点击tooltip切换了switch`的问题
     $('body').on('click', 'span[data-bs-toggle="tooltip"]', function (e) {
       e.preventDefault();
@@ -1165,6 +1218,9 @@
     DefaultTransferMode = '{{ SyncMod }}';
     DefaultPath = "{{ DefaultPath }}";
 
+    // TomSelect下拉框
+    init_tomselect();
+
     // Dropzone配置
     init_dropzone();
 
@@ -1174,6 +1230,9 @@
     {% if not TMDBFlag %}
       // 检查tmdb配置
       show_init_alert_modal();
+    {% elif current_user.level == 1 %}
+      // 用户认证
+      show_user_auth_modal();
     {% endif %}
 
   });
@@ -1220,6 +1279,7 @@
 <style>
   {{ CustomScriptCfg.css|safe or "" }}
 </style>
+
 <!-- 用户自定义JavaScript -->
 <script type="text/javascript">
   {{ CustomScriptCfg.javascript|safe or "" }}

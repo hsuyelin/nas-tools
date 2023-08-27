@@ -66,12 +66,22 @@ class TestAsyncAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)
 
         result = await authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 2)
 
     @pytest.mark.asyncio
@@ -90,12 +100,22 @@ class TestAsyncAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)
 
         result = await authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)  # cached
 
     @pytest.mark.asyncio
@@ -115,12 +135,22 @@ class TestAsyncAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)
 
         result = await authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 2)
 
     @pytest.mark.asyncio
@@ -141,12 +171,22 @@ class TestAsyncAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)
 
         result = await authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)  # cached
 
     @pytest.mark.asyncio
@@ -161,6 +201,11 @@ class TestAsyncAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token == "xoxp-valid"
+        assert result.user_id == "W99999"
+        assert result.user == "some-user"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)
 
         result = await authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
@@ -185,12 +230,22 @@ class TestAsyncAuthorize:
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token == "xoxp-valid"
+        assert result.user_id == "W99999"
+        assert result.user == "some-user"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)
 
         result = await authorize(context=context, enterprise_id="E111", team_id="T0G9PQBBK", user_id="W11111")
         assert result.bot_id == "BZYBOTHED"
         assert result.bot_user_id == "W23456789"
         assert result.user_token == "xoxp-valid"
+        assert result.user_id == "W99999"
+        assert result.user == "some-user"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)  # cached
 
     @pytest.mark.asyncio
@@ -204,6 +259,11 @@ class TestAsyncAuthorize:
         assert result.bot_user_id == "W23456789"
         assert result.bot_token == "xoxb-valid"
         assert result.user_token == "xoxp-valid"
+        assert result.user_id == "W99999"
+        assert result.user == "some-user"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)
 
     @pytest.mark.asyncio
@@ -236,6 +296,11 @@ class TestAsyncAuthorize:
         assert result.bot_user_id == "W23456789"
         assert result.bot_token == "xoxb-valid-refreshed"
         assert result.user_token == "xoxp-valid-refreshed"
+        assert result.user_id == "W99999"
+        assert result.user == "some-user"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)
 
     @pytest.mark.asyncio
@@ -249,6 +314,11 @@ class TestAsyncAuthorize:
         assert result.bot_user_id == "W23456789"
         assert result.bot_token == "xoxb-valid"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)
 
     @pytest.mark.asyncio
@@ -281,6 +351,11 @@ class TestAsyncAuthorize:
         assert result.bot_user_id == "W23456789"
         assert result.bot_token == "xoxb-valid-refreshed"
         assert result.user_token is None
+        assert result.user_id is None
+        assert result.user == "bot"
+        assert result.team_id == "T0G9PQBBK"
+        assert result.team == "Subarachnoid Workspace"
+        assert result.url == "https://subarachnoid.slack.com/"
         await assert_auth_test_count_async(self, 1)
 
 

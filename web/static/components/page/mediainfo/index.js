@@ -242,7 +242,7 @@ export class PageMediainfo extends CustomElement {
                 card-tmdbid=${item.id}
                 card-mediatype=${item.type}
                 card-showsub=1
-                card-image=${'/img?url='+item.image}
+                card-image=${item.image}
                 card-fav=${item.fav}
                 card-vote=${item.vote}
                 card-year=${item.year}
@@ -271,7 +271,7 @@ export class PageMediainfo extends CustomElement {
                 card-tmdbid=${item.id}
                 card-mediatype=${item.type}
                 card-showsub=1
-                card-image=${'/img?url='+item.image}
+                card-image=${item.image}
                 card-fav=${item.fav}
                 card-vote=${item.vote}
                 card-year=${item.year}

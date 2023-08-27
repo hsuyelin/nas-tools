@@ -1,6 +1,8 @@
 from logging import Logger
+from types import TracebackType
 from typing import Optional
 from typing import Text
+from typing import Type
 
 from qbittorrentapi._types import KwargsT
 from qbittorrentapi.definitions import ClientCache
@@ -36,3 +38,10 @@ class AuthAPIMixIn(Request):
     def _SID(self) -> Optional[Text]: ...
     def _session_cookie(self, cookie_name: Text = "SID") -> Optional[Text]: ...
     def auth_log_out(self, **kwargs: KwargsT) -> None: ...
+    def __enter__(self) -> "AuthAPIMixIn": ...
+    def __exit__(
+        self,
+        exctype: Optional[Type[BaseException]],
+        excinst: Optional[BaseException],
+        exctb: Optional[TracebackType],
+    ) -> bool: ...

@@ -49,3 +49,11 @@ class TestRespondInternals:
         assert message is not None
         assert message.get("unfurl_links") is True
         assert message.get("unfurl_media") is True
+
+    def test_metadata(self):
+        message = _build_message(
+            text="Hi there!", response_type="in_channel", metadata={"event_type": "foo", "event_payload": {"foo": "bar"}}
+        )
+        assert message is not None
+        assert message.get("metadata").get("event_type") == "foo"
+        assert message.get("metadata").get("event_payload") == {"foo": "bar"}

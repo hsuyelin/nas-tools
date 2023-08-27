@@ -24,8 +24,6 @@ let ProgressES;
 let LoggingSource = "";
 // 日志EventSource
 let LoggingES;
-// 是否存量消息刷新
-let OldMessageFlag = true;
 // 消息WebSocket
 let MessageWS;
 // 当前协议
@@ -33,6 +31,8 @@ let WSProtocol = "ws://";
 if (window.location.protocol === "https:") {
   WSProtocol = "wss://"
 }
+// 页面加载的时间
+let PageLoadedTime = new Date();
 
 
 /**
@@ -240,8 +240,17 @@ function logger_select(source) {
   start_logging();
 }
 
+// 停止消息服务
+function stop_message() {
+  if (MessageWS) {
+    MessageWS.close();
+    MessageWS = undefined;
+  }
+}
+
 // 连接消息服务
 function connect_message() {
+  stop_message();
   MessageWS = new ReconnectingWebSocket(WSProtocol + window.location.host + '/message');
   MessageWS.onmessage = function (event) {
     render_message(JSON.parse(event.data))
@@ -279,12 +288,14 @@ function render_message(ret) {
       // 滚动到顶部
       $(".offcanvas-body").animate({scrollTop: 0}, 300);
       // 浏览器消息提醒
-      if (!OldMessageFlag && !$("#offcanvasEnd").is(":hidden")) {
-        browserNotification(msg.title, msg.content);
+      if (!$("#offcanvasEnd").is(":hidden")) {
+        // 判断消息时间是否大于页面打开时间
+        let message_time = new Date(msg.time.replace(/-/g, '/'));
+        if (message_time > PageLoadedTime) {
+          browserNotification(msg.title, msg.content);
+        }
       }
     }
-    // 非旧消息
-    OldMessageFlag = false;
   }
   // 下一次处理
   if (lst_time) {
@@ -331,23 +342,6 @@ function restart() {
   });
 }
 
-//更新
-function update(version) {
-  let title;
-  if (version) {
-    title = "是否确认更新到 " + version + " 版本？";
-  } else {
-    title = "将从Github拉取最新程序代码并重启，是否确认？";
-  }
-  show_confirm_modal(title, function () {
-    hide_confirm_modal();
-    ajax_post("update_system", {}, function (ret) {
-    }, true, false)
-    show_wait_modal(true);
-    setTimeout("check_system_online()", 5000);
-  });
-}
-
 // 显示配置不完整提示
 function show_init_alert_modal() {
   GlobalModalAbort = false;
@@ -356,6 +350,62 @@ function show_init_alert_modal() {
     navmenu('basic');
   });
 }
+
+// 显示用户认证对话框
+function show_user_auth_modal() {
+  GlobalModalAbort = false;
+  $("#modal-user-auth").modal("show");
+}
+
+// 用户认证
+function user_auth() {
+  $("#user_auth_btn").text("认证中...").prop("disabled", true);
+  let siteid = $("#user_auth_site").val();
+  let params = input_select_GetVal(`user_auth_${siteid}_params`, `${siteid}_`);
+  ajax_post("auth_user_level", {site: siteid, params: params}, function (ret) {
+    GlobalModalAbort = true;
+    $("#modal-user-auth").modal("hide");
+    $("#user_auth_btn").prop("disabled", false).text("认证");
+    if (ret.code === 0) {
+      window.location.reload();
+    } else {
+      show_fail_modal(ret.msg);
+    }
+  }, true, false);
+}
+
+// 初始化tomselect
+function init_tomselect() {
+  let el;
+  window.TomSelect && (new TomSelect(el = document.getElementById('user_auth_site'), {
+    copyClassesToDropdown: false,
+    dropdownClass: 'dropdown-menu ts-dropdown',
+    optionClass: 'dropdown-item',
+    controlInput: '<input>',
+    render: {
+      item: function (data, escape) {
+        if (data.customProperties) {
+          return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
+        }
+        return '<div>' + escape(data.text) + '</div>';
+      },
+      option: function (data, escape) {
+        if (data.customProperties) {
+          return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
+        }
+        return '<div>' + escape(data.text) + '</div>';
+      },
+    },
+  }));
+}
+
+// TomSelect响应事件
+function switch_cooperation_sites(obj) {
+  let siteid = $(obj).val();
+  $(".user_auth_params").hide();
+  $(`#user_auth_${siteid}_params`).show();
+}
+
 // 停止刷新进度条
 function stop_progress() {
   if (ProgressES) {

@@ -13,7 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        transmission: [ 'version-3.00-r8', '4.0.3' ]
+        python: [ "3.7", "3.8", "3.9", "3.10", "3.11" ]
+
+    services:
+      transmission:
+        image: linuxserver/transmission:${{ matrix.transmission }}
+        ports:
+          - 8080:9091
+          - 6881:6881
+        env:
+          UID: '1000'
+          TZ: Etc/UTC
+          USER: admin
+          PASS: my-secret-password
 
     steps:
       - uses: actions/checkout@v3
@@ -24,19 +37,16 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      - uses: Trim21/setup-poetry@dist/v1
+      - uses: trim21/setup-poetry@dist/v1
 
-      - uses: Trim21/install-poetry-project@dist/v1
-
-      - name: setup test env
-        run: docker-compose -f tests/docker-compose.yaml up -d
+      - uses: trim21/install-poetry-project@dist/v1
 
       - name: test
         run: coverage run -m pytest
         env:
           TR_PORT: 8080
           TR_USER: admin
-          TR_PASSWORD: mysecretpassword
+          TR_PASSWORD: my-secret-password
 
       - run: bash <(curl -s https://codecov.io/bash) -F ${{ matrix.python }}
 
@@ -49,7 +59,7 @@ jobs:
         with:
           python-version: "3.x"
 
-      - uses: Trim21/setup-poetry@dist/v1
+      - uses: trim21/setup-poetry@dist/v1
 
       - run: poetry build
 

@@ -21,6 +21,7 @@ from flask_compress import Compress
 from flask_login import LoginManager, login_user, login_required, current_user
 from flask_sock import Sock
 from icalendar import Calendar, Event, Alarm
+from simple_websocket import ConnectionClosed
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import log
@@ -28,7 +29,7 @@ from app.brushtask import BrushTask
 from app.conf import ModuleConf, SystemConfig
 from app.downloader import Downloader
 from app.filter import Filter
-from app.helper import SecurityHelper, MetaHelper, ChromeHelper, ThreadHelper, FfmpegHelper
+from app.helper import SecurityHelper, MetaHelper, ChromeHelper, ThreadHelper
 from app.indexer import Indexer
 from app.media.meta import MetaInfo
 from app.mediaserver import MediaServer
@@ -215,6 +216,7 @@ def web():
     Indexers = Indexer().get_indexers()
     SearchSource = "douban" if Config().get_config("laboratory").get("use_douban_titles") else "tmdb"
     CustomScriptCfg = SystemConfig().get(SystemConfigKey.CustomScript)
+    CooperationSites = current_user.get_authsites()
     Menus = WebAction().get_user_menus().get("menus") or []
     Commands = WebAction().get_commands()
     return render_template('navigation.html',
@@ -231,6 +233,7 @@ def web():
                            Indexers=Indexers,
                            SearchSource=SearchSource,
                            CustomScriptCfg=CustomScriptCfg,
+                           CooperationSites=CooperationSites,
                            DefaultPath=DefaultPath,
                            Menus=Menus,
                            Commands=Commands)
@@ -255,19 +258,15 @@ def index():
     # 磁盘空间
     LibrarySpaces = WebAction().get_library_spacesize()
 
-    # 我的媒体库是否精简显示
-    mediaLibraryIsSimpleShow = Config().get_config("laboratory").get('simplify_my_media_library')
-
     # 媒体库
-    Librarys = [] if mediaLibraryIsSimpleShow else MediaServer().get_libraries()
+    Librarys = MediaServer().get_libraries()
     LibrarySyncConf = SystemConfig().get(SystemConfigKey.SyncLibrary) or []
 
     # 继续观看
     Resumes = MediaServer().get_resume()
 
     # 最近添加
-    Latests = [] if mediaLibraryIsSimpleShow else MediaServer().get_latest()
-
+    Latests = MediaServer().get_latest()
 
     return render_template("index.html",
                            ServerSucess=ServerSucess,
@@ -285,8 +284,7 @@ def index():
                            Librarys=Librarys,
                            LibrarySyncConf=LibrarySyncConf,
                            Resumes=Resumes,
-                           Latests=Latests,
-                           mediaLibraryIsSimpleShow=mediaLibraryIsSimpleShow
+                           Latests=Latests
                            )
 
 
@@ -393,7 +391,7 @@ def sites():
 @App.route('/sitelist', methods=['POST', 'GET'])
 @login_required
 def sitelist():
-    IndexerSites = Indexer().get_indexer_dict(check=False, public=True, plugins=True)
+    IndexerSites = Indexer().get_indexer_dict(check=False)
     return render_template("site/sitelist.html",
                            Sites=IndexerSites,
                            Count=len(IndexerSites))
@@ -404,22 +402,23 @@ def sitelist():
 def open_app():
     return render_template("openapp.html")
 
+
 # 站点资源页面
 @App.route('/resources', methods=['POST', 'GET'])
 @login_required
 def resources():
-    site_id = request.args.get("site")
+    site_domain = request.args.get("site")
     site_name = request.args.get("title")
     page = request.args.get("page") or 0
     keyword = request.args.get("keyword")
     Results = WebAction().list_site_resources({
-        "id": site_id,
+        "site": site_domain,
         "page": page,
         "keyword": keyword
     }).get("data") or []
     return render_template("site/resources.html",
                            Results=Results,
-                           SiteId=site_id,
+                           SiteDomain=site_domain,
                            Title=site_name,
                            KeyWord=keyword,
                            TotalCount=len(Results),
@@ -851,7 +850,6 @@ def basic():
     RmtModeDict = WebAction().get_rmt_modes()
     CustomScriptCfg = SystemConfig().get(SystemConfigKey.CustomScript)
     ScraperConf = SystemConfig().get(SystemConfigKey.UserScraperConf) or {}
-    support_ffmpeg = FfmpegHelper.is_ffmpeg_supported()
     return render_template("setting/basic.html",
                            Config=Config().get_config(),
                            Proxy=proxy,
@@ -860,8 +858,7 @@ def basic():
                            CurrentUser=current_user,
                            ScraperNfo=ScraperConf.get("scraper_nfo") or {},
                            ScraperPic=ScraperConf.get("scraper_pic") or {},
-                           TmdbDomains=TMDB_API_DOMAINS,
-                           support_ffmpeg=support_ffmpeg)
+                           TmdbDomains=TMDB_API_DOMAINS)
 
 
 # 自定义识别词设置页面
@@ -1683,6 +1680,7 @@ def stream_logging():
     """
     实时日志EventSources响应
     """
+
     def __logging(_source=""):
         """
         实时日志
@@ -1716,6 +1714,7 @@ def stream_progress():
     """
     实时日志EventSources响应
     """
+
     def __progress(_type):
         """
         实时日志
@@ -1739,7 +1738,11 @@ def message_handler(ws):
     消息中心WebSocket
     """
     while True:
-        data = ws.receive()
+        try:
+            data = ws.receive(timeout=10)
+        except ConnectionClosed:
+            print("WebSocket连接已关闭！")
+            break
         if not data:
             continue
         try:

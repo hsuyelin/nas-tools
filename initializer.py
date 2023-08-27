@@ -327,7 +327,7 @@ def update_config():
     try:
         tmdb_proxy = Config().get_config('laboratory').get("tmdb_proxy")
         if tmdb_proxy:
-            _config['app']['tmdb_domain'] = 'tmdb.nastool.cn'
+            _config['app']['tmdb_domain'] = 'tmdb.nastool.org'
             _config['laboratory'].pop("tmdb_proxy")
             overwrite_cofig = True
     except Exception as e:

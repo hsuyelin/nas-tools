@@ -16,7 +16,7 @@ quick start
 
 .. seealso::
 
-   :py:func:`transmission_rpc.client.Client.add_torrent`
+   :py:meth:`transmission_rpc.client.Client.add_torrent`
 
 Example
 =======
@@ -65,6 +65,7 @@ you can find rpc version by transmission version from
 
     client.rst
     torrent.rst
+    const.rst
     session.rst
     errors.rst
     utils.rst

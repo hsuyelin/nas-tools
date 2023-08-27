@@ -1,6 +1,5 @@
 import pytest
 
-from qbittorrentapi._version_support import v
 from qbittorrentapi.transfer import TransferInfoDictionary
 
 
@@ -80,19 +79,22 @@ def test_upload_limit(client):
     assert client.transfer.uploadLimit == 5120
 
 
-def test_ban_peers(client, api_version):
-    if v(api_version) >= v("2.3"):
-        client.transfer_ban_peers(peers="1.1.1.1:8080")
-        assert "1.1.1.1" in client.app.preferences.banned_IPs
-        client.transfer.ban_peers(peers="1.1.1.2:8080")
-        assert "1.1.1.2" in client.app.preferences.banned_IPs
+@pytest.mark.skipif_before_api_version("2.3")
+def test_ban_peers(client):
+    client.transfer_ban_peers(peers="1.1.1.1:8080")
+    assert "1.1.1.1" in client.app.preferences.banned_IPs
+    client.transfer.ban_peers(peers="1.1.1.2:8080")
+    assert "1.1.1.2" in client.app.preferences.banned_IPs
 
-        client.transfer_ban_peers(peers=["1.1.1.3:8080", "1.1.1.4:8080"])
-        assert "1.1.1.3" in client.app.preferences.banned_IPs
-        assert "1.1.1.4" in client.app.preferences.banned_IPs
-        client.transfer.ban_peers(peers=["1.1.1.5:8080", "1.1.1.6:8080"])
-        assert "1.1.1.5" in client.app.preferences.banned_IPs
-        assert "1.1.1.6" in client.app.preferences.banned_IPs
-    else:
-        with pytest.raises(NotImplementedError):
-            client.transfer_ban_peers(peers="1.1.1.1:8080")
+    client.transfer_ban_peers(peers=["1.1.1.3:8080", "1.1.1.4:8080"])
+    assert "1.1.1.3" in client.app.preferences.banned_IPs
+    assert "1.1.1.4" in client.app.preferences.banned_IPs
+    client.transfer.ban_peers(peers=["1.1.1.5:8080", "1.1.1.6:8080"])
+    assert "1.1.1.5" in client.app.preferences.banned_IPs
+    assert "1.1.1.6" in client.app.preferences.banned_IPs
+
+
+@pytest.mark.skipif_after_api_version("2.3")
+def test_ban_peers_not_implemented(client):
+    with pytest.raises(NotImplementedError):
+        client.transfer_ban_peers(peers="1.1.1.1:8080")

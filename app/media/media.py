@@ -38,7 +38,6 @@ class Media:
     _search_tmdbweb = None
     _chatgpt_enable = None
     _default_language = None
-    _tmdb_include_adult = None
 
     def __init__(self):
         self.init_config()
@@ -55,8 +54,6 @@ class Media:
         self._chatgpt_enable = laboratory.get("chatgpt_enable")
         # 默认语言
         self._default_language = media.get("tmdb_language", "zh") or "zh"
-        # TMDB是否包含成人内容
-        self._tmdb_include_adult = media.get("include_adult", "False") or "False"
         # TMDB
         if app.get('rmt_tmdbkey'):
             # TMDB主体
@@ -71,8 +68,6 @@ class Media:
             self.tmdb.language = self._default_language
             # 代理
             self.tmdb.proxies = Config().get_proxies()
-            # 是否包含成人内容
-            self.tmdb.include_adult = self._tmdb_include_adult
             # 调试模式
             self.tmdb.debug = False
             # 查询对象
@@ -906,7 +901,7 @@ class Media:
                 # 没有自带TMDB信息
                 if not tmdb_info:
                     # 识别名称
-                    meta_info = MetaInfo(title=file_name, filePath=file_path)
+                    meta_info = MetaInfo(title=file_name)
                     # 识别不到则使用上级的名称
                     if not meta_info.get_name() or not meta_info.year:
                         parent_info = MetaInfo(parent_name)
@@ -994,7 +989,7 @@ class Media:
                     meta_info.set_tmdb_info(file_media_info)
                 # 自带TMDB信息
                 else:
-                    meta_info = MetaInfo(title=file_name, mtype=media_type, filePath=file_path)
+                    meta_info = MetaInfo(title=file_name, mtype=media_type)
                     meta_info.set_tmdb_info(tmdb_info)
                     if season and meta_info.type != MediaType.MOVIE:
                         meta_info.begin_season = int(season)

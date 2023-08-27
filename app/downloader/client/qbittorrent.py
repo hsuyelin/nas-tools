@@ -38,8 +38,7 @@ class Qbittorrent(_IDownloadClient):
         # 种子自动管理模式，根据下载路径设置为下载器设置分类
         self.init_torrent_management()
         # 设置未完成种子添加!qb后缀
-        if self.qbc:
-            self.qbc.app_set_preferences({"incomplete_files_ext": True})
+        self.qbc.app_set_preferences({"incomplete_files_ext": True})
 
     def init_config(self):
         if self._client_config:
@@ -126,7 +125,7 @@ class Qbittorrent(_IDownloadClient):
                 # 如果分类存在，但是路径不一致，则更新
                 if os.path.normpath(category_item.get("savePath")) != os.path.normpath(save_path):
                     self.__update_category(name=label, save_path=save_path, is_edit=True)
-                    
+
     def __get_qb_category(self):
         """
         查询下载器中已设置的分类
@@ -134,7 +133,7 @@ class Qbittorrent(_IDownloadClient):
         if not self.qbc:
             return {}
         return self.qbc.torrent_categories.categories or {}
-    
+
     def __get_qb_auto(self):
         """
         查询下载器是否开启自动管理
@@ -233,13 +232,11 @@ class Qbittorrent(_IDownloadClient):
         :param ids: 种子Hash列表
         :param tag: 标签内容
         """
-        if not self.qbc:
-            return None
         try:
             return self.qbc.torrents_delete_tags(torrent_hashes=ids, tags=tag)
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
-            return None
+            return False
 
     def set_torrents_status(self, ids, tags=None):
         """
@@ -250,25 +247,6 @@ class Qbittorrent(_IDownloadClient):
         try:
             # 打标签
             self.qbc.torrents_add_tags(tags="已整理", torrent_hashes=ids)
-        except Exception as err:
-            ExceptionUtils.exception_traceback(err)
-
-    def set_torrents_tag(self, ids, tags):
-        """
-        设置种子标签，以及是否强制做种
-        """
-        if not self.qbc:
-            return
-        try:
-            # 打标签
-            
-            torrents, error_flag = self.get_torrents(ids=ids)
-            if error_flag:
-                return None
-            for torrent in torrents:
-                old_tags = list(map(lambda s: s.strip(), (torrent.get("tags") or "").split(",")))
-                self.qbc.torrents_remove_tags(old_tags, torrent_hashes=ids)
-                self.qbc.torrents_add_tags(tags, torrent_hashes=ids)
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
 
@@ -675,6 +653,21 @@ class Qbittorrent(_IDownloadClient):
             return False
         try:
             return self.qbc.torrents_recheck(torrent_hashes=ids)
+        except Exception as err:
+            ExceptionUtils.exception_traceback(err)
+            return False
+
+    def get_client_speed(self):
+        if not self.qbc:
+            return False
+        try:
+            transfer_info = self.qbc.transfer.info
+            if transfer_info:
+                return {
+                    "up_speed": transfer_info.get('up_info_speed'),
+                    "dl_speed": transfer_info.get('dl_info_speed')
+                }
+            return False
         except Exception as err:
             ExceptionUtils.exception_traceback(err)
             return False

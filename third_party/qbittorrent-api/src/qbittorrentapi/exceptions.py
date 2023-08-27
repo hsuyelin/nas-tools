@@ -31,16 +31,16 @@ class APIConnectionError(RequestException, APIError):
 
 
 class LoginFailed(APIConnectionError):
-    """This can technically be raised with any request since log in may be
-    attempted for any request and could fail."""
+    """This can technically be raised with any request since log in may be attempted for
+    any request and could fail."""
 
 
 class HTTPError(RequestsHTTPError, APIConnectionError):
     """
     Base error for all HTTP errors.
 
-    All errors following a successful connection to qBittorrent are
-    returned as HTTP statuses.
+    All errors following a successful connection to qBittorrent are returned as HTTP
+    statuses.
     """
 
     http_status_code = None
@@ -115,13 +115,11 @@ class Unauthorized401Error(HTTP401Error):
 
 
 class Forbidden403Error(HTTP403Error):
-    """Not logged in, IP has been banned, or calling an API method that isn't
-    public."""
+    """Not logged in, IP has been banned, or calling an API method that isn't public."""
 
 
 class NotFound404Error(HTTP404Error):
-    """This should mean qBittorrent couldn't find a torrent for the torrent
-    hash."""
+    """This should mean qBittorrent couldn't find a torrent for the torrent hash."""
 
 
 class MethodNotAllowed405Error(HTTP405Error):
@@ -138,5 +136,4 @@ class UnsupportedMediaType415Error(HTTP415Error):
 
 
 class InternalServerError500Error(HTTP500Error):
-    """Returned if qBittorrent errors internally while processing the
-    request."""
+    """Returned if qBittorrent errors internally while processing the request."""

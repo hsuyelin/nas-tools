@@ -19,7 +19,7 @@ from qbittorrentapi.app import AppAPIMixIn
 from qbittorrentapi.definitions import ClientCache
 from qbittorrentapi.definitions import List
 from qbittorrentapi.definitions import ListEntry
-from qbittorrentapi.definitions import TorrentStates
+from qbittorrentapi.definitions import TorrentState
 
 logger: Logger
 
@@ -53,7 +53,7 @@ class TorrentDictionary(JsonDictionaryT):
     def __init__(self, data: DictInputT, client: TorrentsAPIMixIn) -> None: ...
     def sync_local(self) -> None: ...
     @property
-    def state_enum(self) -> TorrentStates: ...
+    def state_enum(self) -> TorrentState: ...
     @property
     def info(self) -> TorrentDictionary: ...
     def resume(self, **kwargs: KwargsT) -> None: ...
@@ -634,7 +634,7 @@ class TorrentsAPIMixIn(AppAPIMixIn):
         use_download_path: Optional[bool] = None,
         stop_condition: Optional[Literal["MetadataReceived", "FilesChecked"]] = None,
         **kwargs: KwargsT
-    ) -> Text: ...
+    ) -> Literal["Ok.", "Fails."]: ...
     @staticmethod
     def _normalize_torrent_files(
         user_files: TorrentFilesT,

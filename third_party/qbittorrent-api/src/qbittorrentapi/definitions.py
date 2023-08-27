@@ -26,16 +26,16 @@ class APINames(Enum):
     EMPTY = ""
 
 
-class TorrentStates(Enum):
+class TorrentState(Enum):
     """
     Torrent States as defined by qBittorrent.
 
     Definitions:
         - wiki: `<https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-torrent-list>`_
-        - code: `<https://github.com/qbittorrent/qBittorrent/blob/master/src/base/bittorrent/torrent.h#L73>`_
+        - code: `<https://github.com/qbittorrent/qBittorrent/blob/5dcc14153f046209f1067299494a82e5294d883a/src/base/bittorrent/torrent.h#L73>`_
 
     :Usage:
-        >>> from qbittorrentapi import Client, TorrentStates
+        >>> from qbittorrentapi import Client, TorrentState
         >>> client = Client()
         >>> # print torrent hashes for torrents that are downloading
         >>> for torrent in client.torrents_info():
@@ -43,7 +43,7 @@ class TorrentStates(Enum):
         >>>     if torrent.state_enum.is_downloading:
         >>>         print(f'{torrent.hash} is downloading...')
         >>>     # the appropriate enum member can be directly derived
-        >>>     state_enum = TorrentStates(torrent.state)
+        >>>     state_enum = TorrentState(torrent.state)
         >>>     print(f'{torrent.hash}: {state_enum.value}')
     """
 
@@ -72,57 +72,96 @@ class TorrentStates(Enum):
     def is_downloading(self):
         """Returns ``True`` if the State is categorized as Downloading."""
         return self in {
-            TorrentStates.DOWNLOADING,
-            TorrentStates.METADATA_DOWNLOAD,
-            TorrentStates.FORCED_METADATA_DOWNLOAD,
-            TorrentStates.STALLED_DOWNLOAD,
-            TorrentStates.CHECKING_DOWNLOAD,
-            TorrentStates.PAUSED_DOWNLOAD,
-            TorrentStates.QUEUED_DOWNLOAD,
-            TorrentStates.FORCED_DOWNLOAD,
+            TorrentState.DOWNLOADING,
+            TorrentState.METADATA_DOWNLOAD,
+            TorrentState.FORCED_METADATA_DOWNLOAD,
+            TorrentState.STALLED_DOWNLOAD,
+            TorrentState.CHECKING_DOWNLOAD,
+            TorrentState.PAUSED_DOWNLOAD,
+            TorrentState.QUEUED_DOWNLOAD,
+            TorrentState.FORCED_DOWNLOAD,
         }
 
     @property
     def is_uploading(self):
         """Returns ``True`` if the State is categorized as Uploading."""
         return self in {
-            TorrentStates.UPLOADING,
-            TorrentStates.STALLED_UPLOAD,
-            TorrentStates.CHECKING_UPLOAD,
-            TorrentStates.QUEUED_UPLOAD,
-            TorrentStates.FORCED_UPLOAD,
+            TorrentState.UPLOADING,
+            TorrentState.STALLED_UPLOAD,
+            TorrentState.CHECKING_UPLOAD,
+            TorrentState.QUEUED_UPLOAD,
+            TorrentState.FORCED_UPLOAD,
         }
 
     @property
     def is_complete(self):
         """Returns ``True`` if the State is categorized as Complete."""
         return self in {
-            TorrentStates.UPLOADING,
-            TorrentStates.STALLED_UPLOAD,
-            TorrentStates.CHECKING_UPLOAD,
-            TorrentStates.PAUSED_UPLOAD,
-            TorrentStates.QUEUED_UPLOAD,
-            TorrentStates.FORCED_UPLOAD,
+            TorrentState.UPLOADING,
+            TorrentState.STALLED_UPLOAD,
+            TorrentState.CHECKING_UPLOAD,
+            TorrentState.PAUSED_UPLOAD,
+            TorrentState.QUEUED_UPLOAD,
+            TorrentState.FORCED_UPLOAD,
         }
 
     @property
     def is_checking(self):
         """Returns ``True`` if the State is categorized as Checking."""
         return self in {
-            TorrentStates.CHECKING_UPLOAD,
-            TorrentStates.CHECKING_DOWNLOAD,
-            TorrentStates.CHECKING_RESUME_DATA,
+            TorrentState.CHECKING_UPLOAD,
+            TorrentState.CHECKING_DOWNLOAD,
+            TorrentState.CHECKING_RESUME_DATA,
         }
 
     @property
     def is_errored(self):
         """Returns ``True`` if the State is categorized as Errored."""
-        return self in {TorrentStates.MISSING_FILES, TorrentStates.ERROR}
+        return self in {TorrentState.MISSING_FILES, TorrentState.ERROR}
 
     @property
     def is_paused(self):
         """Returns ``True`` if the State is categorized as Paused."""
-        return self in {TorrentStates.PAUSED_UPLOAD, TorrentStates.PAUSED_DOWNLOAD}
+        return self in {TorrentState.PAUSED_UPLOAD, TorrentState.PAUSED_DOWNLOAD}
+
+
+TorrentStates = TorrentState
+
+
+class TrackerStatus(Enum):
+    """
+    Tracker Statuses as defined by qBittorrent.
+
+    Definitions:
+        - wiki: `<https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)#get-torrent-trackers>`_
+        - code: `<https://github.com/qbittorrent/qBittorrent/blob/5dcc14153f046209f1067299494a82e5294d883a/src/base/bittorrent/trackerentry.h#L42>`_
+
+    :Usage:
+        >>> from qbittorrentapi import Client, TrackerStatus
+        >>> client = Client()
+        >>> # print torrent hashes for torrents that are downloading
+        >>> for torrent in client.torrents_info():
+        >>>     for tracker in torrent.trackers:
+        >>>         # display status for each tracker
+        >>>         print(f"{torrent.hash[-6:]}: {TrackerStatus(tracker.status).display:>13} :{tracker.url}")
+    """
+
+    DISABLED = 0
+    NOT_CONTACTED = 1
+    WORKING = 2
+    UPDATING = 3
+    NOT_WORKING = 4
+
+    @property
+    def display(self):
+        """Returns a descriptive display value for status."""
+        return {
+            TrackerStatus.DISABLED: "Disabled",
+            TrackerStatus.NOT_CONTACTED: "Not contacted",
+            TrackerStatus.WORKING: "Working",
+            TrackerStatus.UPDATING: "Updating",
+            TrackerStatus.NOT_WORKING: "Not working",
+        }[self]
 
 
 class ClientCache(object):

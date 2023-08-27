@@ -76,7 +76,7 @@ __all__ = [
 <dl>
 <dt id="slack_bolt.authorization.AuthorizeResult"><code class="flex name class">
 <span>class <span class="ident">AuthorizeResult</span></span>
-<span>(</span><span>*, enterprise_id: Optional[str], team_id: Optional[str], bot_user_id: Optional[str] = None, bot_id: Optional[str] = None, bot_token: Optional[str] = None, bot_scopes: Union[List[str], str, ForwardRef(None)] = None, user_id: Optional[str] = None, user_token: Optional[str] = None, user_scopes: Union[List[str], str, ForwardRef(None)] = None)</span>
+<span>(</span><span>*, enterprise_id: Optional[str], team_id: Optional[str], team: Optional[str] = None, url: Optional[str] = None, bot_user_id: Optional[str] = None, bot_id: Optional[str] = None, bot_token: Optional[str] = None, bot_scopes: Union[List[str], str, ForwardRef(None)] = None, user_id: Optional[str] = None, user: Optional[str] = None, user_token: Optional[str] = None, user_scopes: Union[List[str], str, ForwardRef(None)] = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Authorize function call result</p>
@@ -86,6 +86,10 @@ __all__ = [
 <dd>Organization ID (Enterprise Grid) starting with <code>E</code></dd>
 <dt><strong><code>team_id</code></strong></dt>
 <dd>Workspace ID starting with <code>T</code></dd>
+<dt><strong><code>team</code></strong></dt>
+<dd>Workspace name</dd>
+<dt><strong><code>url</code></strong></dt>
+<dd>Workspace slack.com URL</dd>
 <dt><strong><code>bot_user_id</code></strong></dt>
 <dd>Bot user's User ID starting with either <code>U</code> or <code>W</code></dd>
 <dt><strong><code>bot_id</code></strong></dt>
@@ -96,6 +100,8 @@ __all__ = [
 <dd>The scopes associated with the bot token</dd>
 <dt><strong><code>user_id</code></strong></dt>
 <dd>The request user ID</dd>
+<dt><strong><code>user</code></strong></dt>
+<dd>The request user's name</dd>
 <dt><strong><code>user_token</code></strong></dt>
 <dd>User access token starting with <code>xoxp-</code></dd>
 <dt><strong><code>user_scopes</code></strong></dt>
@@ -110,11 +116,16 @@ __all__ = [
 
     enterprise_id: Optional[str]
     team_id: Optional[str]
+    team: Optional[str]  # since v1.18
+    url: Optional[str]  # since v1.18
+
     bot_id: Optional[str]
     bot_user_id: Optional[str]
     bot_token: Optional[str]
     bot_scopes: Optional[List[str]]  # since v1.17
+
     user_id: Optional[str]
+    user: Optional[str]  # since v1.18
     user_token: Optional[str]
     user_scopes: Optional[List[str]]  # since v1.17
 
@@ -123,6 +134,8 @@ __all__ = [
         *,
         enterprise_id: Optional[str],
         team_id: Optional[str],
+        team: Optional[str] = None,
+        url: Optional[str] = None,
         # bot
         bot_user_id: Optional[str] = None,
         bot_id: Optional[str] = None,
@@ -130,6 +143,7 @@ __all__ = [
         bot_scopes: Optional[Union[List[str], str]] = None,
         # user
         user_id: Optional[str] = None,
+        user: Optional[str] = None,
         user_token: Optional[str] = None,
         user_scopes: Optional[Union[List[str], str]] = None,
     ):
@@ -137,16 +151,21 @@ __all__ = [
         Args:
             enterprise_id: Organization ID (Enterprise Grid) starting with `E`
             team_id: Workspace ID starting with `T`
+            team: Workspace name
+            url: Workspace slack.com URL
             bot_user_id: Bot user&#39;s User ID starting with either `U` or `W`
             bot_id: Bot ID starting with `B`
             bot_token: Bot user access token starting with `xoxb-`
             bot_scopes: The scopes associated with the bot token
             user_id: The request user ID
+            user: The request user&#39;s name
             user_token: User access token starting with `xoxp-`
             user_scopes: The scopes associated wth the user token
         &#34;&#34;&#34;
         self[&#34;enterprise_id&#34;] = self.enterprise_id = enterprise_id
         self[&#34;team_id&#34;] = self.team_id = team_id
+        self[&#34;team&#34;] = self.team = team
+        self[&#34;url&#34;] = self.url = url
         # bot
         self[&#34;bot_user_id&#34;] = self.bot_user_id = bot_user_id
         self[&#34;bot_id&#34;] = self.bot_id = bot_id
@@ -156,6 +175,7 @@ __all__ = [
         self[&#34;bot_scopes&#34;] = self.bot_scopes = bot_scopes  # type: ignore
         # user
         self[&#34;user_id&#34;] = self.user_id = user_id
+        self[&#34;user&#34;] = self.user = user
         self[&#34;user_token&#34;] = self.user_token = user_token
         if user_scopes is not None and isinstance(user_scopes, str):
             user_scopes = [scope.strip() for scope in user_scopes.split(&#34;,&#34;)]
@@ -178,17 +198,21 @@ __all__ = [
         user_id: Optional[str] = (  # type:ignore
             auth_test_response.get(&#34;user_id&#34;) if auth_test_response.get(&#34;bot_id&#34;) is None else None
         )
-        # Since v1.28, user_id can be set when user_token w/ its auth.test response exists
+        user_name = auth_test_response.get(&#34;user&#34;)
         if user_id is None and user_auth_test_response is not None:
             user_id: Optional[str] = user_auth_test_response.get(&#34;user_id&#34;)  # type:ignore
+            user_name: Optional[str] = user_auth_test_response.get(&#34;user&#34;)  # type:ignore
 
         return AuthorizeResult(
             enterprise_id=auth_test_response.get(&#34;enterprise_id&#34;),
             team_id=auth_test_response.get(&#34;team_id&#34;),
+            team=auth_test_response.get(&#34;team&#34;),
+            url=auth_test_response.get(&#34;url&#34;),
             bot_id=auth_test_response.get(&#34;bot_id&#34;),
             bot_user_id=bot_user_id,
             bot_scopes=bot_scopes,
             user_id=user_id,
+            user=user_name,
             bot_token=bot_token,
             user_token=user_token,
             user_scopes=user_scopes,
@@ -220,7 +244,19 @@ __all__ = [
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="slack_bolt.authorization.AuthorizeResult.team"><code class="name">var <span class="ident">team</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="slack_bolt.authorization.AuthorizeResult.team_id"><code class="name">var <span class="ident">team_id</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.authorization.AuthorizeResult.url"><code class="name">var <span class="ident">url</span> : Optional[str]</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="slack_bolt.authorization.AuthorizeResult.user"><code class="name">var <span class="ident">user</span> : Optional[str]</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -265,17 +301,21 @@ def from_auth_test_response(
     user_id: Optional[str] = (  # type:ignore
         auth_test_response.get(&#34;user_id&#34;) if auth_test_response.get(&#34;bot_id&#34;) is None else None
     )
-    # Since v1.28, user_id can be set when user_token w/ its auth.test response exists
+    user_name = auth_test_response.get(&#34;user&#34;)
     if user_id is None and user_auth_test_response is not None:
         user_id: Optional[str] = user_auth_test_response.get(&#34;user_id&#34;)  # type:ignore
+        user_name: Optional[str] = user_auth_test_response.get(&#34;user&#34;)  # type:ignore
 
     return AuthorizeResult(
         enterprise_id=auth_test_response.get(&#34;enterprise_id&#34;),
         team_id=auth_test_response.get(&#34;team_id&#34;),
+        team=auth_test_response.get(&#34;team&#34;),
+        url=auth_test_response.get(&#34;url&#34;),
         bot_id=auth_test_response.get(&#34;bot_id&#34;),
         bot_user_id=bot_user_id,
         bot_scopes=bot_scopes,
         user_id=user_id,
+        user=user_name,
         bot_token=bot_token,
         user_token=user_token,
         user_scopes=user_scopes,
@@ -318,7 +358,10 @@ def from_auth_test_response(
 <li><code><a title="slack_bolt.authorization.AuthorizeResult.bot_user_id" href="#slack_bolt.authorization.AuthorizeResult.bot_user_id">bot_user_id</a></code></li>
 <li><code><a title="slack_bolt.authorization.AuthorizeResult.enterprise_id" href="#slack_bolt.authorization.AuthorizeResult.enterprise_id">enterprise_id</a></code></li>
 <li><code><a title="slack_bolt.authorization.AuthorizeResult.from_auth_test_response" href="#slack_bolt.authorization.AuthorizeResult.from_auth_test_response">from_auth_test_response</a></code></li>
+<li><code><a title="slack_bolt.authorization.AuthorizeResult.team" href="#slack_bolt.authorization.AuthorizeResult.team">team</a></code></li>
 <li><code><a title="slack_bolt.authorization.AuthorizeResult.team_id" href="#slack_bolt.authorization.AuthorizeResult.team_id">team_id</a></code></li>
+<li><code><a title="slack_bolt.authorization.AuthorizeResult.url" href="#slack_bolt.authorization.AuthorizeResult.url">url</a></code></li>
+<li><code><a title="slack_bolt.authorization.AuthorizeResult.user" href="#slack_bolt.authorization.AuthorizeResult.user">user</a></code></li>
 <li><code><a title="slack_bolt.authorization.AuthorizeResult.user_id" href="#slack_bolt.authorization.AuthorizeResult.user_id">user_id</a></code></li>
 <li><code><a title="slack_bolt.authorization.AuthorizeResult.user_scopes" href="#slack_bolt.authorization.AuthorizeResult.user_scopes">user_scopes</a></code></li>
 <li><code><a title="slack_bolt.authorization.AuthorizeResult.user_token" href="#slack_bolt.authorization.AuthorizeResult.user_token">user_token</a></code></li>

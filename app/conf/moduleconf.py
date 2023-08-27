@@ -42,13 +42,6 @@ class ModuleConf(object):
         "move": RmtMode.MOVE
     }
 
-    # 索引器
-    INDEXER_DICT = {
-        "prowlarr": IndexerType.PROWLARR,
-        "jackett": IndexerType.JACKETT,
-        "builtin": IndexerType.BUILTIN
-    }
-
     # 远程转移模式
     REMOTE_RMT_MODES = [RmtMode.RCLONE, RmtMode.RCLONECOPY, RmtMode.MINIO, RmtMode.MINIOCOPY]
 
@@ -136,7 +129,7 @@ class ModuleConf(object):
                         "title": "消息推送代理",
                         "tooltip": "由于微信官方限制，2022年6月20日后创建的企业微信应用需要有固定的公网IP地址并加入IP白名单后才能发送消息，使用有固定公网IP的代理服务器转发可解决该问题；代理服务器需自行搭建，搭建方法可参考项目主页说明",
                         "type": "text",
-                        "placeholder": "https://wechat.nastool.cn"
+                        "placeholder": "https://wechat.nastool.org"
                     },
                     "token": {
                         "id": "wechat_token",
@@ -679,91 +672,6 @@ class ModuleConf(object):
                     "placeholder": "password"
                 }
             }
-        },
-        "aria2": {
-            "name": "Aria2",
-            "img_url": "../static/img/downloader/aria2.png",
-            "color": "#B30100",
-            "monitor_enable": True,
-            "config": {
-                "host": {
-                    "id": "aria2_host",
-                    "required": True,
-                    "title": "IP地址",
-                    "tooltip": "配置IP地址，如为https则需要增加https://前缀",
-                    "type": "text",
-                    "placeholder": "127.0.0.1"
-                },
-                "port": {
-                    "id": "aria2_port",
-                    "required": True,
-                    "title": "端口",
-                    "type": "text",
-                    "placeholder": "6800"
-                },
-                "secret": {
-                    "id": "aria2_secret",
-                    "required": True,
-                    "title": "令牌",
-                    "type": "text",
-                    "placeholder": ""
-                },
-                "use_jsonRpc": {
-                    "id": "aria2_use_jsonRpc",
-                    "required": False,
-                    "title": "使用JSONRPC",
-                    "tooltip": "默认使用127.0.0.1:6800/rpc的形式，开启后将会使用127.0.0.1:6800/jsonrpc的形式",
-                    "type": "switch"
-                }
-            }
-        },
-        "pan115": {
-            "name": "115网盘",
-            "img_url": "../static/img/115.jpg",
-            "background": "bg-azure",
-            "test_command": "app.downloader.client.pan115|Pan115",
-            "config": {
-                "cookie": {
-                    "id": "pan115_cookie",
-                    "required": True,
-                    "title": "Cookie",
-                    "tooltip": "115网盘Cookie，通过115网盘网页端抓取Cookie",
-                    "type": "text",
-                    "placeholder": "USERSESSIONID=xxx;115_lang=zh;UID=xxx;CID=xxx;SEID=xxx"
-                }
-            }
-        },
-        "pikpak": {
-            "name": "PikPak",
-            "img_url": "../static/img/pikpak.png",
-            "background": "bg-indigo",
-            "test_command": "app.downloader.client.pikpak|PikPak",
-            "config": {
-                "username": {
-                    "id": "pikpak_username",
-                    "required": True,
-                    "title": "账号",
-                    "tooltip": "PikPak的账号一般是手机号或者邮箱",
-                    "type": "text",
-                    "placeholder": ""
-                },
-                "password": {
-                    "id": "pikpak_password",
-                    "required": True,
-                    "title": "密码",
-                    "tooltip": "密码",
-                    "type": "password",
-                    "placeholder": ""
-                },
-                "proxy": {
-                    "id": "pikpak_proxy",
-                    "required": False,
-                    "title": "代理",
-                    "tooltip": "如果需要代理才能访问pikpak可以在此处填入代理地址",
-                    "type": "text",
-                    "placeholder": "127.0.0.1:7890"
-                }
-            }
         }
     }
 
@@ -890,8 +798,7 @@ class ModuleConf(object):
     }
 
     # 索引器
-    INDEXER_CONF = {
-    }
+    INDEXER_CONF = {}
 
     # 发现过滤器
     DISCOVER_FILTER_CONF = {

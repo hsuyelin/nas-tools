@@ -18,7 +18,7 @@ class TransferInfoDictionary(Dictionary):
 @aliased
 class Transfer(ClientCache):
     """
-    Alows interaction with the ``Transfer`` API endpoints.
+    Allows interaction with the ``Transfer`` API endpoints.
 
     :Usage:
         >>> from qbittorrentapi import Client

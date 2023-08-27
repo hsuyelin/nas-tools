@@ -169,6 +169,9 @@ class TestApp:
             assert context.authorize_result.user_id == "W99999"
             assert context.authorize_result.user_token == "xoxp-valid-actor-based"
             assert context.authorize_result.user_scopes == ["search:read", "chat:write"]
+            assert context.authorize_result.team_id == "T0G9PQBBK"
+            assert context.authorize_result.team == "Subarachnoid Workspace"
+            assert context.authorize_result.url == "https://subarachnoid.slack.com/"
             say("What's up?")
 
         response = app.dispatch(self.build_request())
@@ -196,14 +199,17 @@ class TestApp:
             assert context.actor_enterprise_id == "E013Y3SHLAY"
             assert context.actor_team_id == "T111111"
             assert context.actor_user_id == "W013QGS7BPF"
-
             assert context.authorize_result.bot_id == "BZYBOTHED"
             assert context.authorize_result.bot_user_id == "W23456789"
             assert context.authorize_result.bot_token == "xoxb-valid-2"
             assert context.authorize_result.bot_scopes == ["commands", "chat:write"]
+            assert context.authorize_result.user == "bot"
             assert context.authorize_result.user_id is None
             assert context.authorize_result.user_token is None
             assert context.authorize_result.user_scopes is None
+            assert context.authorize_result.team_id == "T0G9PQBBK"
+            assert context.authorize_result.team == "Subarachnoid Workspace"
+            assert context.authorize_result.url == "https://subarachnoid.slack.com/"
             say("What's up?")
 
         response = app.dispatch(self.build_request(team_id="T111111"))

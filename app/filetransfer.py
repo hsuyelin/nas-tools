@@ -54,13 +54,11 @@ class FileTransfer:
     _tv_file_rmt_format = ""
     _ignored_paths = []
     _ignored_files = ''
-    _simplify_library_notification = False
 
     def __init__(self):
         self.init_config()
 
     def init_config(self):
-        self._simplify_library_notification = Config().get_config("laboratory").get("simplify_library_notification")
         self.media = Media()
         self.message = Message()
         self.category = Category()
@@ -209,13 +207,13 @@ class FileTransfer:
         :param rmt_mode: RmtMode转移方式
         """
         # 字幕正则式
-        _zhcn_sub_re = r"([.\[(](((zh[-_])?(cn|ch[si]|sg|sc|SC|jpsc|JPSC|chs&jpn|CHS|Chs&Jap|CHS&JAP))|zho?" \
+        _zhcn_sub_re = r"([.\[(](((zh[-_])?(cn|ch[si]|sg|sc))|zho?" \
                        r"|chinese|(cn|ch[si]|sg|zho?|eng)[-_&](cn|ch[si]|sg|zho?|eng)" \
                        r"|简[体中]?)[.\])])" \
                        r"|([\u4e00-\u9fa5]{0,3}[中双][\u4e00-\u9fa5]{0,2}[字文语][\u4e00-\u9fa5]{0,3})" \
                        r"|简体|简中" \
                        r"|(?<![a-z0-9])gb(?![a-z0-9])"
-        _zhtw_sub_re = r"([.\[(](((zh[-_])?(hk|tw|cht|tc|TC|jptc|JPTC|cht&jpn|CHT|Cht&Jap|CHT&JAP))" \
+        _zhtw_sub_re = r"([.\[(](((zh[-_])?(hk|tw|cht|tc))" \
                        r"|繁[体中]?)[.\])])" \
                        r"|繁体中[文字]|中[文字]繁体|繁体" \
                        r"|(?<![a-z0-9])big5(?![a-z0-9])"
@@ -229,7 +227,7 @@ class FileTransfer:
             log.debug("【Rmt】%s 目录下没有找到字幕文件..." % dir_name)
         else:
             log.debug("【Rmt】字幕文件清单：" + str(file_list))
-            metainfo = MetaInfo(title=file_name, filePath=org_name)
+            metainfo = MetaInfo(title=file_name)
             for file_item in file_list:
                 sub_file_name = re.sub(_zhtw_sub_re,
                                        ".",
@@ -239,7 +237,7 @@ class FileTransfer:
                                               flags=re.I),
                                        flags=re.I)
                 sub_file_name = re.sub(_eng_sub_re, ".", sub_file_name, flags=re.I)
-                sub_metainfo = MetaInfo(title=os.path.basename(file_item), filePath=file_item)
+                sub_metainfo = MetaInfo(title=os.path.basename(file_item))
                 if (os.path.splitext(file_name)[0] == os.path.splitext(sub_file_name)[0]) or \
                         (sub_metainfo.cn_name and sub_metainfo.cn_name == metainfo.cn_name) \
                         or (sub_metainfo.en_name and sub_metainfo.en_name == metainfo.en_name):
@@ -252,18 +250,18 @@ class FileTransfer:
                     new_file_type = ""
                     # 兼容jellyfin字幕识别(多重识别), emby则会识别最后一个后缀
                     if re.search(_zhcn_sub_re, file_item, re.I):
-                        new_file_type = ".chs"
+                        new_file_type = ".chi.zh-cn"
                     elif re.search(_zhtw_sub_re, file_item,
                                    re.I):
-                        new_file_type = ".cht"
+                        new_file_type = ".zh-tw"
                     elif re.search(_eng_sub_re, file_item, re.I):
                         new_file_type = ".eng"
                     # 通过对比字幕文件大小  尽量转移所有存在的字幕
                     file_ext = os.path.splitext(file_item)[-1]
                     new_sub_tag_dict = {
                         ".eng": ".英文",
-                        ".chs": ".简体中文",
-                        ".cht": ".繁体中文"
+                        ".chi.zh-cn": ".简体中文",
+                        ".zh-tw": ".繁体中文"
                     }
                     new_sub_tag_list = [
                         new_file_type if t == 0 else "%s%s(%s)" % (new_file_type,
@@ -861,16 +859,10 @@ class FileTransfer:
                     self.update_transfer_unknown_state(file_item)
                 # 电影立即发送消息
                 if media.type == MediaType.MOVIE:
-                    if self._simplify_library_notification:
-                        self.message.send_simplify_transfer_movie_message(in_from,
+                    self.message.send_transfer_movie_message(in_from,
                                                              media,
                                                              exist_filenum,
                                                              self._movie_category_flag)
-                    else:
-                        self.message.send_transfer_movie_message(in_from,
-                                                                 media,
-                                                                 exist_filenum,
-                                                                 self._movie_category_flag)
                 # 否则登记汇总发消息
                 else:
                     # 按季汇总
@@ -926,10 +918,7 @@ class FileTransfer:
         # 循环结束
         # 统计完成情况，发送通知
         if message_medias:
-            if self._simplify_library_notification:
-                self.message.send_simplify_transfer_tv_message(message_medias, in_from)
-            else:
-                self.message.send_transfer_tv_message(message_medias, in_from)
+            self.message.send_transfer_tv_message(message_medias, in_from)
         # 总结
         log.info("【Rmt】%s 处理完成，总数：%s，失败：%s" % (in_path, total_count, failed_count))
         if alert_count > 0:
@@ -1136,7 +1125,7 @@ class FileTransfer:
                     continue
                 files = PathUtils.get_dir_files(dest_path, RMT_MEDIAEXT)
                 for file in files:
-                    file_meta_info = MetaInfo(os.path.basename(file), filePath=file)
+                    file_meta_info = MetaInfo(os.path.basename(file))
                     if not file_meta_info.get_season_list() or not file_meta_info.get_episode_list():
                         continue
                     if file_meta_info.get_name() != meta_info.title:
@@ -1345,18 +1334,6 @@ class FileTransfer:
         """
         return self.dbhelper.delete_transfer_log_by_id(logid=logid)
 
-    def get_transfer_history_count(self):
-        """
-        转移历史记录总条数
-        """
-        return self.dbhelper.get_transfer_history_count()
-
-    def truncate_transfer_history_list(self):
-        """
-        清空转移历史记录
-        """
-        return self.dbhelper.truncate_transfer_history_list()
-
     def delete_transfer_unknown(self, tid):
         """
         删除未知转移记录
@@ -1374,18 +1351,6 @@ class FileTransfer:
         更新未知转移记录状态
         """
         return self.dbhelper.update_transfer_unknown_state(path=path)
-
-    def get_transfer_unknown_count(self):
-        """
-        手动转移历史记录总条数
-        """
-        return self.dbhelper.get_transfer_unknown_count()
-
-    def truncate_transfer_unknown_list(self):
-        """
-        清空手动转移历史记录
-        """
-        return self.dbhelper.truncate_transfer_unknown_list()
 
     def delete_transfer_blacklist(self, path):
         """

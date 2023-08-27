@@ -146,6 +146,9 @@ class TestApp:
             assert context.authorize_result.user_id == "W99999"
             assert context.authorize_result.user_token == "xoxp-valid"
             assert context.authorize_result.user_scopes == ["search:read"]
+            assert context.authorize_result.team_id == "T0G9PQBBK"
+            assert context.authorize_result.team == "Subarachnoid Workspace"
+            assert context.authorize_result.url == "https://subarachnoid.slack.com/"
             say("What's up?")
 
         response = app.dispatch(self.build_app_mention_request())

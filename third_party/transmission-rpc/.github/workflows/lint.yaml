@@ -30,7 +30,7 @@ jobs:
       - name: mypy
         run: mypy --show-column-numbers --python-version 3.7 transmission_rpc
 
-  flake8:
+  ruff:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,10 +43,7 @@ jobs:
 
       - uses: Trim21/install-poetry-project@dist/v1
 
-      - run: echo "::add-matcher::.github/workflows/matcher/flake8.json"
-
-      - name: flake8
-        run: flake8
+      - run: ruff check . --format=github
   lint:
     runs-on: ubuntu-latest
     steps:

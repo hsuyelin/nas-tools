@@ -1,4 +1,4 @@
-from typing import Optional, Union, Sequence
+from typing import Optional, Union, Sequence, Any, Dict
 from ssl import SSLContext
 
 from slack_sdk.models.attachments import Attachment
@@ -35,6 +35,7 @@ class Respond:
         unfurl_links: Optional[bool] = None,
         unfurl_media: Optional[bool] = None,
         thread_ts: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> WebhookResponse:
         if self.response_url is not None:
             client = WebhookClient(
@@ -55,6 +56,7 @@ class Respond:
                     unfurl_links=unfurl_links,
                     unfurl_media=unfurl_media,
                     thread_ts=thread_ts,
+                    metadata=metadata,
                 )
                 return client.send_dict(message)
             elif isinstance(text_or_whole_response, dict):

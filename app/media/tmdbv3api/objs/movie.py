@@ -53,9 +53,9 @@ class Movie(TMDb):
         :return:
         """
         if append_to_response == "all":
-            append_to_response = "images,credits,alternative_titles,translations,external_ids"
+            append_to_response = "images,credits,alternative_titles,translations,external_ids,releases"
         elif append_to_response is None:
-            append_to_response = "alternative_titles,translations,external_ids"
+            append_to_response = "alternative_titles,translations,external_ids,releases"
         return AsObj(
             **self._call(
                 self._urls["details"] % movie_id,

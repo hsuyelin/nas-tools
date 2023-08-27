@@ -84,7 +84,7 @@ class URL(object):
         and prefixed to all subsequent API calls.
 
         :param headers: HTTP headers for request
-        :param requests_kwargs: additional params from user for HTTP ``HEAD`` request
+        :param requests_kwargs: arguments from user for HTTP ``HEAD`` request
         :return: base URL as a ``string`` for Web API endpoint
         """
         if self.client._API_BASE_URL is not None:
@@ -143,7 +143,7 @@ class URL(object):
         :param alt_scheme: alternative scheme to use for URL if default doesn't work
         :param headers: HTTP headers for request
         :param requests_kwargs: kwargs for calls to Requests
-        :return: scheme (ie ``HTTP`` or ``HTTPS``)
+        :return: scheme (i.e. ``HTTP`` or ``HTTPS``)
         """
         logger.debug("Detecting scheme for URL...")
         prefer_https = False
@@ -215,8 +215,8 @@ class Request(object):
         """
         Initialize and/or reset communications context with qBittorrent.
 
-        This is necessary on startup or when the auth cookie needs to be
-        replaced...perhaps because it expired, qBittorrent was
+        This is necessary on startup or when the authorization cookie needs
+        to be replaced...perhaps because it expired, qBittorrent was
         restarted, significant settings changes, etc.
         """
         logger.debug("Re-initializing context...")
@@ -420,9 +420,9 @@ class Request(object):
         """
         Wrapper to manage request retries and severe exceptions.
 
-        This should retry at least once to account for the Web API
-        switching from HTTP to HTTPS. During the second attempt, the URL
-        is rebuilt using HTTP or HTTPS as appropriate.
+        This should retry at least once to account for the Web API switching from HTTP
+        to HTTPS. During the second attempt, the URL is rebuilt using HTTP or HTTPS as
+        appropriate.
         """
 
         def build_error_msg(exc):
@@ -451,9 +451,8 @@ class Request(object):
             """
             Back off on attempting each subsequent request retry.
 
-            The first retry is always immediate. if the backoff factor
-            is 0.3, then will sleep for 0s then .3s, then .6s, etc.
-            between retries.
+            The first retry is always immediate. if the backoff factor is 0.3, then will
+            sleep for 0s then .3s, then .6s, etc. between retries.
             """
             if retry_count > 0:
                 backoff_time = _retry_backoff_factor * (2 ** ((retry_count + 1) - 1))
@@ -520,7 +519,7 @@ class Request(object):
         :param data: key/value pairs to send with a ``POST`` request
         :param files: files to be sent with the request
         :param response_class: class to use to cast the API response
-        :param kwargs: arbitrary keyword args to send to qBittorrent with the request
+        :param kwargs: arbitrary keyword arguments to send with the request
         :return: Requests :class:`~requests.Response`
         """
         response_kwargs, kwargs = self._get_response_kwargs(kwargs)
@@ -580,7 +579,7 @@ class Request(object):
         ``self._EXTRA_HEADERS`` are merged in Requests itself.
 
         :param headers: headers specified for this specific request
-        :param more_headers: headers from requests_kwargs config
+        :param more_headers: headers from requests_kwargs arguments
         :return: final dictionary of headers for this specific request
         """
         user_headers = more_headers or {}
@@ -590,7 +589,7 @@ class Request(object):
     @staticmethod
     def _get_data(http_method, params=None, data=None, files=None, **kwargs):
         """
-        Determine data, params, and files for the Requests call.
+        Determine ``data``, ``params``, and ``files`` for the Requests call.
 
         :param http_method: ``get`` or ``post``
         :param params: key value pairs to send with GET calls
@@ -661,9 +660,8 @@ class Request(object):
             """
             Wrapper to augment Requests Session.
 
-            Requests doesn't allow Session to default certain
-            configuration globally. This gets around that by setting
-            defaults for each request.
+            Requests doesn't allow Session to default certain configuration globally.
+            This gets around that by setting defaults for each request.
             """
 
             def request(self, method, url, **kwargs):
@@ -672,7 +670,8 @@ class Request(object):
 
                 # send Content-Length as 0 for empty POSTs...Requests will not send Content-Length
                 # if data is empty but qBittorrent will complain otherwise
-                is_data = any(x is not None for x in kwargs.get("data", {}).values())
+                data = kwargs.get("data") or {}
+                is_data = any(x is not None for x in data.values())
                 if method.lower() == "post" and not is_data:
                     kwargs.setdefault("headers", {}).update({"Content-Length": "0"})
 
@@ -733,7 +732,7 @@ class Request(object):
         """
         try:
             self._http_session.close()
-        except AttributeError:
+        except Exception:  # noqa: S110
             pass
         self._http_session = None
 

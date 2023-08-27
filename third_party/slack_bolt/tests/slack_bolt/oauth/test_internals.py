@@ -1,4 +1,4 @@
-from slack_bolt.oauth.internals import build_detailed_error
+from slack_bolt.oauth.internals import build_detailed_error, _build_default_install_page_html
 
 
 class TestOAuthInternals:
@@ -23,3 +23,26 @@ class TestOAuthInternals:
         assert result.startswith(
             "access_denied: This error code is returned from Slack. Refer to the documents for details."
         )
+
+    def test_build_detailed_error_others_with_tags(self):
+        result = build_detailed_error("<b>test</b>")
+        assert result.startswith(
+            "&lt;b&gt;test&lt;/b&gt;: This error code is returned from Slack. Refer to the documents for details."
+        )
+
+    def test_build_default_install_page_html(self):
+        test_patterns = [
+            {
+                "input": "https://slack.com/oauth/v2/authorize?state=random&client_id=111.222&scope=commands",
+                "expected": "https://slack.com/oauth/v2/authorize?state=random&amp;client_id=111.222&amp;scope=commands",
+            },
+            {
+                "input": "<b>test</b>",
+                "expected": "&lt;b&gt;test&lt;/b&gt;",
+            },
+        ]
+        for pattern in test_patterns:
+            url = pattern["input"]
+            result = _build_default_install_page_html(url)
+            assert url not in result
+            assert pattern["expected"] in result

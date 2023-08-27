@@ -2,9 +2,6 @@ import json
 from datetime import datetime
 from multiprocessing.dummy import Pool as ThreadPool
 from threading import Lock
-import re
-import json
-from urllib.parse import urlparse, urlunparse
 
 import requests
 
@@ -143,11 +140,7 @@ class SiteUserInfo(object):
         if not site_schema:
             log.error("【Sites】站点 %s 无法识别站点类型" % site_name)
             return None
-
-        parsed_url = urlparse(url)
-        if parsed_url.netloc:
-            site_domain_url = urlunparse((parsed_url.scheme, parsed_url.netloc, "", "", "", ""))
-        return site_schema(site_name, site_domain_url, site_cookie, html_text, session=session, ua=ua, emulate=emulate, proxy=proxy)
+        return site_schema(site_name, url, site_cookie, html_text, session=session, ua=ua, emulate=emulate, proxy=proxy)
 
     def __refresh_site_data(self, site_info):
         """
@@ -158,7 +151,6 @@ class SiteUserInfo(object):
         site_id = site_info.get("id")
         site_name = site_info.get("name")
         site_url = site_info.get("strict_url")
-        original_site_url = site_url
         if not site_url:
             return
         site_cookie = site_info.get("cookie")
@@ -166,23 +158,6 @@ class SiteUserInfo(object):
         unread_msg_notify = site_info.get("unread_msg_notify")
         chrome = site_info.get("chrome")
         proxy = site_info.get("proxy")
-
-        need_goto_user_detail_fetch, user_detail_pattern = self.sites.need_goto_user_detail_fetch(site_id=site_id)
-        if need_goto_user_detail_fetch:
-            proxies = Config().get_proxies() if proxy else None
-            res = RequestUtils(cookies=site_cookie,
-                               session=requests.Session(),
-                               headers=ua,
-                               proxies=proxies
-                               ).get_res(url=site_url)
-            if res and res.status_code == 200:
-                try:
-                    matches = re.findall(user_detail_pattern, res.text)
-                    if matches:
-                        site_url = site_url.rstrip("/") + f"/userdetails.php?id={matches[0]}"
-                except requests.exceptions.RequestException as e:
-                    pass
-
         try:
             site_user_info = self.build(url=site_url,
                                         site_id=site_id,
@@ -205,7 +180,8 @@ class SiteUserInfo(object):
                 # 发送通知，存在未读消息
                 self.__notify_unread_msg(site_name, site_user_info, unread_msg_notify)
 
-                _updated_sites_data = {
+                self._sites_data.update(
+                    {
                         site_name: {
                             "upload": site_user_info.upload,
                             "username": site_user_info.username,
@@ -217,16 +193,11 @@ class SiteUserInfo(object):
                             "seeding_size": site_user_info.seeding_size,
                             "leeching": site_user_info.leeching,
                             "bonus": site_user_info.bonus,
-                            "url": original_site_url,
+                            "url": site_url,
                             "err_msg": site_user_info.err_msg,
                             "message_unread": site_user_info.message_unread
                         }
-                    }
-
-                _updated_sites_json = json.dumps(_updated_sites_data, indent=4)
-                log.debug(f"【Sites】站点 {site_name} 数据：{_updated_sites_json}")
-
-                self._sites_data.update(_updated_sites_data)
+                    })
 
                 return site_user_info
 
@@ -458,18 +429,3 @@ class SiteUserInfo(object):
         self.dbhelper.update_site_seed_info_site_name(name, old_name)
         self.dbhelper.update_site_statistics_site_name(name, old_name)
         return True
-
-    def is_min_join_date_beyond_one_month(self):
-        """
-        查询最早加入PT站的时间是否超过一个月
-        """
-        # 读取强制刷流配置
-        _force_enable_brush = Config().get_config("pt").get("force_enable_brush")
-        if _force_enable_brush:
-            return True
-
-        first_pt_site = self.get_pt_site_min_join_date()
-        if not first_pt_site or not StringUtils.is_one_month_ago(first_pt_site):
-            return False
-        else:
-            return True
