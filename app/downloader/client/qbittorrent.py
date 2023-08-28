@@ -37,8 +37,9 @@ class Qbittorrent(_IDownloadClient):
         self.connect()
         # 种子自动管理模式，根据下载路径设置为下载器设置分类
         self.init_torrent_management()
-        # 设置未完成种子添加!qb后缀
-        self.qbc.app_set_preferences({"incomplete_files_ext": True})
+        if self.qbc:
+            # 设置未完成种子添加!qb后缀
+            self.qbc.app_set_preferences({"incomplete_files_ext": True})
 
     def init_config(self):
         if self._client_config:
