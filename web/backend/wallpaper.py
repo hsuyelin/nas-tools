@@ -2,6 +2,7 @@ import base64
 import datetime
 from functools import lru_cache
 
+import log
 from app.media import Media
 from app.utils import RequestUtils, ExceptionUtils
 from config import Config
@@ -63,10 +64,14 @@ def __get_bing_wallpaper(today):
         ExceptionUtils.exception_traceback(err)
         return ""
     if resp and resp.status_code == 200:
-        if resp.json():
-            for image in resp.json().get('images') or []:
-                img_url = f"https://cn.bing.com{image.get('url')}" if 'url' in image else ''
-                img_title = image.get('title', '')
-                img_link = image.get('copyrightlink', '')
-                return img_url, img_title, img_link
+        try:
+            result = resp.json()
+            if isinstance(result, dict):
+                for image in result.get('images') or []:
+                    img_url = f"https://cn.bing.com{image.get('url')}" if 'url' in image else ''
+                    img_title = image.get('title', '')
+                    img_link = image.get('copyrightlink', '')
+                    return img_url, img_title, img_link
+        except Exception as err:
+            log.error(f"【WallPaper】获取bing每日壁纸错误: {str(err)}")
     return '', '', ''
