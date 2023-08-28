@@ -189,10 +189,13 @@ class BuiltinIndexer(_IIndexClient):
             elif indexer.parser == "TorrentLeech":
                 error_flag, result_array = TorrentLeech(indexer).search(keyword=search_word)
             else:
-                error_flag, result_array = self.__spider_search(
-                    keyword=search_word,
-                    indexer=indexer,
-                    mtype=match_media.type if match_media and match_media.tmdb_info else None)
+                if PluginsSpider().status(indexer=indexer):
+                    error_flag, result_array = PluginsSpider().search(keyword=search_word, indexer=indexer)
+                else:
+                    error_flag, result_array = self.__spider_search(
+                        keyword=search_word,
+                        indexer=indexer,
+                        mtype=match_media.type if match_media and match_media.tmdb_info else None)
         except Exception as err:
             error_flag = True
             print(str(err))
@@ -247,7 +250,7 @@ class BuiltinIndexer(_IIndexClient):
         elif indexer.parser == "TorrentLeech":
             error_flag, result_array = TorrentLeech(indexer).search(keyword=keyword,
                                                                     page=page)
-        else:
+        else:   
             if PluginsSpider().status(indexer=indexer):
                 error_flag, result_array = PluginsSpider().search(keyword=keyword, 
                                                                   indexer=indexer, 

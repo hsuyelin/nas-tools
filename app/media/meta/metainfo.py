@@ -7,7 +7,7 @@ from app.media.meta.metaanime import MetaAnime
 from app.media.meta.metavideo import MetaVideo
 from app.utils.types import MediaType
 from app.utils import StringUtils
-from config import Config
+from config import Config, RMT_MEDIAEXT
 from app.helper import FfmpegHelper
 
 
