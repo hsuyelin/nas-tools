@@ -182,9 +182,9 @@ security:
 
 # 【实验室】
 laboratory:
-  # 【识别增强】关键字猜想
+  # 【识别增强】：关键字猜想
   search_keyword: false
-  # 【WEB识别增强】通过TMDB WEB检索
+  # 【WEB识别增强】：通过TMDB WEB检索
   search_tmdbweb: false
   # 【ChatGPT识别增强】通过ChatGPT识别文件名
   chatgpt_enable: false
@@ -196,3 +196,5 @@ laboratory:
   search_en_title: false
   # 【显示更多内置站点】：开启后会展示更多内置站点，有些需要手动进行映射
   show_more_sites: true
+  # 【入库通知精简】：开启后会简化入库推送通知
+  simplify_library_notification: false

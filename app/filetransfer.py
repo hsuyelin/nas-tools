@@ -54,6 +54,7 @@ class FileTransfer:
     _tv_file_rmt_format = ""
     _ignored_paths = []
     _ignored_files = ''
+    _simplify_library_notification = False
 
     def __init__(self):
         self.init_config()
@@ -67,6 +68,10 @@ class FileTransfer:
         self.dbhelper = DbHelper()
         self.progress = ProgressHelper()
         self.eventmanager = EventManager()
+
+        laboratory = Config().get_config("laboratory")
+        if laboratory:
+            self._simplify_library_notification = laboratory.get("simplify_library_notification", False) or False
 
         media = Config().get_config('media')
         if media:

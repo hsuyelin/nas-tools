@@ -35,7 +35,6 @@ class Message(object):
     def init_config(self):
         self.dbhelper = DbHelper()
         self.messagecenter = MessageCenter()
-
         self._domain = Config().get_domain()
         # 停止旧服务
         if self._active_clients:
@@ -96,7 +95,7 @@ class Message(object):
         state, ret_msg = self.__build_class(ctype=ctype,
                                             conf=config).send_msg(title="测试",
                                                                   text="这是一条测试消息",
-                                                                  url="https://github.com/NAStool/nas-tools")
+                                                                  url="https://github.com/hsuyelin/nas-tools")
         if not state:
             log.error(f"【Message】{ctype} 发送测试消息失败：%s" % ret_msg)
         return state
@@ -294,6 +293,8 @@ class Message(object):
                 msg_str = f"{msg_str}，类别：{media_info.category}"
         if media_info.get_resource_type_string():
             msg_str = f"{msg_str}，质量：{media_info.get_resource_type_string()}"
+        if StringUtils.is_string_and_not_empty(media_info.get_resource_team_string()):
+            msg_str = f"{msg_str}，发布组/字幕组：{media_info.get_resource_team_string()}"
         msg_str = f"{msg_str}，大小：{StringUtils.str_filesize(media_info.size)}，来自：{in_from.value}"
         if exist_filenum != 0:
             msg_str = f"{msg_str}，{exist_filenum}个文件已存在"
@@ -325,10 +326,122 @@ class Message(object):
                 msg_str = f"类型：{item_info.type.value}"
             if item_info.category:
                 msg_str = f"{msg_str}，类别：{item_info.category}"
+            if StringUtils.is_string_and_not_empty(item_info.get_resource_type_string()):
+                msg_str = f"{msg_str}，质量：{item_info.get_resource_type_string()}"
+            if StringUtils.is_string_and_not_empty(item_info.get_resource_team_string()):
+                msg_str = f"{msg_str}，发布组/字幕组：{item_info.get_resource_team_string()}"
             if item_info.total_episodes == 1:
                 msg_str = f"{msg_str}，大小：{StringUtils.str_filesize(item_info.size)}，来自：{in_from.value}"
             else:
                 msg_str = f"{msg_str}，总大小：{StringUtils.str_filesize(item_info.size)}，来自：{in_from.value}"
+            # 插入消息中心
+            self.messagecenter.insert_system_message(title=msg_title, content=msg_str)
+            # 发送消息
+            for client in self._active_clients:
+                if "transfer_finished" in client.get("switchs"):
+                    self.__sendmsg(
+                        client=client,
+                        title=msg_title,
+                        text=msg_str,
+                        image=item_info.get_message_image(),
+                        url='history')
+
+    def send_simplify_transfer_movie_message(self, in_from: Enum, media_info, exist_filenum, category_flag):
+        """
+        发送精简转移电影的消息
+        :param in_from: 转移来源
+        :param media_info: 转移的媒体信息
+        :param exist_filenum: 已存在的文件数
+        :param category_flag: 二级分类开关
+        :return: 发送状态、错误信息
+        """
+        msg_title = f"{media_info.get_title_string()} 已入库"
+        
+        msg_str = ""
+
+        # 获取自定义，如：简体内嵌.v2
+        if StringUtils.is_string_and_not_empty(media_info.get_customization_string()):
+            msg_str = f"{media_info.get_customization_string()}"
+
+        # 获取字幕组，如：云光字幕组
+        if StringUtils.is_string_and_not_empty(media_info.get_resource_team_string()):
+            if StringUtils.is_string_and_not_empty(msg_str):
+                msg_str = f"{msg_str}.{media_info.get_resource_team_string()}"
+            else:
+                msg_str = f"{media_info.get_resource_team_string()}"
+
+        # 获取大小，如：500MB
+        if StringUtils.is_string_and_not_empty(msg_str):
+            msg_str = f"{msg_str}，{StringUtils.str_filesize(media_info.size)}"
+        else:
+            msg_str = f"{StringUtils.str_filesize(media_info.size)}"
+
+        # 获取质量，如：WEB-DL 1080p
+        if StringUtils.is_string_and_not_empty(media_info.get_resource_type_string()):
+            msg_str = f"{msg_str}，{media_info.get_resource_type_string()}"
+
+        # 获取类型，如：动漫
+        if media_info.category:
+            if category_flag:
+                msg_str = f"{msg_str}，类型：{media_info.category}"
+        
+        if exist_filenum != 0:
+            msg_str = f"{msg_str}，{exist_filenum}个文件已存在"
+
+        # 插入消息中心
+        self.messagecenter.insert_system_message(title=msg_title, content=msg_str)
+        # 发送消息
+        for client in self._active_clients:
+            if "transfer_finished" in client.get("switchs"):
+                self.__sendmsg(
+                    client=client,
+                    title=msg_title,
+                    text=msg_str,
+                    image=media_info.get_message_image(),
+                    url='history'
+                )
+
+    def send_simplify_transfer_tv_message(self, message_medias: dict, in_from: Enum):
+        """
+        发送转移电视剧/动漫的消息
+        """
+        for item_info in message_medias.values():
+            if item_info.total_episodes == 1:
+                msg_title = f"{item_info.get_title_string()} {item_info.get_season_episode_string()} 已入库"
+            else:
+                msg_title = f"{item_info.get_title_string()} {item_info.get_season_string()} 共{item_info.total_episodes}集 已入库"
+
+            msg_str = ""
+
+            # 获取自定义，如：简体内嵌.v2
+            if StringUtils.is_string_and_not_empty(item_info.get_customization_string()):
+                msg_str = f"{item_info.get_customization_string()}"
+
+            # 获取字幕组，如：云光字幕组
+            if StringUtils.is_string_and_not_empty(item_info.get_resource_team_string()):
+                if StringUtils.is_string_and_not_empty(msg_str):
+                    msg_str = f"{msg_str}.{item_info.get_resource_team_string()}"
+                else:
+                    msg_str = f"{item_info.get_resource_team_string()}"
+
+            # 获取大小，如：500MB
+            if StringUtils.is_string_and_not_empty(msg_str):
+                msg_str = f"{msg_str}，{StringUtils.str_filesize(item_info.size)}"
+            else:
+                msg_str = f"{StringUtils.str_filesize(item_info.size)}"
+
+            # 获取质量，如：WEB-DL 1080p
+            if StringUtils.is_string_and_not_empty(item_info.get_resource_type_string()):
+                msg_str = f"{msg_str}，{item_info.get_resource_type_string()}"
+
+            # 获取类型，如：动漫
+            if item_info.category:
+                msg_str = f"{msg_str}，类型：{item_info.type.value}"
+
+            # 获取类别，如：动漫
+            if item_info.category:
+                msg_str = f"{msg_str}，{item_info.category}"
+
             # 插入消息中心
             self.messagecenter.insert_system_message(title=msg_title, content=msg_str)
             # 发送消息
