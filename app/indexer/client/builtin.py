@@ -11,12 +11,13 @@ from app.indexer.client._render_spider import RenderSpider
 from app.indexer.client._spider import TorrentSpider
 from app.indexer.client._tnode import TNodeSpider
 from app.indexer.client._torrentleech import TorrentLeech
+from app.indexer.client._plugins import PluginsSpider
 from app.sites import Sites
 from app.utils import StringUtils
 from app.utils.types import SearchType, IndexerType, ProgressKey, SystemConfigKey
 from config import Config
 from web.backend.user import User
-
+from web.backend.pro_user import ProUser
 
 class BuiltinIndexer(_IIndexClient):
     # 索引器ID
@@ -119,6 +120,14 @@ class BuiltinIndexer(_IIndexClient):
         if public and self._show_more_sites:
             for site_url in self.user.get_public_sites():
                 indexer = self.user.get_indexer(url=site_url)
+                if check and (not indexer_sites or indexer.id not in indexer_sites):
+                    continue
+                if indexer.domain not in _indexer_domains:
+                    _indexer_domains.append(indexer.domain)
+                    ret_indexers.append(indexer)
+        # 获取插件站点
+        if PluginsSpider().sites():
+            for indexer in PluginsSpider().sites():
                 if check and (not indexer_sites or indexer.id not in indexer_sites):
                     continue
                 if indexer.domain not in _indexer_domains:
@@ -239,9 +248,15 @@ class BuiltinIndexer(_IIndexClient):
             error_flag, result_array = TorrentLeech(indexer).search(keyword=keyword,
                                                                     page=page)
         else:
-            error_flag, result_array = self.__spider_search(indexer=indexer,
-                                                            page=page,
-                                                            keyword=keyword)
+            if PluginsSpider().status(indexer=indexer):
+                error_flag, result_array = PluginsSpider().search(keyword=keyword, 
+                                                                  indexer=indexer, 
+                                                                  page=page)
+
+            else:
+                error_flag, result_array = self.__spider_search(indexer=indexer,
+                                                                page=page,
+                                                                keyword=keyword)
         # 索引花费的时间
         seconds = round((datetime.datetime.now() - start_time).seconds, 1)
 

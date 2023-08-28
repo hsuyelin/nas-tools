@@ -28,8 +28,7 @@ class Indexer(object):
     def init_config(self):
         self.progress = ProgressHelper()
         self.dbhelper = DbHelper()
-        indexer = Config().get_config("pt").get('search_indexer') or 'builtin'
-        self._client = self.__get_client(indexer)
+        self._client = self.__get_client('builtin')
         if self._client:
             self._client_type = self._client.get_type()
 
