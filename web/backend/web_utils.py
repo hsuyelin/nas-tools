@@ -1,5 +1,4 @@
 from functools import lru_cache
-from urllib.parse import quote
 
 import cn2an
 
@@ -55,17 +54,21 @@ class WebUtils:
         try:
             releases_update_only = Config().get_config("app").get("releases_update_only")
             version_res = RequestUtils(proxies=Config().get_proxies()).get_res(
-                f"https://nastool.org/{quote(WebUtils.get_current_version())}/update")
-            if version_res:
+                "https://api.github.com/repos/hsuyelin/nas-tools/releases/latest")
+            commit_res = RequestUtils(proxies=Config().get_proxies()).get_res(
+                "https://api.github.com/repos/hsuyelin/nas-tools/commits/master")
+            if version_res and commit_res:
                 ver_json = version_res.json()
-                version = ver_json.get("latest")
-                link = ver_json.get("link")
-                if version and releases_update_only:
-                    version = version.split()[0]
-                return version, link
+                commit_json = commit_res.json()
+                if releases_update_only:
+                    version = f"{ver_json['tag_name']}"
+                else:
+                    version = f"{ver_json['tag_name']} {commit_json['sha'][:7]}"
+                url = ver_json["html_url"]
+                return version, url, True
         except Exception as e:
             ExceptionUtils.exception_traceback(e)
-        return None, None
+        return None, None, False
 
     @staticmethod
     def get_mediainfo_from_id(mtype, mediaid, wait=False):
