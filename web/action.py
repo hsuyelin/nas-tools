@@ -101,6 +101,7 @@ class WebAction:
             "truncate_rsshistory": self.truncate_rsshistory,
             "add_brushtask": self.__add_brushtask,
             "del_brushtask": self.__del_brushtask,
+            "brushtask_enable": self.__brushtask_enable,
             "brushtask_detail": self.__brushtask_detail,
             "update_brushtask_state": self.__update_brushtask_state,
             "name_test": self.__name_test,
@@ -2039,6 +2040,14 @@ class WebAction:
         except Exception as e:
             ExceptionUtils.exception_traceback(e)
             return {"code": 1, "msg": "刷流任务设置失败"}
+
+    @staticmethod
+    def __brushtask_enable():
+        """
+        刷流任务可用状态
+        """
+        isBeyondOneMonth = SiteUserInfo().is_min_join_date_beyond_one_month()
+        return {"code": 0, "isBeyondOneMonth": isBeyondOneMonth}
 
     def __name_test(self, data):
         """
@@ -4750,10 +4759,6 @@ class WebAction:
         """
         # 需要过滤的菜单
         ignore = []
-        # 查询最早加入PT站的时间, 如果不足一个月, 则隐藏刷流任务
-        first_pt_site = SiteUserInfo().get_pt_site_min_join_date()
-        if not first_pt_site or not StringUtils.is_one_month_ago(first_pt_site):
-            ignore.append('brushtask')
         # 获取可用菜单
         menus = current_user.get_usermenus(ignore=ignore)
         return {

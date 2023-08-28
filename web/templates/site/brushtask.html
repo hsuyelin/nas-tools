@@ -774,9 +774,17 @@
       });
       return;
     }
-    $("#brushtask_modal_title").text("新建任务");
-    $("#brushtask_id").val("");
-    $("#modal-brushtask").modal('show');
+
+    ajax_post("brushtask_enable", {}, function (ret) {
+      if (!ret.isBeyondOneMonth) {
+        show_fail_modal("加入PT站点最早时间不足1个月，未通过新人考核期，请先通过PT站点的新人考核后再尝试！", function () {
+        });
+        return;
+      }
+      $("#brushtask_modal_title").text("新建任务");
+      $("#brushtask_id").val("");
+      $("#modal-brushtask").modal('show');
+    });
   }
 
   // 折叠任务详情

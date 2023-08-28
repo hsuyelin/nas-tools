@@ -429,3 +429,18 @@ class SiteUserInfo(object):
         self.dbhelper.update_site_seed_info_site_name(name, old_name)
         self.dbhelper.update_site_statistics_site_name(name, old_name)
         return True
+
+    def is_min_join_date_beyond_one_month(self):
+        """
+        查询最早加入PT站的时间是否超过一个月
+        """
+        # 读取强制刷流配置
+        _force_enable_brush = Config().get_config("pt").get("force_enable_brush")
+        if _force_enable_brush:
+            return True
+
+        first_pt_site = self.get_pt_site_min_join_date()
+        if not first_pt_site or not StringUtils.is_one_month_ago(first_pt_site):
+            return False
+        else:
+            return True
