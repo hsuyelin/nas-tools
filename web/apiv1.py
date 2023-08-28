@@ -7,7 +7,7 @@ from app.sites import Sites
 from app.utils import TokenCache
 from config import Config
 from web.action import WebAction
-from web.backend.user import User
+from web.backend.pro_user import ProUser
 from web.security import require_auth, login_required, generate_access_token
 
 apiv1_bp = Blueprint("apiv1",
@@ -87,7 +87,7 @@ class UserLogin(Resource):
         password = args.get('password')
         if not username or not password:
             return {"code": 1, "success": False, "message": "用户名或密码错误"}
-        user_info = User().get_user(username)
+        user_info = ProUser().get_user(username)
         if not user_info:
             return {"code": 1, "success": False, "message": "用户名或密码错误"}
         # 校验密码
@@ -123,7 +123,7 @@ class UserInfo(ClientResource):
         """
         args = self.parser.parse_args()
         username = args.get('username')
-        user_info = User().get_user(username)
+        user_info = ProUser().get_user(username)
         if not user_info:
             return {"code": 1, "success": False, "message": "用户名不正确"}
         return {
