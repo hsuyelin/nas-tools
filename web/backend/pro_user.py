@@ -7,6 +7,7 @@ from base64 import b64decode
 from app.helper import DbHelper
 from config import Config
 from app.conf import ModuleConf
+from web.backend.user import User
 
 MENU_CONF = {
     '我的媒体库': {
@@ -221,3 +222,18 @@ class ProUser(UserMixin):
 
     def delete_user(self, name):
         return self.dbhelper.delete_user(name)
+
+    def check_user(self, site=None, params={}):
+        return True
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    @property
+    def is_authenticated(self):
+        return True

@@ -1185,9 +1185,6 @@
     {% if not TMDBFlag %}
       // 检查tmdb配置
       show_init_alert_modal();
-    {% elif current_user.level == 1 %}
-      // 用户认证
-      show_user_auth_modal();
     {% endif %}
 
   });
