@@ -14,3 +14,6 @@
 Dockerfile-dev
 config/sites.json
 nastools_test.py
+/node_modules/**
+package-lock.json
+package.json

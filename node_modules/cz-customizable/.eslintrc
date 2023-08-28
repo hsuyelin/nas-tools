@@ -1,0 +1,16 @@
+{
+  "extends": ["airbnb-base", "plugin:prettier/recommended"],
+  "env": {
+    "node": true,
+    "jasmine": true
+  },
+  "globals": {
+    "console": true,
+    "jest": true,
+    "module": true
+  },
+  "plugins": ["prettier"],
+  "rules": {
+
+  }
+}
