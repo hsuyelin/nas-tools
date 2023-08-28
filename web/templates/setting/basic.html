@@ -419,19 +419,33 @@
                     </label>
                   </div>
                 </div>
-              <div class="row">
-                <div class="col-lg">
-                  <div class="mb-3">
-                    <label class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" id="media.filename_prefer_barre" {% if
-                        Config.media.filename_prefer_barre %}checked{% endif %}>
-                      <span class="form-check-label">使用横杠替换冒号 <span class="form-help"
-                                                                          title="开启后，文件名中的中英文冒号将替换为横杠"
-                                                                          data-bs-toggle="tooltip">?</span></span>
-                    </label>
-                  </div>
-                </div>
+          </div>
+          <div class="row">
+            <div class="col-lg">
+              <div class="mb-3">
+                <label class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="media.filename_prefer_barre" {% if
+                    Config.media.filename_prefer_barre %}checked{% endif %}>
+                  <span class="form-check-label">使用横杠替换冒号 <span class="form-help"
+                                                                      title="开启后，文件名中的中英文冒号将替换为横杠"
+                                                                      data-bs-toggle="tooltip">?</span></span>
+                </label>
               </div>
+            </div>
+            <div class="col-lg">
+              <div class="mb-3">
+                <label class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="media.ffmpeg_video_meta" {% if
+                    Config.media.ffmpeg_video_meta %}checked{% endif %}>
+                  <span class="form-check-label">刮削视频元数据 <span class="form-help"
+                                                                      title="开启后，通过ffmpeg获取视频文件真实的元数据，将会大幅增加转移时间，低配置机器不建议开启"
+                                                                      data-bs-toggle="tooltip">?</span></span>
+                </label>
+              </div>
+            </div>
+            <div class="col-lg">
+              <div class="mb-3" style="display:none;">
+                <h1>占位元素 </h1>
               </div>
             </div>
           </div>

@@ -906,7 +906,7 @@ class Media:
                 # 没有自带TMDB信息
                 if not tmdb_info:
                     # 识别名称
-                    meta_info = MetaInfo(title=file_name)
+                    meta_info = MetaInfo(title=file_name, filePath=file_path)
                     # 识别不到则使用上级的名称
                     if not meta_info.get_name() or not meta_info.year:
                         parent_info = MetaInfo(parent_name)
@@ -994,7 +994,7 @@ class Media:
                     meta_info.set_tmdb_info(file_media_info)
                 # 自带TMDB信息
                 else:
-                    meta_info = MetaInfo(title=file_name, mtype=media_type)
+                    meta_info = MetaInfo(title=file_name, mtype=media_type, filePath=file_path)
                     meta_info.set_tmdb_info(tmdb_info)
                     if season and meta_info.type != MediaType.MOVIE:
                         meta_info.begin_season = int(season)

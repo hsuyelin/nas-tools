@@ -50,7 +50,7 @@ class MetaVideo(MetaBase):
     _video_encode_re = r"^[HX]26[45]$|^AVC$|^HEVC$|^VC\d?$|^MPEG\d?$|^Xvid$|^DivX$|^HDR\d*$"
     _audio_encode_re = r"^DTS\d?$|^DTSHD$|^DTSHDMA$|^Atmos$|^TrueHD\d?$|^AC3$|^\dAudios?$|^DDP\d?$|^DD\d?$|^LPCM\d?$|^AAC\d?$|^FLAC\d?$|^HD\d?$|^MA\d?$"
 
-    def __init__(self, title, subtitle=None, fileflag=False):
+    def __init__(self, title, subtitle=None, fileflag=False, filePath=None):
         super().__init__(title, subtitle, fileflag)
         if not title:
             return
