@@ -54,6 +54,13 @@
               <a href="javascript:delete_checked_unknown()" class="btn-action text-danger d-md-none" title="批量删除">
                 {{ SVG.trash() }}
               </a>
+              <a href="javascript:truncate_unknown_all()" class="btn text-danger d-none d-md-inline-block" title="清空记录">
+                {{ SVG.eraser() }}
+                清空记录
+              </a>
+              <a href="javascript:truncate_unknown_all()" class="btn-action text-danger d-md-none" title="重新识别">
+                {{ SVG.eraser() }}
+              </a>
             </div>
           </div>
           <div class="table-responsive {% if TotalCount > 0 %}table-page-body{% endif %}">
@@ -190,7 +197,6 @@
     });
   }
 
-
   //批量删除
   function delete_checked_unknown() {
     let logids = select_GetSelectedVAL("unknow_record");
@@ -203,6 +209,17 @@
         window_history_refresh();
       });
     })
+  }
+
+  //清空所有手动转移记录
+  function truncate_unknown_all() {
+    show_confirm_modal("该操作仅会清空所有手动转移记录，但不会删除源文件，是否确认？", function () {
+      hide_confirm_modal();
+      ajax_post("truncate_transfer_unknown", {}, function (ret) {
+        show_success_modal("清理所有转移记录成功");
+        window_history_refresh();
+      });
+    });
   }
 
   //批量重新识别

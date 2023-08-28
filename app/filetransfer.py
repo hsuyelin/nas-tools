@@ -212,13 +212,13 @@ class FileTransfer:
         :param rmt_mode: RmtMode转移方式
         """
         # 字幕正则式
-        _zhcn_sub_re = r"([.\[(](((zh[-_])?(cn|ch[si]|sg|sc))|zho?" \
+        _zhcn_sub_re = r"([.\[(](((zh[-_])?(cn|ch[si]|sg|sc|SC|jpsc|JPSC|chs&jpn|CHS|Chs&Jap|CHS&JAP))|zho?" \
                        r"|chinese|(cn|ch[si]|sg|zho?|eng)[-_&](cn|ch[si]|sg|zho?|eng)" \
                        r"|简[体中]?)[.\])])" \
                        r"|([\u4e00-\u9fa5]{0,3}[中双][\u4e00-\u9fa5]{0,2}[字文语][\u4e00-\u9fa5]{0,3})" \
                        r"|简体|简中" \
                        r"|(?<![a-z0-9])gb(?![a-z0-9])"
-        _zhtw_sub_re = r"([.\[(](((zh[-_])?(hk|tw|cht|tc))" \
+        _zhtw_sub_re = r"([.\[(](((zh[-_])?(hk|tw|cht|tc|TC|jptc|JPTC|cht&jpn|CHT|Cht&Jap|CHT&JAP))" \
                        r"|繁[体中]?)[.\])])" \
                        r"|繁体中[文字]|中[文字]繁体|繁体" \
                        r"|(?<![a-z0-9])big5(?![a-z0-9])"
@@ -255,18 +255,18 @@ class FileTransfer:
                     new_file_type = ""
                     # 兼容jellyfin字幕识别(多重识别), emby则会识别最后一个后缀
                     if re.search(_zhcn_sub_re, file_item, re.I):
-                        new_file_type = ".chi.zh-cn"
+                        new_file_type = ".chs"
                     elif re.search(_zhtw_sub_re, file_item,
                                    re.I):
-                        new_file_type = ".zh-tw"
+                        new_file_type = ".cht"
                     elif re.search(_eng_sub_re, file_item, re.I):
                         new_file_type = ".eng"
                     # 通过对比字幕文件大小  尽量转移所有存在的字幕
                     file_ext = os.path.splitext(file_item)[-1]
                     new_sub_tag_dict = {
                         ".eng": ".英文",
-                        ".chi.zh-cn": ".简体中文",
-                        ".zh-tw": ".繁体中文"
+                        ".chs": ".简体中文",
+                        ".cht": ".繁体中文"
                     }
                     new_sub_tag_list = [
                         new_file_type if t == 0 else "%s%s(%s)" % (new_file_type,
@@ -864,10 +864,16 @@ class FileTransfer:
                     self.update_transfer_unknown_state(file_item)
                 # 电影立即发送消息
                 if media.type == MediaType.MOVIE:
-                    self.message.send_transfer_movie_message(in_from,
+                    if self._simplify_library_notification:
+                        self.message.send_simplify_transfer_movie_message(in_from,
                                                              media,
                                                              exist_filenum,
                                                              self._movie_category_flag)
+                    else:
+                        self.message.send_transfer_movie_message(in_from,
+                                                                 media,
+                                                                 exist_filenum,
+                                                                 self._movie_category_flag)
                 # 否则登记汇总发消息
                 else:
                     # 按季汇总
@@ -923,7 +929,10 @@ class FileTransfer:
         # 循环结束
         # 统计完成情况，发送通知
         if message_medias:
-            self.message.send_transfer_tv_message(message_medias, in_from)
+            if self._simplify_library_notification:
+                self.message.send_simplify_transfer_tv_message(message_medias, in_from)
+            else:
+                self.message.send_transfer_tv_message(message_medias, in_from)
         # 总结
         log.info("【Rmt】%s 处理完成，总数：%s，失败：%s" % (in_path, total_count, failed_count))
         if alert_count > 0:
@@ -1339,6 +1348,18 @@ class FileTransfer:
         """
         return self.dbhelper.delete_transfer_log_by_id(logid=logid)
 
+    def get_transfer_history_count(self):
+        """
+        转移历史记录总条数
+        """
+        return self.dbhelper.get_transfer_history_count()
+
+    def truncate_transfer_history_list(self):
+        """
+        清空转移历史记录
+        """
+        return self.dbhelper.truncate_transfer_history_list()
+
     def delete_transfer_unknown(self, tid):
         """
         删除未知转移记录
@@ -1356,6 +1377,18 @@ class FileTransfer:
         更新未知转移记录状态
         """
         return self.dbhelper.update_transfer_unknown_state(path=path)
+
+    def get_transfer_unknown_count(self):
+        """
+        手动转移历史记录总条数
+        """
+        return self.dbhelper.get_transfer_unknown_count()
+
+    def truncate_transfer_unknown_list(self):
+        """
+        清空手动转移历史记录
+        """
+        return self.dbhelper.truncate_transfer_unknown_list()
 
     def delete_transfer_blacklist(self, path):
         """
