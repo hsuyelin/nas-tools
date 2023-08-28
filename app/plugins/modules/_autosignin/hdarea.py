@@ -9,7 +9,7 @@ class HDArea(_ISiteSigninHandler):
     """
     
     # 匹配的站点Url，每一个实现类都需要设置为自己的站点Url
-    site_url = "hdarea.co"
+    site_url = "hdarea.club"
 
     # 签到成功
     _success_text = "此次签到您获得"
@@ -42,7 +42,7 @@ class HDArea(_ISiteSigninHandler):
         html_res = RequestUtils(cookies=site_cookie,
                                 headers=ua,
                                 proxies=proxy
-                                ).post_res(url="https://www.hdarea.co/sign_in.php", data=data)
+                                ).post_res(url="https://hdarea.club/sign_in.php", data=data)
         if not html_res or html_res.status_code != 200:
             self.error(f"签到失败，请检查站点连通性")
             return False, f'【{site}】签到失败，请检查站点连通性'
