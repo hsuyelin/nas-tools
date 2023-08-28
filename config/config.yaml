@@ -103,6 +103,8 @@ media:
   tmdb_language: zh
   # 【搜索结果中包含成人内容条目】：需要先去TMDB个人设置中将<搜索结果中包含成人内容条目>选项开启，开启该选项后将会在刮削或者检索时包含成人内容
   tmdb_include_adult: false
+  # 【使用横杠替换冒号】：如开启，文件名中的中英文冒号将替换为横杠
+  filename_prefer_barre: false
 
 # 配置Emby服务器信息
 emby:

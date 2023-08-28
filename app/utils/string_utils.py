@@ -12,7 +12,7 @@ import zhconv
 
 from app.utils.exception_utils import ExceptionUtils
 from app.utils.types import MediaType
-
+from config import Config
 
 class StringUtils:
 
@@ -292,9 +292,28 @@ class StringUtils:
 
     @staticmethod
     def clear_file_name(name):
+        """
+        去除文件中的特殊字符
+        """
         if not name:
             return None
-        return re.sub(r"[*?\\/\"<>~|]", "", name, flags=re.IGNORECASE).replace(":", "：")
+
+        replacement_dict = {
+            r"[*?\\/\"<>~|,，？]": "",
+            r"[\s]+": " ",
+        }
+
+        cleaned_name = name
+        for pattern, replacement in replacement_dict.items():
+            cleaned_name = re.sub(pattern, replacement, cleaned_name, flags=re.IGNORECASE).strip()
+
+        media = Config().get_config('media')
+        filename_prefer_barre = media.get("filename_prefer_barre", False) or False
+        if filename_prefer_barre:
+            cleaned_name = cleaned_name.replace(":", " - ").replace("：", " - ")
+        else:
+            cleaned_name = cleaned_name.replace(":", "：")
+        return cleaned_name
 
     @staticmethod
     def get_keyword_from_string(content):
