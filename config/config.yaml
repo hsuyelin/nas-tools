@@ -101,6 +101,8 @@ media:
   default_rmt_mode: copy
   # 默认TMDB信息语种
   tmdb_language: zh
+  # 【搜索结果中包含成人内容条目】：需要先去TMDB个人设置中将<搜索结果中包含成人内容条目>选项开启，开启该选项后将会在刮削或者检索时包含成人内容
+  tmdb_include_adult: false
 
 # 配置Emby服务器信息
 emby:

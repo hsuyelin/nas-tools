@@ -22,6 +22,7 @@ class TMDb(object):
     TMDB_CACHE_ENABLED = "TMDB_CACHE_ENABLED"
     TMDB_PROXIES = "TMDB_PROXIES"
     TMDB_DOMAIN = "TMDB_DOMAIN"
+    TMDB_INCLUDE_ADULT = "TMDB_INCLUDE_ADULT"
     REQUEST_CACHE_MAXSIZE = 512
 
     def __init__(self, obj_cached=True, session=None):
@@ -88,6 +89,17 @@ class TMDb(object):
         os.environ[self.TMDB_LANGUAGE] = language
 
     @property
+    def include_adult(self):
+        if os.environ.get(self.TMDB_INCLUDE_ADULT) == "True" or os.environ.get(self.TMDB_INCLUDE_ADULT) == True:
+            return "true"
+        else:
+            return "false"
+
+    @include_adult.setter
+    def include_adult(self, include_adult):
+        os.environ[self.TMDB_INCLUDE_ADULT] = str(include_adult)
+
+    @property
     def wait_on_rate_limit(self):
         if os.environ.get(self.TMDB_WAIT_ON_RATE_LIMIT) == "False":
             return False
@@ -143,10 +155,11 @@ class TMDb(object):
         if self.api_key is None or self.api_key == "":
             raise TMDbException("No API key found.")
 
-        url = "%s%s?api_key=%s&include_adult=false&%s&language=%s" % (
+        url = "%s%s?api_key=%s&include_adult=%s&%s&language=%s" % (
             self.domain,
             action,
             self.api_key,
+            self.include_adult,
             append_to_response,
             self.language,
         )
