@@ -268,13 +268,13 @@ class CloudflareSpeedTest(_IPluginModule):
 
         # 开始优选
         if err_flag:
-            self.info("正在进行CLoudflare CDN优选，请耐心等待")
+            self.info("正在进行Cloudflare CDN优选，请耐心等待")
             # 执行优选命令，-dd不测速
             _result_file_basename = os.path.basename(self._result_file)
             _cf_ipv4_basename = os.path.basename(self._cf_ipv4)
             _cf_ipv6_basename = os.path.basename(self._cf_ipv6)
             cf_command = f'cd {self._cf_path} && chmod a+x {self._binary_name} && ./{self._binary_name} {self._additional_args} -o {_result_file_basename}' + (
-                f' -f {_cf_ipv4_basename}' if {self._ipv4} else '') + (f' -f {_cf_ipv6_basename}' if {self._ipv6} else '')
+                f' -f {_cf_ipv4_basename}' if self._ipv4 else '') + (f' -f {_cf_ipv6_basename}' if self._ipv6 else '')
             self.info(f'正在执行优选命令 {cf_command}')
             os.system(cf_command)
 
