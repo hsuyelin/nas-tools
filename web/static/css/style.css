@@ -28,6 +28,139 @@ body, .page {
     display: none;
 }
 
+#mediafile_tree {
+    overflow: auto !important;
+    max-width: 300px;
+    max-height: 600px;
+}
+
+.jqueryFileTree {
+    padding: 0px 5px !important;
+}
+
+.jqueryFileTree LI.directory {
+    white-space: nowrap !important;
+}
+
+.theme-light .jqueryFileTree LI.directory {
+    background: url(../img/filetree-custom/light/folder_close.png) left top 5px no-repeat;
+}
+
+.theme-light .jqueryFileTree LI.expanded {
+    background: url(../img/filetree-custom/light/folder_open.png) left top 5px no-repeat;
+}
+
+.theme-light .jqueryFileTree LI.directory.sync-src {
+    background: url(../img/filetree-custom/light/sync_src_folder_close.png) left top 5px no-repeat;
+}
+
+.theme-light .jqueryFileTree LI.expanded.sync-src {
+    background: url(../img/filetree-custom/light/sync_src_folder_open.png) left top 5px no-repeat;
+}
+
+.theme-light .jqueryFileTree LI.directory.sync-dest {
+    background: url(../img/filetree-custom/light/sync_dest_folder_close.png) left top 5px no-repeat;
+}
+
+.theme-light .jqueryFileTree LI.expanded.sync-dest {
+    background: url(../img/filetree-custom/light/sync_dest_folder_open.png) left top 5px no-repeat;
+}
+
+.theme-dark .jqueryFileTree LI.directory {
+    background: url(../img/filetree-custom/dark/folder_close.png) left top 5px no-repeat;
+}
+
+.theme-dark .jqueryFileTree LI.expanded {
+    background: url(../img/filetree-custom/dark/folder_open.png) left top 5px no-repeat;
+}
+
+.theme-dark .jqueryFileTree LI.directory.sync-src {
+    background: url(../img/filetree-custom/dark/sync_src_folder_close.png) left top 5px no-repeat;
+}
+
+.theme-dark .jqueryFileTree LI.expanded.sync-src {
+    background: url(../img/filetree-custom/dark/sync_src_folder_open.png) left top 5px no-repeat;
+}
+
+.theme-dark .jqueryFileTree LI.directory.sync-dest {
+    background: url(../img/filetree-custom/dark/sync_dest_folder_close.png) left top 5px no-repeat;
+}
+
+.theme-dark .jqueryFileTree LI.expanded.sync-dest {
+    background: url(../img/filetree-custom/dark/sync_dest_folder_open.png) left top 5px no-repeat;
+}
+
+.link-direction {
+    font-weight: bold;
+    font-size: 8px;
+    margin: 0px 0px 0px 5px;
+}
+
+.link-direction[direction="→"] {
+    content: attr(direction);
+    color: #ff3232;
+}
+
+.link-direction[direction="←"] {
+    content: attr(direction);
+    color: #32ff32;
+}
+
+.link-folder {
+    content: attr(link);
+    font-weight: normal;
+    font-size: 8px;
+    color: #999999;
+    border-radius: 5px;
+    border: 1px solid #999999;
+    margin: 0px 5px;
+    padding: 0px 5px;
+}
+
+.jqueryFileTree LI a:hover {
+    background: transparent;
+    color: var(--tblr-link-color) !important;
+}
+
+#mediafile_folder_sync::before,
+.mediafile_link span::before {
+    content: "";
+    display: inline-flex;
+    margin: 0px 5px 0px 10px;
+    width: 10px;
+    transform: scale(0.6);
+}
+
+#mediafile_folder_sync[direction="→"]::before {
+    content: "●";
+    color: #ff3232;
+}
+
+#mediafile_folder_sync[direction="←"]::before {
+    content: "●";
+    color: #32ff32;
+}
+
+.mediafile_link span[direction="→"]::before {
+    content: "→";
+    color: #ff3232;
+}
+
+.mediafile_link span[direction="←"]::before {
+    content: "←";
+    color: #32ff32;
+}
+
+.mediafile_link ul {
+    padding-left: 0px;
+}
+
+.mediafile_link li {
+    list-style: none;
+    color: #999999;
+    font-size: 8px;
+}
+  
 .dropzone {
     border: 1px dashed var(--tblr-border-color) !important;
 }
