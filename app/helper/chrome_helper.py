@@ -44,15 +44,9 @@ class ChromeHelper(object):
             return
         global driver_executable_path
         try:
-            latest_release_url = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
-            latest_chromedriver_version = requests.get(latest_release_url).text
-            if latest_chromedriver_version:
-                driver_executable_path = ChromeDriverManager(version=f'{latest_chromedriver_version}').install()
-            if os.path.exists(driver_executable_path):
-                log.info(f"【ChromeHelper】存在内置驱动: {driver_executable_path}")
-                self._executable_path = driver_executable_path
-            else:
-                raise ValueError('【ChromeHelper】未获取到驱动最新版本')
+            download_webdriver_path = ChromeDriverManager().install()
+            SystemUtils.chmod755(download_webdriver_path)
+            driver_executable_path = download_webdriver_path
         except Exception as err:
              ExceptionUtils.exception_traceback(err)
 

@@ -40,7 +40,6 @@ class TorrentSpider(feapder.AirSpider):
             driver_type="CHROME",
             timeout=20,
             window_size=(1024, 800),
-            executable_path=_webdriver_path,
             render_time=10,
             custom_argument=["--ignore-certificate-errors"],
         )
@@ -250,7 +249,7 @@ class TorrentSpider(feapder.AirSpider):
         log.info(f"【Spider】开始请求：{searchurl}")
         yield feapder.Request(url=searchurl,
                               use_session=True,
-                              render=False)
+                              render=self.render)
 
     def download_midware(self, request):
         request.headers = {

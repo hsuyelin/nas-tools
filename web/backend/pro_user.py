@@ -345,13 +345,13 @@ class ProUser(UserMixin):
         return IndexerConf(datas=indexer,
                            siteid=siteid,
                            cookie=cookie,
-                           ua=ua,
                            name=name,
                            rule=rule,
-                           pri=pri,
                            public=public,
                            proxy=proxy,
-                           render=render)
+                           ua=ua,
+                           render=render,
+                           pri=pri)
 
     def get_public_sites(self):
         if self._public_sites:

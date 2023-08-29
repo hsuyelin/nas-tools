@@ -9,7 +9,7 @@ import psutil
 from app.utils.exception_utils import ExceptionUtils
 from app.utils.path_utils import PathUtils
 from app.utils.types import OsType
-from config import WEBDRIVER_PATH
+from config import Config, WEBDRIVER_PATH
 
 
 class SystemUtils:
@@ -107,6 +107,25 @@ class SystemUtils:
             return None
         else:
             return WEBDRIVER_PATH.get(SystemUtils.get_system().value)
+
+    @staticmethod
+    def chmod755(filePath):
+        if not os.path.exists(filePath):
+            return
+        if not SystemUtils.is_docker() \
+            and not SystemUtils.is_macos() \
+            and not SystemUtils.is_synology():
+            return
+        os.chmod(filePath, 0o755)
+
+    @staticmethod
+    def get_download_webdriver_path():
+        download_webdriver_path = os.path.join(Config().get_config_path(), "webdriver")
+        try:
+            os.makedirs(download_webdriver_path)
+        except OSError as e:
+            pass
+        return download_webdriver_path
 
     @staticmethod
     def copy(src, dest):
