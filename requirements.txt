@@ -111,7 +111,7 @@ typing_extensions==4.7.1
 tzdata==2023.3
 tzlocal==5.0.1
 undetected-chromedriver==3.5.3
-urllib3==1.26.16
+urllib3==2.0.4
 w3lib==2.1.2
 watchdog==3.0.0
 wcwidth==0.2.6

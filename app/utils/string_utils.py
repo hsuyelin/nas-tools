@@ -254,20 +254,6 @@ class StringUtils:
         return addr.scheme, addr.netloc
 
     @staticmethod
-    def get_host_from_url(url):
-        """
-        获取URL Host
-        """
-        try:
-            parsed_url = parse.urlparse(url)
-            if parsed_url.scheme and parsed_url.netloc:
-                return parsed_url.netloc
-        except Exception:
-            pass
-        
-        return None
-
-    @staticmethod
     def get_url_domain(url):
         """
         获取URL的域名部分，不含WWW和HTTP

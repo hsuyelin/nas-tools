@@ -328,15 +328,15 @@ class ProUser(UserMixin):
         if not indexer_list:
             return None
 
-        host = StringUtils.get_host_from_url(url)
-        if not StringUtils.is_string_and_not_empty(host):
+        domain = StringUtils.get_url_domain(url)
+        if not StringUtils.is_string_and_not_empty(domain):
             return None
 
         indexer = {}
         for item in indexer_list:
             if "domain" in item:
-                indexer_host = StringUtils.get_host_from_url(item.get("domain", ""))
-                if StringUtils.is_string_and_not_empty(indexer_host) and host == indexer_host:
+                indexer_domain = StringUtils.get_url_domain(item.get("domain", ""))
+                if StringUtils.is_string_and_not_empty(indexer_domain) and domain == indexer_domain:
                     indexer = item
 
         if not indexer:
