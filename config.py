@@ -183,6 +183,9 @@ class Config(object):
     def get_script_path(self):
         return os.path.join(self.get_root_path(), "scripts", "sqls")
 
+    def get_user_sites_bin_path(self):
+        return os.path.join(self.get_root_path(), "web", "backend", "user.sites.bin")
+
     def get_user_plugin_path(self):
         return os.path.join(self.get_config_path(), "plugins")
 

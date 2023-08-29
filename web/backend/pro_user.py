@@ -2,12 +2,15 @@ from flask_login import UserMixin
 from werkzeug.security import check_password_hash
 from operator import itemgetter
 import json
+import os
 from base64 import b64decode
 
+import log
 from app.helper import DbHelper
 from config import Config
 from app.conf import ModuleConf
-from web.backend.user import User
+from app.utils import StringUtils
+from app.indexer.indexerConf import IndexerConf
 
 MENU_CONF = {
     '我的媒体库': {
@@ -120,6 +123,9 @@ class ProUser(UserMixin):
     """
     dbhelper = None
     admin_users = []
+    _user_sites = {}
+    _public_sites = []
+    _brush_conf = {}
 
     def __init__(self, user=None):
         self.dbhelper = DbHelper()
@@ -140,6 +146,10 @@ class ProUser(UserMixin):
             "level": 2,
             'search': 1
         }]
+        user_sites, public_sites, brush_conf = self.__parse_users_sites(Config().get_user_sites_bin_path())
+        self._user_sites = user_sites
+        self._public_sites = public_sites
+        self._brush_conf = brush_conf
 
     def verify_password(self, password):
         """
@@ -203,7 +213,6 @@ class ProUser(UserMixin):
             for index, page in enumerate(menu_value.get('list', [])):
                 if page['page'] in ignore:
                     MENU_CONF[menu_key]['list'].pop(index)
-                    # print(MENU_CONF[menu_key]['list'][index])
 
         menu_list = list(itemgetter(*user_pris_list)(MENU_CONF))
         return menu_list
@@ -230,10 +239,128 @@ class ProUser(UserMixin):
     def is_active(self):
         return True
 
+    @is_active.setter
+    def is_active(self, is_active):
+        pass
+
     @property
     def is_anonymous(self):
         return False
 
+    @is_anonymous.setter
+    def is_anonymous(self, is_anonymous):
+        pass
+
     @property
     def is_authenticated(self):
         return True
+
+    @is_authenticated.setter
+    def is_authenticated(self, is_authenticated):
+        pass
+
+    @property
+    def public_sites(self):
+        return _public_sites
+
+    @public_sites.setter
+    def public_sites(self, public_sites):
+        pass
+
+    @property
+    def brush_conf(self):
+        return _brush_conf
+
+    @brush_conf.setter
+    def brush_conf(self, brush_conf):
+        pass
+
+    def __parse_users_sites(self, user_sites_bin_path):
+        if not os.path.exists(user_sites_bin_path):
+            log.error(f"【User】用户站点索引文件不存在")
+            return None
+        try:
+            with open(user_sites_bin_path, "rb") as f:
+                base64_encoded_sites = f.read()
+                decoded_sites = b64decode(base64_encoded_sites)
+                decoded_sites_string = decoded_sites.decode("utf-8")
+                user_sites = json.loads(decoded_sites_string)
+
+                public_sites = []
+                if "indexer" in user_sites:
+                    indexer_list = user_sites.get("indexer", [])
+                    if indexer_list:
+                        for item in indexer_list:
+                            if "public" in item:
+                                public = item.get("public", False)
+                                if public:
+                                    public_domain = item.get("domain", "")
+                                    if StringUtils.is_string_and_not_empty(public_domain):
+                                        public_sites.append(public_domain)
+
+                brush_conf = {}
+                if "conf" in user_sites:
+                    brush_conf = user_sites.get("conf", {})
+
+                return user_sites, public_sites, brush_conf
+        except Exception as err:
+            log.error(f"【User】用户站点索引解析失败: {str(err)}")
+            return {}, [], {}
+
+    def get_indexer(self, 
+                    url,
+                    siteid=None,
+                    cookie=None,
+                    ua=None,
+                    name=None,
+                    rule=None,
+                    pri=None,
+                    public=None,
+                    proxy=None,
+                    render=None):
+        if not self._user_sites or not StringUtils.is_string_and_not_empty(url):
+            return None
+
+        if not "indexer" in self._user_sites:
+            return None
+
+        indexer_list = self._user_sites.get("indexer", [])
+        if not indexer_list:
+            return None
+
+        host = StringUtils.get_host_from_url(url)
+        if not StringUtils.is_string_and_not_empty(host):
+            return None
+
+        indexer = {}
+        for item in indexer_list:
+            if "domain" in item:
+                indexer_host = StringUtils.get_host_from_url(item.get("domain", ""))
+                if StringUtils.is_string_and_not_empty(indexer_host) and host == indexer_host:
+                    indexer = item
+
+        if not indexer:
+            return None
+
+        return IndexerConf(datas=indexer,
+                           siteid=siteid,
+                           cookie=cookie,
+                           ua=ua,
+                           name=name,
+                           rule=rule,
+                           pri=pri,
+                           public=public,
+                           proxy=proxy,
+                           render=render)
+
+    def get_public_sites(self):
+        if self._public_sites:
+            return self._public_sites
+        _, public_sites, _ = self.__parse_users_sites(Config().get_user_sites_bin_path())
+        return public_sites
+
+    def get_brush_conf(self):
+        if self._brush_conf:
+            return self._brush_conf
+        _, _, brush_conf = self.__parse_users_sites(Config().get_user_sites_bin_path())
+        return brush_conf

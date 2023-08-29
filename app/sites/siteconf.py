@@ -8,7 +8,6 @@ from app.helper import ChromeHelper
 from app.utils import ExceptionUtils, StringUtils, RequestUtils
 from app.utils.commons import singleton
 from config import Config
-from web.backend.user import User
 from web.backend.pro_user import ProUser
 
 
@@ -78,7 +77,7 @@ class SiteConf:
         self.init_config()
 
     def init_config(self):
-        self.user = User()
+        self.user = ProUser()
 
     def get_checkin_conf(self):
         return self._SITE_CHECKIN_XPATH

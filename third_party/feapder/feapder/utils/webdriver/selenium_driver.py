@@ -12,8 +12,8 @@ import json
 import logging
 import os
 from typing import Optional, Union, List
-
 import requests
+
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
@@ -76,7 +76,6 @@ class SeleniumDriver(WebDriver, RemoteWebDriver):
         """
         super(SeleniumDriver, self).__init__(**kwargs)
         self._xhr_url_regexes = xhr_url_regexes
-        self._driver_type = self._driver_type or SeleniumDriver.CHROME
 
         if self._xhr_url_regexes and self._driver_type != SeleniumDriver.CHROME:
             raise Exception(
@@ -236,10 +235,7 @@ class SeleniumDriver(WebDriver, RemoteWebDriver):
         elif self._auto_install_driver:
             latest_release_url = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
             latest_chromedriver_version = requests.get(latest_release_url).text
-            if latest_chromedriver_version:
-                kwargs.update(executable_path=ChromeDriverManager(version=f'{latest_chromedriver_version}').install())
-            else:
-                kwargs.update(executable_path=ChromeDriverManager().install())
+            kwargs.update(executable_path=ChromeDriverManager(version=f'{latest_chromedriver_version}').install())
 
         driver = webdriver.Chrome(options=chrome_options, **kwargs)
 
