@@ -42,19 +42,25 @@ requires = [
     "requests>=2.22.0",
     "bs4>=0.0.1",
     "ipython>=7.14.0",
-    "redis-py-cluster>=2.1.0",
     "cryptography>=3.3.2",
-    "selenium>=3.141.0",
-    "pymongo>=3.10.1",
     "urllib3>=1.25.8",
     "loguru>=0.5.3",
     "influxdb>=5.3.1",
     "pyperclip>=1.8.2",
-    "webdriver-manager>=3.5.3",
-    "terminal-layout>=2.1.3"
+    "terminal-layout>=2.1.3",
 ]
 
-extras_requires = ["bitarray>=1.5.3", "PyExecJS>=1.5.1"]
+render_requires = [
+    "webdriver-manager>=3.5.3",
+    "selenium>=3.141.0",
+]
+
+all_requires = [
+    "bitarray>=1.5.3",
+    "PyExecJS>=1.5.1",
+    "pymongo>=3.10.1",
+    "redis-py-cluster>=2.1.0",
+] + render_requires
 
 setuptools.setup(
     name="feapder",
@@ -63,11 +69,11 @@ setuptools.setup(
     license="MIT",
     author_email="feapder@qq.com",
     python_requires=">=3.6",
-    description="feapder是一款支持分布式、批次采集、任务防丢、报警丰富的python爬虫框架",
+    description="feapder是一款支持分布式、批次采集、数据防丢、报警丰富的python爬虫框架",
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=requires,
-    extras_require={"all": extras_requires},
+    extras_require={"all": all_requires, "render": render_requires},
     entry_points={"console_scripts": ["feapder = feapder.commands.cmdline:execute"]},
     url="https://github.com/Boris-code/feapder.git",
     packages=packages,

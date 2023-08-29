@@ -122,8 +122,7 @@ class Scheduler(threading.Thread):
             setattr(setting, "SPIDER_THREAD_COUNT", thread_count)
         self._thread_count = setting.SPIDER_THREAD_COUNT
 
-        self._spider_name = redis_key
-        self._project_name = redis_key.split(":")[0]
+        self._spider_name = self.name
         self._task_table = task_table
 
         self._tab_spider_status = setting.TAB_SPIDER_STATUS.format(redis_key=redis_key)
@@ -136,9 +135,6 @@ class Scheduler(threading.Thread):
         self._last_check_task_count_time = 0
         self._stop_heartbeat = False  # 是否停止心跳
         self._redisdb = RedisDB()
-
-        self._project_total_state_table = "{}_total_state".format(self._project_name)
-        self._is_exist_project_total_state_table = False
 
         # Request 缓存设置
         Request.cached_redis_key = redis_key
@@ -154,6 +150,8 @@ class Scheduler(threading.Thread):
         self.init_metrics()
         # 重置丢失的任务
         self.reset_task()
+
+        self._stop_spider = False
 
     def init_metrics(self):
         """
@@ -176,7 +174,7 @@ class Scheduler(threading.Thread):
 
         while True:
             try:
-                if self.all_thread_is_done():
+                if self._stop or self.all_thread_is_done():
                     if not self._is_notify_end:
                         self.spider_end()  # 跑完一轮
                         self._is_notify_end = True
@@ -487,8 +485,9 @@ class Scheduler(threading.Thread):
 
             spand_time = tools.get_current_timestamp() - begin_timestamp
 
-            msg = "《%s》爬虫结束，耗时 %s" % (
+            msg = "《%s》爬虫%s，采集耗时 %s" % (
                 self._spider_name,
+                "被终止" if self._stop_spider else "结束",
                 tools.format_seconds(spand_time),
             )
             log.info(msg)
@@ -586,3 +585,6 @@ class Scheduler(threading.Thread):
             lose_count = len(datas)
             if lose_count:
                 log.info("重置丢失任务完毕，共{}条".format(len(datas)))
+
+    def stop_spider(self):
+        self._stop_spider = True

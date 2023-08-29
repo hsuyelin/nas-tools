@@ -22,6 +22,8 @@
 # REDISDB_IP_PORTS = "localhost:6379"
 # REDISDB_USER_PASS = ""
 # REDISDB_DB = 0
+# # 连接redis时携带的其他参数，如ssl=True
+# REDISDB_KWARGS = dict()
 # # 适用于redis哨兵模式
 # REDISDB_SERVICE_NAME = ""
 #
@@ -46,9 +48,10 @@
 # KEEP_ALIVE = False  # 爬虫是否常驻
 
 # 下载
-# DOWNLOADER = "feapder.network.downloader.RequestsDownloader"
+# DOWNLOADER = "feapder.network.downloader.RequestsDownloader"  # 请求下载器
 # SESSION_DOWNLOADER = "feapder.network.downloader.RequestsSessionDownloader"
-# RENDER_DOWNLOADER = "feapder.network.downloader.SeleniumDownloader"
+# RENDER_DOWNLOADER = "feapder.network.downloader.SeleniumDownloader"  # 渲染下载器
+# # RENDER_DOWNLOADER="feapder.network.downloader.PlaywrightDownloader"
 # MAKE_ABSOLUTE_LINKS = True  # 自动转成绝对连接
 
 # # 浏览器渲染
@@ -116,6 +119,8 @@
 # # 设置代理
 # PROXY_EXTRACT_API = None  # 代理提取API ，返回的代理分割符为\r\n
 # PROXY_ENABLE = True
+# PROXY_MAX_FAILED_TIMES = 5  # 代理最大失败次数，超过则不使用，自动删除
+# PROXY_POOL = "feapder.network.proxy_pool.ProxyPool"  # 代理池
 #
 # # 随机headers
 # RANDOM_HEADERS = True
