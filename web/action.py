@@ -12,6 +12,7 @@ import time
 from math import floor
 from pathlib import Path
 from urllib.parse import unquote
+import ast
 
 import cn2an
 from flask_login import logout_user, current_user
@@ -124,6 +125,7 @@ class WebAction:
             "refresh_process": self.refresh_process,
             "restory_backup": self.__restory_backup,
             "start_mediasync": self.__start_mediasync,
+            "start_mediaDisplayModuleSync": self.__start_mediaDisplayModuleSync,
             "mediasync_state": self.__mediasync_state,
             "get_tvseason_list": self.__get_tvseason_list,
             "get_userrss_task": self.__get_userrss_task,
@@ -2601,6 +2603,32 @@ class WebAction:
         SystemConfig().set(key=SystemConfigKey.SyncLibrary, value=librarys)
         ThreadHelper().start_thread(MediaServer().sync_mediaserver, ())
         return {"code": 0}
+
+    @staticmethod
+    def __start_mediaDisplayModuleSync(data):
+        """
+        开始媒体库同步
+        """
+        selectedData = data.get("selected") or []
+        unselectedData = data.get("unselected") or []
+        try:
+            selectedModules = [ast.literal_eval(item) for item in selectedData]
+            if selectedModules:
+                for module in selectedModules:
+                    module["selected"] = True
+
+            unselectedModules = [ast.literal_eval(item) for item in unselectedData]
+            if unselectedModules:
+                for module in unselectedModules:
+                    module["selected"] = False
+
+            modules = selectedModules + unselectedModules
+            modules_str = json.dumps(modules, ensure_ascii=False, indent=4)
+            log.debug(f"【我的媒体库】元数据: {modules_str}")
+            SystemConfig().set(key=SystemConfigKey.LibraryDisplayModule, value=modules)
+            return {"code": 0}
+        except Exception as e:
+            return {"code": 1}
 
     @staticmethod
     def __mediasync_state():

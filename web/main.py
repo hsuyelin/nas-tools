@@ -259,6 +259,11 @@ def index():
     # 媒体库
     Librarys = MediaServer().get_libraries()
     LibrarySyncConf = SystemConfig().get(SystemConfigKey.SyncLibrary) or []
+    AllLibraryModule = [MyMediaLibraryType.MINE, MyMediaLibraryType.WATCHING, MyMediaLibraryType.NEWESTADD]
+    LibraryManageConf = SystemConfig().get(SystemConfigKey.LibraryDisplayModule) or []
+    if not LibraryManageConf:
+        for Library in AllLibraryModule:
+            LibraryManageConf.append({"id": Library.value, "selected": True})
 
     # 继续观看
     Resumes = MediaServer().get_resume()
@@ -281,6 +286,7 @@ def index():
                            MediaServerType=MSType,
                            Librarys=Librarys,
                            LibrarySyncConf=LibrarySyncConf,
+                           LibraryManageConf=LibraryManageConf,
                            Resumes=Resumes,
                            Latests=Latests
                            )

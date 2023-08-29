@@ -192,6 +192,20 @@ function select_SelectPart(condition, name) {
 }
 
 /**
+ * 获取选中input所有元素value
+ * @param: name 被管理checkbox的name
+ **/
+function select_GetUnselectedVAL(name) {
+  let selectedVAL = [];
+  $(`input[${select_name(name)}][type=checkbox]`).each(function () {
+    if (!($(this).prop("checked"))) {
+      selectedVAL.push($(this).val());
+    }
+  });
+  return selectedVAL;
+}
+
+/**
  * 获取选中input元素value
  * @param: name 被管理checkbox的name
  **/
