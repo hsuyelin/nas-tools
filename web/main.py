@@ -389,7 +389,7 @@ def sites():
 @App.route('/sitelist', methods=['POST', 'GET'])
 @login_required
 def sitelist():
-    IndexerSites = Indexer().get_indexer_dict(check=False)
+    IndexerSites = Indexer().get_indexer_dict(check=False, public=False, plugins=False)
     return render_template("site/sitelist.html",
                            Sites=IndexerSites,
                            Count=len(IndexerSites))

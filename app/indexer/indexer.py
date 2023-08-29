@@ -6,8 +6,8 @@ from app.helper import ProgressHelper, SubmoduleHelper, DbHelper
 from app.utils import ExceptionUtils, StringUtils
 from app.utils.commons import singleton
 from app.utils.types import SearchType, IndexerType, ProgressKey
+from app.sites import Sites
 from config import Config
-
 
 @singleton
 class Indexer(object):
@@ -41,13 +41,13 @@ class Indexer(object):
                 ExceptionUtils.exception_traceback(e)
         return None
 
-    def get_indexers(self, check=False):
+    def get_indexers(self, check=False, public=True):
         """
         获取当前索引器的索引站点
         """
         if not self._client:
             return []
-        return self._client.get_indexers(check=check)
+        return self._client.get_indexers(check=check, public=public)
 
     def get_indexer(self, url):
         """
@@ -57,18 +57,26 @@ class Indexer(object):
             return None
         return self._client.get_indexer(url)
 
-    def get_indexer_dict(self, check=True):
+    def get_indexer_dict(self, check=True, public=True, plugins=True):
         """
         获取用户已经选择的索引器字典
         """
-        return [
-            {
-                "id": index.id,
-                "name": index.name,
-                "domain": StringUtils.get_url_domain(index.domain),
-                "public": index.public,
-            } for index in self.get_indexers(check=check)
-        ]
+        indexers_dicts = []
+        for indexer in self.get_indexers(check=check, public=public):
+            if indexer:
+                if plugins:
+                    indexers_dicts.append({"id": indexer.id,
+                                           "name": indexer.name,
+                                           "domain": StringUtils.get_url_domain(indexer.domain),
+                                           "public": indexer.public})
+                else:
+                    sites = Sites().get_sites(siteurl=indexer.domain)
+                    if sites:
+                        indexers_dicts.append({"id": indexer.id,
+                                           "name": indexer.name,
+                                           "domain": StringUtils.get_url_domain(indexer.domain),
+                                           "public": indexer.public})
+        return indexers_dicts
 
     def get_indexer_hash_dict(self):
         """
