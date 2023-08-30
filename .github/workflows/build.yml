@@ -42,7 +42,7 @@ jobs:
           images: |
             ${{ github.event.inputs.docker_username }}/nas-tools
           tags: |
-            type=semver,pattern=${{ env.app_version }}
+            type=raw,value=${{ env.app_version }}
             type=raw,value=latest
 
       -
@@ -97,7 +97,7 @@ jobs:
           images: |
             ${{ github.event.inputs.docker_username }}/nas-tools
           tags: |
-            type=semver,pattern=${{ env.app_version }}
+            type=raw,value=${{ env.app_version }}
             type=raw,value=debian
 
       -
