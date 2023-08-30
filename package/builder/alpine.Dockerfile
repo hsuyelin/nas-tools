@@ -1,11 +1,11 @@
-FROM python:3.10.10-alpine AS Builder
+FROM python:3.10.11-alpine AS Builder
 
 ARG branch
 
 ENV NASTOOL_CONFIG=/nas-tools/config/config.yaml
 ENV py_site_packages=/usr/local/lib/python3.10/site-packages
 
-RUN apk add build-base git libxslt-dev libxml2-dev musl-dev gcc libffi-dev
+RUN apk add build-base git libxslt-dev libxml2-dev musl-dev gcc libffi-dev dumb-init
 RUN pip install --upgrade pip setuptools
 RUN pip install wheel cython pyinstaller==5.7.0
 RUN git clone --depth=1 -b ${branch} https://github.com/hsuyelin/nas-tools --recurse-submodule /nas-tools

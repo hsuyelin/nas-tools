@@ -1,4 +1,4 @@
-FROM python:3.10.10-bullseye AS Builder
+FROM python:3.10.11-bullseye AS Builder
 
 ARG branch
 
