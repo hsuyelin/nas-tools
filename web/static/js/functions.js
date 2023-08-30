@@ -351,61 +351,6 @@ function show_init_alert_modal() {
   });
 }
 
-// 显示用户认证对话框
-function show_user_auth_modal() {
-  GlobalModalAbort = false;
-  $("#modal-user-auth").modal("show");
-}
-
-// 用户认证
-function user_auth() {
-  $("#user_auth_btn").text("认证中...").prop("disabled", true);
-  let siteid = $("#user_auth_site").val();
-  let params = input_select_GetVal(`user_auth_${siteid}_params`, `${siteid}_`);
-  ajax_post("auth_user_level", {site: siteid, params: params}, function (ret) {
-    GlobalModalAbort = true;
-    $("#modal-user-auth").modal("hide");
-    $("#user_auth_btn").prop("disabled", false).text("认证");
-    if (ret.code === 0) {
-      window.location.reload();
-    } else {
-      show_fail_modal(ret.msg);
-    }
-  }, true, false);
-}
-
-// 初始化tomselect
-function init_tomselect() {
-  let el;
-  window.TomSelect && (new TomSelect(el = document.getElementById('user_auth_site'), {
-    copyClassesToDropdown: false,
-    dropdownClass: 'dropdown-menu ts-dropdown',
-    optionClass: 'dropdown-item',
-    controlInput: '<input>',
-    render: {
-      item: function (data, escape) {
-        if (data.customProperties) {
-          return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
-        }
-        return '<div>' + escape(data.text) + '</div>';
-      },
-      option: function (data, escape) {
-        if (data.customProperties) {
-          return '<div><span class="dropdown-item-indicator">' + data.customProperties + '</span>' + escape(data.text) + '</div>';
-        }
-        return '<div>' + escape(data.text) + '</div>';
-      },
-    },
-  }));
-}
-
-// TomSelect响应事件
-function switch_cooperation_sites(obj) {
-  let siteid = $(obj).val();
-  $(".user_auth_params").hide();
-  $(`#user_auth_${siteid}_params`).show();
-}
-
 // 停止刷新进度条
 function stop_progress() {
   if (ProgressES) {
