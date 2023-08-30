@@ -2623,9 +2623,10 @@ class WebAction:
                     module["selected"] = False
 
             modules = selectedModules + unselectedModules
-            modules_str = json.dumps(modules, ensure_ascii=False, indent=4)
-            log.debug(f"【我的媒体库】元数据: {modules_str}")
-            SystemConfig().set(key=SystemConfigKey.LibraryDisplayModule, value=modules)
+            sorted_modules = sorted(modules, key=lambda x: x["id"])
+            sorted_modules_str = json.dumps(sorted_modules, ensure_ascii=False, indent=4)
+            log.debug(f"【我的媒体库】元数据: {sorted_modules_str}")
+            SystemConfig().set(key=SystemConfigKey.LibraryDisplayModule, value=sorted_modules)
             return {"code": 0}
         except Exception as e:
             return {"code": 1}

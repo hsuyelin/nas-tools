@@ -5,7 +5,7 @@
   <div class="page-header d-print-none">
     <div class="row align-items-center">
       {% for item in LibraryManageConf %}
-        {% if item['id'] == '我的媒体库' and item['selected'] %}
+        {% if item['name'] == '我的媒体库' and item['selected'] %}
           <div class="col">
             <h2 class="page-title">
               我的媒体库
@@ -52,7 +52,7 @@
 {% if ServerSucess %}
 {% with curdomainleft = request.host.split(':')[0] %}
 {% for item in LibraryManageConf %}
-{% if item['id'] == '我的媒体库' and item['selected'] %}
+{% if item['name'] == '我的媒体库' and item['selected'] %}
 <div class="page-body">
   <div class="container-xl">
     <div class="d-grid gap-3 grid-normal-card">
@@ -88,7 +88,7 @@
 
 {% if Resumes %}
 {% for item in LibraryManageConf %}
-{% if item['id'] == '正在观看' and item['selected'] %}
+{% if item['name'] == '正在观看' and item['selected'] %}
 <div class="container-xl">
   <div class="page-header d-print-none">
     <div class="row align-items-center">
@@ -139,7 +139,7 @@
 
 {% if Latests %}
 {% for item in LibraryManageConf %}
-{% if item['id'] == '最新入库' and item['selected'] %}
+{% if item['name'] == '最新入库' and item['selected'] %}
 <div class="container-xl">
   <div class="page-header d-print-none">
     <div class="row align-items-center">
@@ -246,7 +246,7 @@
                     <input class="form-check-input m-0 align-middle" name="library_item" value="{{ Library }}" type="checkbox"
                            {% if Library.selected %} checked {% endif %}>
                 </td>
-                <td><span>{{ Library.id }}</span></td>
+                <td><span>{{ Library.name }}</span></td>
             </tr>
             {% endfor %}
           </tbody>

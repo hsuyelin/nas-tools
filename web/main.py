@@ -262,8 +262,8 @@ def index():
     AllLibraryModule = [MyMediaLibraryType.MINE, MyMediaLibraryType.WATCHING, MyMediaLibraryType.NEWESTADD]
     LibraryManageConf = SystemConfig().get(SystemConfigKey.LibraryDisplayModule) or []
     if not LibraryManageConf:
-        for Library in AllLibraryModule:
-            LibraryManageConf.append({"id": Library.value, "selected": True})
+        for index, item in enumerate(AllLibraryModule):
+            LibraryManageConf.append({"id": index, "name": item.value, "selected": True})
 
     # 继续观看
     Resumes = MediaServer().get_resume()
