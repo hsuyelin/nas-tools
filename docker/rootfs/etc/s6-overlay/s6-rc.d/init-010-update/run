@@ -1,27 +1,6 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash
 
-# 使用递归函数比较两个目录
-function compare {
-    for entry in "$1"/*; do
-        if [[ -d "$entry" ]]; then
-            if [[ ! -d "$2/$(basename "$entry")" ]]; then
-                mkdir "$2/$(basename "$entry")"
-                echo "创建 $2/$(basename "$entry") 文件夹"
-            fi
-            compare "$entry" "$2/$(basename "$entry")"
-        elif [[ -f "$entry" ]]; then
-            if [[ ! -f "$2/$(basename "$entry")" ]]; then
-                cp "$entry" "$2/$(basename "$entry")"
-                echo "创建 $2/$(basename "$entry") 文件"
-            elif [[ "$(diff "$entry" "$2/$(basename "$entry")")" ]]; then
-                cp "$entry" "$2/$(basename "$entry")"
-                echo "更新 $2/$(basename "$entry") 文件"
-            fi
-        fi
-    done
-}
-
 # 更换国内软件源
 function package_cn {
 
@@ -172,9 +151,9 @@ function __main {
         echo "windows/" > .gitignore
         # 更新分支
         if [[ "${NASTOOL_VERSION}" == "dev" ]]; then
-        branch="dev"
+            branch="dev"
         else
-        branch="master"
+            branch="master"
         fi
 
         git clean -dffx
@@ -183,11 +162,6 @@ function __main {
 
         if [ $? -eq 0 ]; then
             echo "主程序更新成功"
-            # 服务脚本更新
-            compare "/nas-tools/docker/rootfs/etc" "/etc"
-            chmod -R +x \
-                /etc/cont-init.d \
-                /etc/services.d
             # 系统软件包更新
             package_update
             # Python依赖包更新

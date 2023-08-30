@@ -18,7 +18,7 @@ exec \
 }
 
 if [ -f ${NASTOOL_CONFIG} ]; then
-    NT_LOG=$(awk -F"[' ]+" '/loglevel/{print $3}' /config/config.yaml)
+    NT_LOG=$(yq '.app.loglevel' /config/config.yaml)
     if [[ "${NT_LOG}" == "debug" ]]; then
         __debug
     else

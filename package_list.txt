@@ -1,11 +1,12 @@
 bash
 chromium-chromedriver
 curl
-dumb-init
 ffmpeg
 fuse3
 git
 inotify-tools
+netcat-openbsd
+procps-ng
 redis
 s6-overlay
 shadow
@@ -13,4 +14,5 @@ sudo
 tzdata
 wget
 xvfb
+yq
 zip
