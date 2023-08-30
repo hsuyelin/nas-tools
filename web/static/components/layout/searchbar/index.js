@@ -155,7 +155,8 @@ export class LayoutSearchbar extends CustomElement {
                     <div class="dropdown-divider"></div>
                     ${["Docker", "Synology"].includes(this.layout_systemflag)
                     ? html`
-                      <a href="javascript:restart()" class="dropdown-item">重启</a>`
+                      <a href="javascript:restart()" class="dropdown-item">重启</a>
+                      <a href="javascript:update()" class="dropdown-item">更新</a>`
                     : nothing }
                   `
                 : nothing }

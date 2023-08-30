@@ -342,6 +342,23 @@ function restart() {
   });
 }
 
+//更新
+function update(version) {
+  let title;
+  if (version) {
+    title = "是否确认更新到 " + version + " 版本？";
+  } else {
+    title = "将从Github拉取最新程序代码并重启，是否确认？";
+  }
+  show_confirm_modal(title, function () {
+    hide_confirm_modal();
+    ajax_post("update_system", {}, function (ret) {
+    }, true, false)
+    show_wait_modal(true);
+    setTimeout("check_system_online()", 5000);
+  });
+}
+
 // 显示配置不完整提示
 function show_init_alert_modal() {
   GlobalModalAbort = false;
