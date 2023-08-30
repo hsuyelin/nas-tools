@@ -2,8 +2,6 @@ import random
 from threading import Lock
 from time import sleep
 
-import re
-
 import zhconv
 
 import log
@@ -273,9 +271,6 @@ class DouBan:
             # 封面图
             cover_url = web_info.get("cover")
             if cover_url:
-                # cover_url = re.sub(r"//([^/]+)/", "//qnmob3.doubanio.com/", cover_url)
-                # cover_url = cover_url.replace("s_ratio_poster", "m_ratio_poster")
-                # ret_media['cover_url'] = cover_url
                 ret_media['cover_url'] = cover_url.replace("s_ratio_poster", "m_ratio_poster")
             # 评分
             rating = web_info.get("rate")
@@ -450,7 +445,6 @@ class DouBan:
                 if poster_filter and ("movie_large.jpg" in poster_path
                                       or "tv_normal.png" in poster_path):
                     continue
-                # poster_path = re.sub(r"//([^/]+)/", "//qnmob3.doubanio.com/", poster_path)
                 poster_path = poster_path.replace("s_ratio_poster", "m_ratio_poster")
             elif poster_filter:
                 continue

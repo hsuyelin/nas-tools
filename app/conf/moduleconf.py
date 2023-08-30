@@ -42,13 +42,6 @@ class ModuleConf(object):
         "move": RmtMode.MOVE
     }
 
-    # 索引器
-    INDEXER_DICT = {
-        "prowlarr": IndexerType.PROWLARR,
-        "jackett": IndexerType.JACKETT,
-        "builtin": IndexerType.BUILTIN
-    }
-
     # 远程转移模式
     REMOTE_RMT_MODES = [RmtMode.RCLONE, RmtMode.RCLONECOPY, RmtMode.MINIO, RmtMode.MINIOCOPY]
 
@@ -136,7 +129,7 @@ class ModuleConf(object):
                         "title": "消息推送代理",
                         "tooltip": "由于微信官方限制，2022年6月20日后创建的企业微信应用需要有固定的公网IP地址并加入IP白名单后才能发送消息，使用有固定公网IP的代理服务器转发可解决该问题；代理服务器需自行搭建，搭建方法可参考项目主页说明",
                         "type": "text",
-                        "placeholder": "https://wechat.nastool.cn"
+                        "placeholder": "https://wechat.nastool.org"
                     },
                     "token": {
                         "id": "wechat_token",
@@ -707,19 +700,12 @@ class ModuleConf(object):
                     "title": "令牌",
                     "type": "text",
                     "placeholder": ""
-                },
-                "use_jsonRpc": {
-                    "id": "aria2_use_jsonRpc",
-                    "required": False,
-                    "title": "使用JSONRPC",
-                    "tooltip": "默认使用127.0.0.1:6800/rpc的形式，开启后将会使用127.0.0.1:6800/jsonrpc的形式",
-                    "type": "switch"
                 }
             }
         },
         "pan115": {
             "name": "115网盘",
-            "img_url": "../static/img/115.jpg",
+            "img_url": "../static/img/downloader/115.jpg",
             "background": "bg-azure",
             "test_command": "app.downloader.client.pan115|Pan115",
             "config": {
@@ -735,7 +721,7 @@ class ModuleConf(object):
         },
         "pikpak": {
             "name": "PikPak",
-            "img_url": "../static/img/pikpak.png",
+            "img_url": "../static/img/downloader/pikpak.png",
             "background": "bg-indigo",
             "test_command": "app.downloader.client.pikpak|PikPak",
             "config": {
@@ -890,8 +876,7 @@ class ModuleConf(object):
     }
 
     # 索引器
-    INDEXER_CONF = {
-    }
+    INDEXER_CONF = {}
 
     # 发现过滤器
     DISCOVER_FILTER_CONF = {

@@ -1,6 +1,0 @@
-#---------------------------------------------------------
-# PlexAPI core requirements.
-# pip install -r requirements.txt
-#---------------------------------------------------------
-requests
-backports.cached-property; python_version<="3.7"

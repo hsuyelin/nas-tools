@@ -1,2 +1,0 @@
-slack_bolt
-uvicorn<1

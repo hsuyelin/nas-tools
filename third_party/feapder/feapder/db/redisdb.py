@@ -6,16 +6,14 @@ Created on 2016-11-16 16:25
 ---------
 @author: Boris
 """
-
+import os
 import time
 
 import redis
-from redis._compat import unicode, long, basestring
 from redis.connection import Encoder as _Encoder
 from redis.exceptions import ConnectionError, TimeoutError
 from redis.exceptions import DataError
 from redis.sentinel import Sentinel
-from rediscluster import RedisCluster
 
 import feapder.setting as setting
 from feapder.utils.log import log
@@ -34,19 +32,19 @@ class Encoder(_Encoder):
         #     )
         elif isinstance(value, float):
             value = repr(value).encode()
-        elif isinstance(value, (int, long)):
+        elif isinstance(value, int):
             # python 2 repr() on longs is '123L', so use str() instead
             value = str(value).encode()
         elif isinstance(value, (list, dict, tuple)):
-            value = unicode(value)
-        elif not isinstance(value, basestring):
+            value = str(value)
+        elif not isinstance(value, str):
             # a value we don't know how to deal with. throw an error
             typename = type(value).__name__
             raise DataError(
                 "Invalid input of type: '%s'. Convert to a "
                 "bytes, string, int or float first." % typename
             )
-        if isinstance(value, unicode):
+        if isinstance(value, str):
             value = value.encode(self.encoding, self.encoding_errors)
         return value
 
@@ -87,6 +85,8 @@ class RedisDB:
             user_pass = setting.REDISDB_USER_PASS
         if service_name is None:
             service_name = setting.REDISDB_SERVICE_NAME
+        if kwargs is None:
+            kwargs = setting.REDISDB_KWARGS
 
         self._is_redis_cluster = False
 
@@ -156,6 +156,12 @@ class RedisDB:
                         )
 
                     else:
+                        try:
+                            from rediscluster import RedisCluster
+                        except ModuleNotFoundError as e:
+                            log.error('请安装 pip install "feapder[all]"')
+                            os._exit(0)
+
                         # log.debug("使用redis集群模式")
                         self._redis = RedisCluster(
                             startup_nodes=startup_nodes,
@@ -180,7 +186,7 @@ class RedisDB:
                     self._is_redis_cluster = False
             else:
                 self._redis = redis.StrictRedis.from_url(
-                    self._url, decode_responses=self._decode_responses
+                    self._url, decode_responses=self._decode_responses, **self._kwargs
                 )
                 self._is_redis_cluster = False
 
@@ -583,18 +589,17 @@ class RedisDB:
         return is_exists
 
     def lpush(self, table, values):
-
         if isinstance(values, list):
             pipe = self._redis.pipeline()
 
             if not self._is_redis_cluster:
                 pipe.multi()
             for value in values:
-                pipe.rpush(table, value)
+                pipe.lpush(table, value)
             pipe.execute()
 
         else:
-            return self._redis.rpush(table, values)
+            return self._redis.lpush(table, values)
 
     def lpop(self, table, count=1):
         """

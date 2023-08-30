@@ -1,5 +1,0 @@
-{
-  "scripts": {
-    "pypi": "python setup.py sdist upload"
-  }
-}

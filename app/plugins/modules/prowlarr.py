@@ -10,7 +10,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from app.utils import RequestUtils
-from app.helper import IndexerConf
+from app.indexer.indexerConf import IndexerConf
 from app.utils import ExceptionUtils, StringUtils
 
 from app.plugins.modules._base import _IPluginModule

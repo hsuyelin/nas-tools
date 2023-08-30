@@ -188,17 +188,17 @@
 
   //跳转页
   function go_page(page) {
-    navmenu(`resources?site={{ SiteId }}&title={{ Title }}&page=${page}&keyword=${$("#search_word").val()}`)
+    navmenu(`resources?site={{ SiteDomain }}&title={{ Title }}&page=${page}&keyword=${$("#search_word").val()}`)
   }
 
   // 上一页
   function go_pre_page(page) {
-    navmenu(`resources?site={{ SiteId }}&title={{ Title }}&page=${page - 1}&keyword=${$("#search_word").val()}`)
+    navmenu(`resources?site={{ SiteDomain }}&title={{ Title }}&page=${page - 1}&keyword=${$("#search_word").val()}`)
   }
 
   // 下一页
   function go_next_page(page) {
-    navmenu(`resources?site={{ SiteId }}&title={{ Title }}&page=${page + 1}&keyword=${$("#search_word").val()}`)
+    navmenu(`resources?site={{ SiteDomain }}&title={{ Title }}&page=${page + 1}&keyword=${$("#search_word").val()}`)
   }
 
   //下载按钮
@@ -288,8 +288,8 @@
 
   // 搜索按钮
   $('#search_word').bind('keypress', function (event) {
-    if (event.keyCode == "13") {
-      navmenu("resources?site={{ SiteId }}" + "&title={{ Title }}" + "&page={{ CurrentPage }}" + "&keyword=" + $("#search_word").val());
+    if (event.keyCode === 13) {
+      navmenu("resources?site={{ SiteDomain }}" + "&title={{ Title }}" + "&page={{ CurrentPage }}" + "&keyword=" + $("#search_word").val());
     }
   });
 

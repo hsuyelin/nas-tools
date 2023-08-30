@@ -654,21 +654,6 @@ class Downloader:
             return None
         return _client.get_completed_torrents(ids=ids, tag=tag)
 
-    def set_torrents_tag(self, downloader_id=None, ids=None, tags=None):
-        """
-        设置种子标签
-        :param downloader_id: 下载器ID
-        :param ids: 种子ID
-        :param tag: 种子标签
-        :return: 种子信息列表
-        """
-        if not downloader_id:
-            downloader_id = self.default_downloader_id
-        _client = self.__get_client(downloader_id)
-        if not _client:
-            return None
-        _client.set_torrents_tag(ids=ids, tags=tags)
-
     def start_torrents(self, downloader_id=None, ids=None):
         """
         下载控制：开始
@@ -1331,6 +1316,14 @@ class Downloader:
                 "enabled": downloader_conf.get("enabled"),
             }
         return ret_dict
+
+    def get_downloader(self, downloader_id=None):
+        """
+        获取下载器实例
+        """
+        if not downloader_id:
+            return self.default_client
+        return self.__get_client(downloader_id)
 
     def get_downloader(self, downloader_id=None):
         """

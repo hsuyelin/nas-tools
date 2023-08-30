@@ -17,6 +17,8 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.firefox.service import Service as GeckoService
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
@@ -30,11 +32,9 @@ logging.getLogger("WDM").setLevel(OTHERS_LOG_LEVAL)
 
 class SeleniumDriver(WebDriver, RemoteWebDriver):
     CHROME = "CHROME"
-    PHANTOMJS = "PHANTOMJS"
     FIREFOX = "FIREFOX"
 
     __CHROME_ATTRS__ = {
-        "executable_path",
         "port",
         "options",
         "service_args",
@@ -50,7 +50,6 @@ class SeleniumDriver(WebDriver, RemoteWebDriver):
         "timeout",
         "capabilities",
         "proxy",
-        "executable_path",
         "options",
         "service_log_path",
         "firefox_options",
@@ -58,13 +57,6 @@ class SeleniumDriver(WebDriver, RemoteWebDriver):
         "desired_capabilities",
         "log_path",
         "keep_alive",
-    }
-    __PHANTOMJS_ATTRS__ = {
-        "executable_path",
-        "port",
-        "desired_capabilities",
-        "service_args",
-        "service_log_path",
     }
 
     def __init__(self, xhr_url_regexes: list = None, **kwargs):
@@ -85,15 +77,12 @@ class SeleniumDriver(WebDriver, RemoteWebDriver):
         if self._driver_type == SeleniumDriver.CHROME:
             self.driver = self.chrome_driver()
 
-        elif self._driver_type == SeleniumDriver.PHANTOMJS:
-            self.driver = self.phantomjs_driver()
-
         elif self._driver_type == SeleniumDriver.FIREFOX:
             self.driver = self.firefox_driver()
 
         else:
             raise TypeError(
-                "dirver_type must be one of CHROME or PHANTOMJS or FIREFOX, but received {}".format(
+                "dirver_type must be one of CHROME or FIREFOX, but received {}".format(
                     type(self._driver_type)
                 )
             )
@@ -162,13 +151,10 @@ class SeleniumDriver(WebDriver, RemoteWebDriver):
                 firefox_options.add_argument(arg)
 
         kwargs = self.filter_kwargs(self._kwargs, self.__FIREFOX_ATTRS__)
-
-        if self._executable_path:
-            kwargs.update(executable_path=self._executable_path)
-        elif self._auto_install_driver:
-            kwargs.update(executable_path=GeckoDriverManager().install())
+        service = GeckoService(GeckoDriverManager().install())
 
         driver = webdriver.Firefox(
+            service=service,
             capabilities=firefox_capabilities,
             options=firefox_options,
             firefox_profile=firefox_profile,
@@ -230,14 +216,9 @@ class SeleniumDriver(WebDriver, RemoteWebDriver):
                 chrome_options.add_argument(arg)
 
         kwargs = self.filter_kwargs(self._kwargs, self.__CHROME_ATTRS__)
-        if self._executable_path:
-            kwargs.update(executable_path=self._executable_path)
-        elif self._auto_install_driver:
-            latest_release_url = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
-            latest_chromedriver_version = requests.get(latest_release_url).text
-            kwargs.update(executable_path=ChromeDriverManager(version=f'{latest_chromedriver_version}').install())
+        service = ChromeService(ChromeDriverManager().install)
 
-        driver = webdriver.Chrome(options=chrome_options, **kwargs)
+        driver = webdriver.Chrome(service=service, options=chrome_options, **kwargs)
 
         # 隐藏浏览器特征
         if self._use_stealth_js:
@@ -273,46 +254,6 @@ class SeleniumDriver(WebDriver, RemoteWebDriver):
                 "params": {"behavior": "allow", "downloadPath": self._download_path},
             }
             driver.execute("send_command", params)
-
-        return driver
-
-    def phantomjs_driver(self):
-        import warnings
-
-        warnings.filterwarnings("ignore")
-
-        service_args = []
-        dcap = DesiredCapabilities.PHANTOMJS
-
-        if self._proxy:
-            service_args.append(
-                "--proxy=%s" % self._proxy() if callable(self._proxy) else self._proxy
-            )
-        if self._user_agent:
-            dcap["phantomjs.page.settings.userAgent"] = (
-                self._user_agent() if callable(self._user_agent) else self._user_agent
-            )
-        if not self._load_images:
-            service_args.append("--load-images=no")
-
-        # 添加自定义的配置参数
-        if self._custom_argument:
-            for arg in self._custom_argument:
-                service_args.append(arg)
-
-        kwargs = self.filter_kwargs(self._kwargs, self.__PHANTOMJS_ATTRS__)
-
-        if self._executable_path:
-            kwargs.update(executable_path=self._executable_path)
-
-        driver = webdriver.PhantomJS(
-            service_args=service_args, desired_capabilities=dcap, **kwargs
-        )
-
-        if self._window_size:
-            driver.set_window_size(self._window_size[0], self._window_size[1])
-
-        del warnings
 
         return driver
 

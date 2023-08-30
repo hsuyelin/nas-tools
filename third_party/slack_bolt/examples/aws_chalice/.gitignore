@@ -1,5 +1,0 @@
-.chalice/config.json
-.chalice/deployments/
-.chalice/venv/
-.chalice/deployed/
-vendor/

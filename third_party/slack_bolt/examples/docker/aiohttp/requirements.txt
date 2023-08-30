@@ -1,2 +1,0 @@
-slack_bolt
-aiohttp>=3,<4

@@ -7,6 +7,7 @@ from app.filter import Filter
 from app.helper import DbHelper, RssHelper
 from app.media import Media
 from app.media.meta import MetaInfo
+from app.message import Message
 from app.sites import Sites, SiteConf
 from app.subscribe import Subscribe
 from app.utils import ExceptionUtils, Torrent
@@ -27,6 +28,7 @@ class Rss:
     dbhelper = None
     rsshelper = None
     subscribe = None
+    message = None
 
     def __init__(self):
         self.init_config()
@@ -40,6 +42,7 @@ class Rss:
         self.dbhelper = DbHelper()
         self.rsshelper = RssHelper()
         self.subscribe = Subscribe()
+        self.message = Message()
 
     def rssdownload(self):
         """

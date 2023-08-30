@@ -12,7 +12,7 @@ import time
 from math import floor
 from pathlib import Path
 from urllib.parse import unquote
-
+import ast
 
 import cn2an
 from flask_login import logout_user, current_user
@@ -25,7 +25,7 @@ from app.downloader import Downloader
 from app.filetransfer import FileTransfer
 from app.filter import Filter
 from app.helper import DbHelper, ProgressHelper, ThreadHelper, \
-    MetaHelper, DisplayHelper, WordsHelper, IndexerHelper
+    MetaHelper, DisplayHelper, WordsHelper
 from app.helper import RssHelper, PluginHelper
 from app.indexer import Indexer
 from app.media import Category, Media, Bangumi, DouBan, Scraper
@@ -47,7 +47,7 @@ from app.utils.types import RmtMode, OsType, SearchType, SyncType, MediaType, Mo
     EventType, SystemConfigKey, RssType
 from config import RMT_MEDIAEXT, RMT_SUBEXT, RMT_AUDIO_TRACK_EXT, Config
 from web.backend.search_torrents import search_medias_for_web, search_media_by_message
-from web.backend.user import User
+from web.backend.pro_user import ProUser
 from web.backend.web_utils import WebUtils
 
 
@@ -100,9 +100,9 @@ class WebAction:
             "rss_detail": self.__rss_detail,
             "truncate_blacklist": self.truncate_blacklist,
             "truncate_rsshistory": self.truncate_rsshistory,
-            "brushtask_enable": self.__brushtask_enable, 
             "add_brushtask": self.__add_brushtask,
             "del_brushtask": self.__del_brushtask,
+            "brushtask_enable": self.__brushtask_enable,
             "brushtask_detail": self.__brushtask_detail,
             "update_brushtask_state": self.__update_brushtask_state,
             "name_test": self.__name_test,
@@ -125,6 +125,7 @@ class WebAction:
             "refresh_process": self.refresh_process,
             "restory_backup": self.__restory_backup,
             "start_mediasync": self.__start_mediasync,
+            "start_mediaDisplayModuleSync": self.__start_mediaDisplayModuleSync,
             "mediasync_state": self.__mediasync_state,
             "get_tvseason_list": self.__get_tvseason_list,
             "get_userrss_task": self.__get_userrss_task,
@@ -166,10 +167,10 @@ class WebAction:
             "get_tv_rss_list": self.get_tv_rss_list,
             "get_rss_history": self.get_rss_history,
             "get_transfer_history": self.get_transfer_history,
-            "truncate_filetransfer_history": self.truncate_filetransfer_history,
+            "truncate_transfer_history": self.truncate_transfer_history,
             "get_unknown_list": self.get_unknown_list,
             "get_unknown_list_by_page": self.get_unknown_list_by_page,
-            "truncate_filetransfer_unknown": self.truncate_filetransfer_unknown,
+            "truncate_transfer_unknown": self.truncate_transfer_unknown,
             "get_customwords": self.get_customwords,
             "get_users": self.get_users,
             "get_filterrules": self.get_filterrules,
@@ -215,6 +216,7 @@ class WebAction:
             "get_season_episodes": self.__get_season_episodes,
             "get_user_menus": self.get_user_menus,
             "get_top_menus": self.get_top_menus,
+            "auth_user_level": self.auth_user_level,
             "update_downloader": self.__update_downloader,
             "del_downloader": self.__del_downloader,
             "check_downloader": self.__check_downloader,
@@ -236,20 +238,6 @@ class WebAction:
             "get_category_config": self.get_category_config,
             "get_system_processes": self.get_system_processes,
             "run_plugin_method": self.run_plugin_method,
-            "update_all_config": self.__update_all_config
-        }
-        # 远程命令响应
-        self._commands = {
-            "/ptr": {"func": TorrentRemover().auto_remove_torrents, "desc": "自动删种"},
-            "/ptt": {"func": Downloader().transfer, "desc": "下载文件转移"},
-            "/rst": {"func": Sync().transfer_sync, "desc": "目录同步"},
-            "/rss": {"func": Rss().rssdownload, "desc": "电影/电视剧订阅"},
-            "/ssa": {"func": Subscribe().subscribe_search_all, "desc": "订阅搜索"},
-            "/tbl": {"func": self.truncate_blacklist, "desc": "清理转移缓存"},
-            "/trh": {"func": self.truncate_rsshistory, "desc": "清理RSS缓存"},
-            "/utf": {"func": self.unidentification, "desc": "重新识别"},
-            "/udt": {"func": self.update_system, "desc": "系统更新"},
-            "/sta": {"func": self.user_statistics, "desc": "站点数据统计"}
         }
         # 远程命令响应
         self._commands = {
@@ -325,13 +313,9 @@ class WebAction:
         Downloader().stop_service()
         # 关闭插件
         PluginManager().stop_service()
-        # 清空索引器缓存
-        IndexerHelper().stop_service()
 
     @staticmethod
     def start_service():
-        # 加载索引器配置
-        IndexerHelper()
         # 加载站点配置
         SiteConf()
         # 启动虚拟显示
@@ -663,17 +647,15 @@ class WebAction:
                 continue
             # 查询站点
             site_info = Sites().get_sites(siteurl=url)
-            if not url.startswith("magnet:"):
-                # 下载种子文件，并读取信息
-                file_path, _, _, _, retmsg = Torrent().get_torrent_info(
-                    url=url,
-                    cookie=site_info.get("cookie"),
-                    ua=site_info.get("ua"),
-                    proxy=site_info.get("proxy")
-                )
-            else:
-                file_dir = Config().get_temp_path()
-                file_path, retmsg = Torrent().magent2torrent(url, file_dir)
+            if not site_info:
+                return {"code": -1, "msg": "根据链接地址未匹配到站点"}
+            # 下载种子文件，并读取信息
+            file_path, _, _, _, retmsg = Torrent().get_torrent_info(
+                url=url,
+                cookie=site_info.get("cookie"),
+                ua=site_info.get("ua"),
+                proxy=site_info.get("proxy")
+            )
             if not file_path:
                 return {"code": -1, "msg": f"下载种子文件失败： {retmsg}"}
             media_info = Media().get_media_info(title=os.path.basename(file_path))
@@ -1077,8 +1059,8 @@ class WebAction:
         """
         检查新版本
         """
-        version, url, flag = WebUtils.get_latest_version()
-        if flag:
+        version, url = WebUtils.get_latest_version()
+        if version:
             return {"code": 0, "version": version, "url": url}
         return {"code": -1, "version": "", "url": ""}
 
@@ -1718,9 +1700,9 @@ class WebAction:
             pris = data.get("pris")
             if isinstance(pris, list):
                 pris = ",".join(pris)
-            ret = User().add_user(name, password, pris)
+            ret = ProUser().add_user(name, password, pris)
         else:
-            ret = User().delete_user(name)
+            ret = ProUser().delete_user(name)
 
         if ret == 1 or ret:
             return {"code": 0, "success": False}
@@ -1938,14 +1920,6 @@ class WebAction:
         return {"code": 0}
 
     @staticmethod
-    def __brushtask_enable():
-        """
-        刷流任务可用状态
-        """
-        isBeyondOneMonth = SiteUserInfo().is_min_join_date_beyond_one_month()
-        return {"code": 0, "isBeyondOneMonth": isBeyondOneMonth}
-
-    @staticmethod
     def __add_brushtask(data):
         """
         新增刷流任务
@@ -1960,6 +1934,8 @@ class WebAction:
         brushtask_state = data.get("brushtask_state")
         brushtask_rssurl = data.get("brushtask_rssurl")
         brushtask_label = data.get("brushtask_label")
+        brushtask_up_limit = data.get("brushtask_up_limit")
+        brushtask_dl_limit = data.get("brushtask_dl_limit")
         brushtask_savepath = data.get("brushtask_savepath")
         brushtask_transfer = 'Y' if data.get("brushtask_transfer") else 'N'
         brushtask_sendmessage = 'Y' if data.get(
@@ -2012,6 +1988,8 @@ class WebAction:
             "downloader": brushtask_downloader,
             "seed_size": brushtask_totalsize,
             "label": brushtask_label,
+            "up_limit": brushtask_up_limit,
+            "dl_limit": brushtask_dl_limit,
             "savepath": brushtask_savepath,
             "transfer": brushtask_transfer,
             "state": brushtask_state,
@@ -2064,6 +2042,14 @@ class WebAction:
         except Exception as e:
             ExceptionUtils.exception_traceback(e)
             return {"code": 1, "msg": "刷流任务设置失败"}
+
+    @staticmethod
+    def __brushtask_enable():
+        """
+        刷流任务可用状态
+        """
+        isBeyondOneMonth = SiteUserInfo().is_min_join_date_beyond_one_month()
+        return {"code": 0, "isBeyondOneMonth": isBeyondOneMonth}
 
     def __name_test(self, data):
         """
@@ -2619,6 +2605,33 @@ class WebAction:
         return {"code": 0}
 
     @staticmethod
+    def __start_mediaDisplayModuleSync(data):
+        """
+        开始媒体库同步
+        """
+        selectedData = data.get("selected") or []
+        unselectedData = data.get("unselected") or []
+        try:
+            selectedModules = [ast.literal_eval(item) for item in selectedData]
+            if selectedModules:
+                for module in selectedModules:
+                    module["selected"] = True
+
+            unselectedModules = [ast.literal_eval(item) for item in unselectedData]
+            if unselectedModules:
+                for module in unselectedModules:
+                    module["selected"] = False
+
+            modules = selectedModules + unselectedModules
+            sorted_modules = sorted(modules, key=lambda x: x["id"])
+            sorted_modules_str = json.dumps(sorted_modules, ensure_ascii=False, indent=4)
+            log.debug(f"【我的媒体库】元数据: {sorted_modules_str}")
+            SystemConfig().set(key=SystemConfigKey.LibraryDisplayModule, value=sorted_modules)
+            return {"code": 0}
+        except Exception as e:
+            return {"code": 1}
+
+    @staticmethod
     def __mediasync_state():
         """
         获取媒体库同步数据情况
@@ -2805,7 +2818,7 @@ class WebAction:
 
     @staticmethod
     def list_site_resources(data):
-        resources = Indexer().list_resources(indexer_id=data.get("id"),
+        resources = Indexer().list_resources(url=data.get("site"),
                                              page=data.get("page"),
                                              keyword=data.get("keyword"))
         if not resources:
@@ -3806,20 +3819,14 @@ class WebAction:
         }
 
     @staticmethod
-    def truncate_filetransfer_history():
+    def truncate_transfer_history():
         """
         清空媒体整理历史记录
         """
         if FileTransfer().get_transfer_history_count() < 1:
-            return {
-                "code": 0,
-                "result": True
-            }
+            return { "code": 0, "result": True }
         FileTransfer().truncate_transfer_history_list()
-        return {
-            "code": 0,
-            "result": True
-        }
+        return { "code": 0, "result": True }
 
     @staticmethod
     def get_unknown_list():
@@ -3892,20 +3899,14 @@ class WebAction:
         }
 
     @staticmethod
-    def truncate_filetransfer_unknown(): 
+    def truncate_transfer_unknown(): 
         """
         清空媒体手动整理历史记录
         """
         if FileTransfer().get_transfer_unknown_count() < 1:
-            return {
-                "code": 0,
-                "result": True
-            }
+            return { "code": 0, "result": True }
         FileTransfer().truncate_transfer_unknown_list()
-        return {
-            "code": 0,
-            "result": True
-        }
+        return { "code": 0, "result": True }
 
     @staticmethod
     def unidentification():
@@ -3986,7 +3987,7 @@ class WebAction:
         """
         查询所有用户
         """
-        user_list = User().get_users()
+        user_list = ProUser().get_users()
         Users = []
         for user in user_list:
             pris = str(user.PRIS).split(",")
@@ -4805,7 +4806,23 @@ class WebAction:
             "menus": current_user.get_topmenus()
         }
 
-    def __update_downloader(self, data):
+    @staticmethod
+    def auth_user_level(data=None):
+        """
+        用户认证
+        """
+        if data:
+            site = data.get("site")
+            params = data.get("params")
+        else:
+            site, params = None, {}
+        state, msg = ProUser().check_user(site, params)
+        if state:
+            return {"code": 0, "msg": "认证成功"}
+        return {"code": 1, "msg": f"{msg or '认证失败，请检查合作站点账号是否正常！'}"}
+
+    @staticmethod
+    def __update_downloader(data):
         """
         更新下载器
         """
@@ -5173,26 +5190,6 @@ class WebAction:
         data.pop("method")
         result = PluginManager().run_plugin_method(pid=plugin_id, method=method, **data)
         return {"code": 0, "result": result}
-
-    @staticmethod
-    def __update_all_config(data):
-        """
-        设置系统设置（数据库）
-        """
-        conf = data.get("conf")
-        db = data.get("db")
-        if data.get('test'):
-            conf = data
-        if conf:
-            ret = WebAction().__update_config(conf)
-            if ret.get('code') == 1:
-                return ret
-        if db:
-            ret = WebAction().__set_system_config(db)
-            if ret.get('code') == 1:
-                return ret
-
-        return {"code": 0}
 
     def get_commands(self):
         """

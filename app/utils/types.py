@@ -1,5 +1,9 @@
 from enum import Enum
 
+class MyMediaLibraryType(Enum):
+    MINE = '我的媒体库'
+    WATCHING = '正在观看'
+    NEWESTADD = '最新入库'
 
 class MediaType(Enum):
     TV = '电视剧'
@@ -145,12 +149,16 @@ class EventType(Enum):
 class SystemConfigKey(Enum):
     # 同步媒体库范围
     SyncLibrary = "SyncLibrary"
+    # 媒体库显示模块
+    LibraryDisplayModule = "LibraryDisplayModule"
     # 站点Cookie获取参数
     CookieUserInfo = "CookieUserInfo"
     # CookieCloud同步参数
     CookieCloud = "CookieCloud"
     # 自定义JS/CSS
     CustomScript = "CustomScript"
+    # 用户认证参数
+    UserSiteAuthParams = "UserSiteAuthParams"
     # 默认下载器
     DefaultDownloader = "DefaultDownloader"
     # 默认下载设置

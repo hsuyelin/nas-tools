@@ -35,21 +35,28 @@
 
 From PyPi:
 
-通用版
+精简版
 
 ```shell
-pip3 install feapder
+pip install feapder
+```
+
+浏览器渲染版：
+```shell
+pip install "feapder[render]"
 ```
 
 完整版：
 
 ```shell
-pip3 install feapder[all]
+pip install "feapder[all]"
 ```
 
-通用版与完整版区别：
+三个版本区别：
 
-1. 完整版支持基于内存去重
+1. 精简版：不支持浏览器渲染、不支持基于内存去重、不支持入库mongo
+2. 浏览器渲染版：不支持基于内存去重、不支持入库mongo
+3. 完整版：支持所有功能
 
 完整版可能会安装出错，若安装出错，请参考[安装问题](question/安装问题)
 
@@ -99,12 +106,21 @@ FirstSpider|2021-02-09 14:55:14,620|air_spider.py|run|line:80|INFO| 无任务，
 1. start_requests： 生产任务
 2. parse： 解析数据
 
+## 参与贡献
+
+贡献之前请先阅读 [贡献指南](./CONTRIBUTING.md)
+
+感谢所有做过贡献的人!
+
+<a href="https://github.com/Boris-code/feapder/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Boris-code/feapder" />
+</a>
+
 ## 爬虫工具推荐
 
 1. 爬虫在线工具库：http://www.spidertools.cn
 2. 爬虫管理系统：http://feapder.com/#/feapder_platform/feaplat
 3. 验证码识别库：https://github.com/sml2h3/ddddocr
-
 
 ## 微信赞赏
 

@@ -865,7 +865,7 @@
               }
               resolve();
             });
-          }, 3000); // 3秒的延迟
+          }, 1000); // 1秒的延迟
         } else {
           test_one_site(siteid, ret => {
             if (ret) {
@@ -884,13 +884,5 @@
       await testSiteWithDelay(siteids[i], i > 0);
     }
   });
-
-  // 读取浏览器UA
-  function set_user_agent(id) {
-    let userAgent = navigator.userAgent;
-    if (userAgent){
-        $("#"+id).val(userAgent);
-    }
-  }
 
 </script>

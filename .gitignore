@@ -4,8 +4,6 @@
 /test.py
 /setup.py
 /build_sites.py
-/web/backend/user*.so
-/web/backend/user*.pyd
 /build/**
 /venv/**
 /cloudflarespeedtest/**
@@ -14,3 +12,6 @@
 Dockerfile-dev
 config/sites.json
 nastools_test.py
+/node_modules/**
+package-lock.json
+package.json

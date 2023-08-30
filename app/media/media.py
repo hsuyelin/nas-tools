@@ -56,7 +56,7 @@ class Media:
         # 默认语言
         self._default_language = media.get("tmdb_language", "zh") or "zh"
         # TMDB是否包含成人内容
-        self._tmdb_include_adult = media.get("include_adult", "False") or "False"
+        self._tmdb_include_adult = media.get("tmdb_include_adult")
         # TMDB
         if app.get('rmt_tmdbkey'):
             # TMDB主体
@@ -71,7 +71,7 @@ class Media:
             self.tmdb.language = self._default_language
             # 代理
             self.tmdb.proxies = Config().get_proxies()
-            # 是否包含成人内容
+            # TMDB是否包含成人内容
             self.tmdb.include_adult = self._tmdb_include_adult
             # 调试模式
             self.tmdb.debug = False

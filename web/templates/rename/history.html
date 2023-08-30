@@ -264,7 +264,7 @@
   function truncate_history() {
     show_confirm_modal("该操作仅会清空所有转移记录，但不会删除源文件，是否确认？", function () {
       hide_confirm_modal();
-      ajax_post("truncate_filetransfer_history", {}, function (ret) {
+      ajax_post("truncate_transfer_history", {}, function (ret) {
         show_success_modal("清理所有转移记录成功");
         window_history_refresh();
       });

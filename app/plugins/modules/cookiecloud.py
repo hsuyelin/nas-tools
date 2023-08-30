@@ -1,28 +1,17 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 from threading import Event
-from datetime import datetime
-from jinja2 import Template
 
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from app.helper import IndexerHelper
+from app.indexer import Indexer
 from app.plugins.modules._base import _IPluginModule
 from app.sites import Sites
-from app.utils import RequestUtils, StringUtils
+from app.utils import RequestUtils
 from config import Config
 
-class CookieCloudRunResult:
-
-    def __init__(self, date=None, flag=False, msg=""):
-        self.date = date
-        self.flag = flag
-        self.msg = msg
-
-    def __str__(self):
-        return f"CookieCloudRunResult(date={self.date}, flag={self.flag}, msg={self.msg})"
 
 class CookieCloud(_IPluginModule):
     # 插件名称
@@ -34,7 +23,7 @@ class CookieCloud(_IPluginModule):
     # 主题色
     module_color = "#77B3D4"
     # 插件版本
-    module_version = "1.1"
+    module_version = "1.0"
     # 插件作者
     module_author = "jxxghp"
     # 作者主页
@@ -48,16 +37,13 @@ class CookieCloud(_IPluginModule):
 
     # 私有属性
     sites = None
+    indexer = None
     _scheduler = None
-    _index_helper = None
-    # 上次运行结果属性
-    _last_run_results_list = None
     # 设置开关
     _req = None
     _server = None
     _key = None
     _password = None
-    _enabled = False
     # 任务执行间隔
     _cron = None
     _onlyonce = False
@@ -85,7 +71,7 @@ class CookieCloud(_IPluginModule):
                             'content': [
                                 {
                                     'id': 'server',
-                                    'placeholder': 'https://nastool.cn/cookiecloud'
+                                    'placeholder': 'https://nastool.org/cookiecloud'
                                 }
                             ]
 
@@ -161,48 +147,9 @@ class CookieCloud(_IPluginModule):
             }
         ]
 
-    def get_page(self):
-        """
-        插件的额外页面，返回页面标题和页面内容
-        :return: 标题，页面内容，确定按钮响应函数
-        """
-        if not isinstance(self._last_run_results_list, list) or len(self._last_run_results_list) <= 0:
-            self.info("未获取到上次运行结果")
-            return None, None, None
-
-        template = """
-          <div class="table-responsive table-modal-body">
-            <table class="table table-vcenter card-table table-hover table-striped">
-              <thead>
-              {% if ResultsCount > 0 %}
-              <tr>
-                <th>运行开始时间</th>
-                <th>运行消息</th>
-                <th>是否连通</th>
-                <th></th>
-              </tr>
-              {% endif %}
-              </thead>
-              <tbody>
-              {% if ResultsCount > 0 %}
-                {% for Item in Results %}
-                  <tr id="indexer_{{ Item.id }}">
-                    <td>{{ Item.date }}</td>
-                    <td>{{ Item.msg }}</td>
-                    <td>{{ Item.flag }}</td>
-                  </tr>
-                {% endfor %}
-              {% endif %}
-              </tbody>
-            </table>
-          </div>
-        """
-        return "同步记录", Template(template).render(ResultsCount=len(self._last_run_results_list), Results=self._last_run_results_list), None
-
     def init_config(self, config=None):
         self.sites = Sites()
-        self._index_helper = IndexerHelper()
-        self._last_run_results_list = []
+        self.indexer = Indexer()
 
         # 读取配置
         if config:
@@ -219,23 +166,11 @@ class CookieCloud(_IPluginModule):
                 if self._server.endswith("/"):
                     self._server = self._server[:-1]
 
-            # 测试
-            _, msg, flag = self.__download_data()
-            _last_run_date = self.__get_current_date_str()
-            _last_run_msg = msg if StringUtils.is_string_and_not_empty(msg) else "测试连通性成功"
-            _result = CookieCloudRunResult(date=_last_run_date, flag=flag, msg=_last_run_msg)
-            self._last_run_results_list.append(_result)
-            if flag:
-                self._enabled = True
-            else:
-                self._enabled = False
-                self.info(msg)
-
         # 停止现有任务
         self.stop_service()
 
         # 启动服务
-        if self._enabled:
+        if self.get_state():
             self._scheduler = BackgroundScheduler(timezone=Config().get_timezone())
 
             # 运行一次
@@ -267,17 +202,7 @@ class CookieCloud(_IPluginModule):
                 self._scheduler.start()
 
     def get_state(self):
-        return self._enabled and self._cron
-
-    def __get_current_date_str(self):
-        """
-        获取当前日期字符串，格式为：2023-08-03 19:00:00
-        """
-        # 获取当前时间并添加 1 秒
-        new_time = datetime.now(tz=pytz.timezone(Config().get_timezone())) + timedelta(seconds=1)
-
-        # 将时间格式化为指定格式
-        return new_time.strftime('%Y-%m-%d %H:%M:%S')
+        return self._server and self._cron and self._key and self._password
 
     def __download_data(self) -> [dict, str, bool]:
         """
@@ -305,22 +230,14 @@ class CookieCloud(_IPluginModule):
         """
         # 同步数据
         self.info(f"同步服务开始 ...")
-        # 最多显示50条同步数据
-        if len(self._last_run_results_list) > 50:
-            self._last_run_results_list = []
-        _last_run_date = self.__get_current_date_str()
         contents, msg, flag = self.__download_data()
         if not flag:
             self.error(msg)
             self.__send_message(msg)
-            _result = CookieCloudRunResult(date=_last_run_date, flag=flag, msg=msg)
-            self._last_run_results_list.append(_result)
             return
         if not contents:
             self.info(f"未从CookieCloud获取到数据")
             self.__send_message(msg)
-            _result = CookieCloudRunResult(date=_last_run_date, flag=flag, msg=msg)
-            self._last_run_results_list.append(_result)
             return
         # 整理数据,使用domain域名的最后两级作为分组依据
         domain_groups = defaultdict(list)
@@ -336,8 +253,6 @@ class CookieCloud(_IPluginModule):
         for domain, content_list in domain_groups.items():
             if self._event.is_set():
                 self.info(f"同步服务停止")
-                _result = CookieCloudRunResult(date=_last_run_date, flag=flag, msg=msg)
-                self._last_run_results_list.append(_result)
                 return
             if not content_list:
                 continue
@@ -368,7 +283,7 @@ class CookieCloud(_IPluginModule):
                     update_count += 1
             else:
                 # 查询是否在索引器范围
-                indexer_info = self._index_helper.get_indexer_info(domain_url)
+                indexer_info = self.indexer.get_indexer(domain_url)
                 if indexer_info:
                     # 支持则新增站点
                     site_pri = self.sites.get_max_site_pri() + 1
@@ -386,8 +301,6 @@ class CookieCloud(_IPluginModule):
         else:
             msg = f"同步完成，但未更新任何站点数据！"
         self.info(msg)
-        _result = CookieCloudRunResult(date=_last_run_date, flag=flag, msg=msg)
-        self._last_run_results_list.append(_result)
         # 发送消息
         if self._notify:
             self.__send_message(msg)

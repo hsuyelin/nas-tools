@@ -1,8 +1,6 @@
 import json
 import os.path
-import sys
 import tempfile
-import zipfile
 from functools import reduce
 from threading import Lock
 
@@ -12,7 +10,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 import log
 import app.helper.cloudflare_helper as CloudflareHelper
-from app.utils import SystemUtils, RequestUtils, ExceptionUtils, StringUtils
+from app.utils import SystemUtils, RequestUtils, ExceptionUtils
 from config import Config
 
 lock = Lock()
@@ -42,23 +40,15 @@ class ChromeHelper(object):
     def init_driver(self):
         if self._executable_path:
             return
-
         if not uc.find_chrome_executable():
             return
-
         global driver_executable_path
         try:
-            latest_release_url = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE"
-            latest_chromedriver_version = requests.get(latest_release_url).text
-            driver_executable_path = ChromeDriverManager(version=f'{latest_chromedriver_version}').install()
-            if os.path.exists(driver_executable_path):
-                log.info(f"【ChromeHelper】存在内置驱动: {driver_executable_path}")
-                self._executable_path = driver_executable_path
-            else:
-                raise ValueError('【ChromeHelper】未获取到驱动最新版本')
+            download_webdriver_path = ChromeDriverManager().install()
+            SystemUtils.chmod755(download_webdriver_path)
+            driver_executable_path = download_webdriver_path
         except Exception as err:
              ExceptionUtils.exception_traceback(err)
-             log.error("【ChromeHelper】获取驱动发生错误：%s" % str(err))
 
     @property
     def browser(self):
@@ -70,10 +60,8 @@ class ChromeHelper(object):
     def get_status(self):
         if self._executable_path \
                 and not os.path.exists(self._executable_path):
-            log.debug(f"【ChromeHelper】驱动路径不存在")
             return False
         if not uc.find_chrome_executable():
-            log.debug(f"【ChromeHelper】undetected_chromedriver 未能匹配驱动")
             return False
         return True
 

@@ -967,7 +967,7 @@
             <span class="dropzone-msg-desc">点击或者拖动种子文件到此处</span>
           </div>
         </form>
-        <textarea class="form-control mt-2" id="torrent_urls" rows="8" placeholder="https://xxxx或magnet:?xt=xxxx，换行添加多个链接" aria-label=""></textarea>
+        <textarea class="form-control mt-2" id="torrent_urls" rows="8" placeholder="https://xxxx，换行添加多个链接" aria-label=""></textarea>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-link link-secondary me-auto" data-bs-dismiss="modal">取消</button>
@@ -1155,6 +1155,14 @@
         }
     });
 
+    // 浏览器关闭事件
+    window.addEventListener("beforeunload", function() {
+      // 关闭连接
+      stop_message();
+      stop_logging();
+      stop_progress();
+    });
+
     // tooltip点击事件处理，阻止冒泡到上级元素，避免比如`点击tooltip切换了switch`的问题
     $('body').on('click', 'span[data-bs-toggle="tooltip"]', function (e) {
       e.preventDefault();
@@ -1220,6 +1228,7 @@
 <style>
   {{ CustomScriptCfg.css|safe or "" }}
 </style>
+
 <!-- 用户自定义JavaScript -->
 <script type="text/javascript">
   {{ CustomScriptCfg.javascript|safe or "" }}

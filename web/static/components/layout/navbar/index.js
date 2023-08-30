@@ -22,7 +22,7 @@ export class LayoutNavbar extends CustomElement {
     this.layout_appversion = "v3.0.0";
     this._active_name = "";
     this._update_appversion = "";
-    this._update_url = "https://github.com/hsuyelin/nas-tools";
+    this._update_url = "https://github.com/NAStool/nas-tools/releases";
     this._is_update = false;
     this._is_expand = false;
     this.classList.add("navbar","navbar-vertical","navbar-expand-lg","lit-navbar-fixed","lit-navbar","lit-navbar-hide-scrollbar");
@@ -75,7 +75,7 @@ export class LayoutNavbar extends CustomElement {
 
     // 检查更新
     if (this.layout_userlevel > 1 && this.layout_useradmin === "1") {
-      // this._check_new_version();
+      this._check_new_version();
     }
   }
 
@@ -88,13 +88,13 @@ export class LayoutNavbar extends CustomElement {
             url = ret.url;
             break;
           case 2:
-            url = "https://github.com/hsuyelin/nas-tools/commits/master"
+            url = "https://github.com/NAStool/nas-tools/releases"
             break;
         }
         if (url) {
           this._update_url = url;
           this._update_appversion = ret.version;
-          this._is_update = true;
+          // this._is_update = true;
         }
       }
     });
@@ -175,13 +175,7 @@ export class LayoutNavbar extends CustomElement {
                     </a>
                     ${this._is_update
                     ? html`
-                      <svg xmlns="http://www.w3.org/2000/svg" class="cursor-pointer icon icon-tabler icon-tabler-arrow-big-up-lines-filled ms-2 text-red" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"
-                        @click=${ (e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          update(this._update_appversion);
-                          return false;
-                        }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="cursor-pointer icon icon-tabler icon-tabler-arrow-big-up-lines-filled ms-2 text-red" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                         <path d="M9 12h-3.586a1 1 0 0 1 -.707 -1.707l6.586 -6.586a1 1 0 0 1 1.414 0l6.586 6.586a1 1 0 0 1 -.707 1.707h-3.586v3h-6v-3z" fill="currentColor"></path>
                         <path d="M9 21h6"></path>
