@@ -20,6 +20,9 @@
 https://wiki.nastool.org
 
 ## 开发路线及官方原版新增内容
+
+基于官方 3.2.3 版本
+
 [开发路线](https://github.com/hsuyelin/nas-tools/discussions/91)
 
 - [x] 支持Aria2/115/PikPak下载器
