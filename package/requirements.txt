@@ -110,7 +110,7 @@ typing_extensions==4.3.0
 tzdata==2022.2
 tzlocal==4.2
 undetected-chromedriver==3.5.3
-urllib3==2.0.4
+urllib3==1.26.12
 w3lib==2.0.1
 watchdog==2.1.9
 wcwidth==0.2.5
