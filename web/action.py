@@ -9,6 +9,7 @@ import shutil
 import signal
 import sqlite3
 import time
+import hashlib
 from math import floor
 from pathlib import Path
 from urllib.parse import unquote
@@ -177,6 +178,7 @@ class WebAction:
             "get_downloading": self.get_downloading,
             "test_site": self.__test_site,
             "get_sub_path": self.__get_sub_path,
+            "get_hardlinks": self.__get_hardlinks,
             "rename_file": self.__rename_file,
             "delete_files": self.__delete_files,
             "download_subtitle": self.__download_subtitle,
@@ -4107,8 +4109,54 @@ class WebAction:
                             "type": "file",
                             "rel": os.path.dirname(ff).replace("\\", "/"),
                             "ext": ext,
-                            "size": StringUtils.str_filesize(os.path.getsize(ff))
+                            "size": StringUtils.str_filesize(os.path.getsize(ff)),
+                            "linkid": hashlib.md5(ff.encode()).hexdigest()
                         })
+
+        except Exception as e:
+            ExceptionUtils.exception_traceback(e)
+            return {
+                "code": -1,
+                "message": '加载路径失败: %s' % str(e)
+            }
+        return {
+            "code": 0,
+            "count": len(r),
+            "data": r
+        }
+
+    @staticmethod
+    def __get_hardlinks(data):
+        """
+        获取硬链接
+        """            
+        def parse_hardlinks(hardlinks):
+            paths = []
+            for link in hardlinks:
+                paths.append(SystemUtils.shorten_path(link["file"], 'left', 2))      
+            return paths
+                
+        r = {}
+        try:
+            file = data.get("filepath")
+            direction = ""
+            hardlinks = []
+            sync_dirs = Sync().get_hardlinks_sync_dirs()                 
+            for dir in sync_dirs:
+                if file.startswith(dir[0]):
+                    direction = '→'
+                    hardlinks = parse_hardlinks(SystemUtils().find_hardlinks(file=file, fdir=dir[1]))
+                    break
+                elif file.startswith(dir[1]):
+                    direction = '←'
+                    hardlinks = parse_hardlinks(SystemUtils().find_hardlinks(file=file, fdir=dir[0]))
+                    break     
+                                    
+            r={
+                "linkid": hashlib.md5(file.encode()).hexdigest(),
+                "direction": direction,
+                "hardlinks": hardlinks
+            }
 
         except Exception as e:
             ExceptionUtils.exception_traceback(e)

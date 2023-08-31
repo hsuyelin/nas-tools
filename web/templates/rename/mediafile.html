@@ -29,7 +29,7 @@
           <div class="card-body py-0 border-0">
             <div class="d-flex flex-column flex-md-row justify-content-md-between">
               <div class="text-muted align-self-center">
-                共 <span id="mediafile_num">0</span> 个文件
+                共 <span id="mediafile_num">0</span> 个文件 <span id="mediafile_folder_sync"></span>
               </div>
               <div class="align-self-center">
                 <a href="javascript:mediafile_transfer_all()" class="btn btn-primary" title="转移当前目录">
@@ -145,6 +145,16 @@
 
   //刷新文件列表
   function refresh_files(folder) {
+    // 获取文件夹路径的MD5找到目录树节点
+    let node = $(`#mediafile_tree #${CryptoJS.MD5(folder).toString()}`);
+    if (node && node.hasClass("sync-src")) {
+      $("#mediafile_folder_sync").attr("direction", "→").text("硬链接同步来源目录");
+    } else if (node && node.hasClass("sync-dest")) {
+      $("#mediafile_folder_sync").attr("direction", "←").text("硬链接同步目标目录");
+    } else {
+      $("#mediafile_folder_sync").removeAttr("direction").text("");
+    }
+
     if (folder) {
       $("#mediafile_current_dir").val(folder);
     } else {
@@ -162,6 +172,7 @@
           let fileext = ret.data[i].ext;
           let filename = ret.data[i].name;
           let filesize = ret.data[i].size;
+          let linkid = ret.data[i].linkid;          
           let template_html = $("#mediafile_item_template").text();
           $("#mediafile_file_container").append(
               template_html.replaceAll("{FILEEXT}", fileext)
@@ -169,8 +180,17 @@
                   .replaceAll("{FILESIZE}", filesize + "B")
                   .replaceAll("{FILEPOS}", i)
                   .replaceAll("{FILEPATH}", filepath.replace("'", "&apos;"))
+                  .replaceAll("{LINKID}", linkid)
           );
-        $("#mediafile_current_files").val(JSON.stringify(files))
+          $("#mediafile_current_files").val(JSON.stringify(files))
+          // 获取媒体文件的所有硬链接
+          ajax_post("get_hardlinks", { filepath: filepath }, function (ret) {
+            if (ret.data) {
+              for (let j = 0; j < ret.data.hardlinks.length; j++) {
+                $(`#mediafile_file_container #${ret.data.linkid}`).append(`<li><span direction="${ret.data.direction}">${ret.data.hardlinks[j]}</span></li>`);
+              }
+            }
+          });        
         }
       }
     });
@@ -432,6 +452,7 @@
           <div class="row">
             <div class="col">
               <h3 class="mb-0"><a href='javascript:mediafile_transfer("{FILENAME}", "{FILEPOS}")'>{FILENAME}</a></h3>
+              <h4 class="mb-0 mediafile_link"><ul id="{LINKID}"></ul></h4>
               <custom-chips class="mt-1" id="testresults_{FILEPOS}"></custom-chips>
               <input type="hidden" value="{FILEPATH}" id="mediafilepath_{FILEPOS}">
             </div>

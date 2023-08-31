@@ -10,7 +10,7 @@ from app.utils.exception_utils import ExceptionUtils
 from app.utils.path_utils import PathUtils
 from app.utils.types import OsType
 from config import Config, WEBDRIVER_PATH
-
+from math import ceil
 
 class SystemUtils:
 
@@ -397,3 +397,48 @@ class SystemUtils:
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
         return processes
+
+    # 缩略路径
+    @staticmethod
+    def shorten_path(path, ignore = 'center',  max_levels = 2, max_name = 40):
+        """缩略路径
+
+        Args:
+            path (str): 原始路径
+            ignore (str, optional): 忽略的位置，忽略左侧为'left'，忽略右侧为'right'. 默认忽略中间为'center'.
+            max_levels (int, optional): 最大的路径层级，不包含根目录和文件的目录数量. 默认为2.
+            max_name (int, optional): 最大的文件名长度，超长则忽略中间名称. 默认为40.
+
+        Returns:
+            str: 缩略后的路径
+        """
+        parts = path.split(os.path.sep)  # 使用操作系统的路径分隔符来拆分路径
+        root = parts[0]
+        parts = parts[1:]
+        file = ""
+        if os.path.isfile(path):
+            file = parts[-1] if len(parts[-1])<= max_name else parts[-1][:(max_name-3)//2]+'...'+parts[-1][-(max_name-3)//2:]
+            parts = parts[:-1]  # 如果路径是文件，去掉最后一个部分（文件名）
+        if len(parts) <= max_levels:
+            return path  # 如果路径层次小于等于max_levels，保留原始路径
+        else:
+            shortened_parts = []
+            if ignore == 'left':
+                shortened_parts.append('...')
+                for i in range(-max_levels, 0):
+                    shortened_parts.append(parts[i])                    
+            elif ignore == 'right':
+                shortened_parts.append(root) 
+                for i in range(max_levels):
+                    shortened_parts.append(parts[i])                    
+                shortened_parts.append('...')
+            else:
+                shortened_parts.append(root) 
+                for i in range(max_levels // 2):
+                    shortened_parts.append(parts[i])                    
+                shortened_parts.append('...')     
+                for i in range(-ceil(max_levels/2), 0):
+                    shortened_parts.append(parts[i])                                      
+            if file:
+                shortened_parts.append(file) # 文件则添加名称
+            return os.path.sep.join(shortened_parts)

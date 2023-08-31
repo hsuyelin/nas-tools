@@ -132,6 +132,16 @@ class Sync(object):
             return self._sync_path_confs.get(str(sid)) or {}
         return self._sync_path_confs
 
+    def get_hardlinks_sync_dirs(self):
+        """
+        获取所有硬链接的同步目录设置
+        """
+        sync_dirs = []
+        for src, conf in self.get_sync_path_conf().items():
+            if conf["syncmod"].upper() == 'LINK':
+                sync_dirs.append([conf["from"], conf["to"]]) 
+        return sync_dirs
+
     def check_source(self, source=None, sid=None):
         """
         检查关闭其他源目录相同或为父目录或为子目录的同步目录
