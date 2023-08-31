@@ -347,6 +347,17 @@ def update_config():
     except Exception as e:
         ExceptionUtils.exception_traceback(e)
 
+    # 新增baiduocr配置文件，如果以前没有需要新增
+    try:
+        baidu_ocr = Config().get_config('baiduocr')
+        if not baidu_ocr:
+            _config['baiduocr'] = {}
+            _config['baiduocr']['api_key'] = ''
+            _config['baiduocr']['secret_key'] = ''
+            overwrite_cofig = True
+    except Exception as e:
+        ExceptionUtils.exception_traceback(e)
+
     # 重写配置文件
     if overwrite_cofig:
         Config().save_config(_config)
