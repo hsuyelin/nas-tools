@@ -13,7 +13,7 @@ from app.plugins import PluginManager
 from app.media import Category
 from app.utils import ConfigLoadCache, CategoryLoadCache, ExceptionUtils, StringUtils
 from app.utils.commons import INSTANCES
-from app.utils.types import SystemConfigKey, BuiltinIndexerFileMd5
+from app.utils.types import SystemConfigKey, BuiltinIndexerFileMd5, ProgressKey
 from config import Config
 from web.action import WebAction
 
