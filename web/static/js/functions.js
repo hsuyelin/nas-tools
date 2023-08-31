@@ -325,9 +325,7 @@ function restart() {
   show_confirm_modal("立即重启系统？", function () {
     hide_confirm_modal();
     ajax_post("restart", {}, function (ret) {
-      if (ret.code === 0) {
-        setTimeout(logout, 3000);
-      }
+      setTimeout(logout, 3000);
     }, true, false);
     show_wait_modal(true);
   });
@@ -344,9 +342,7 @@ function update(version) {
   show_confirm_modal(title, function () {
     hide_confirm_modal();
     ajax_post("update_system", {}, function (ret) {
-      if (ret.code === 0) {
-        setTimeout(logout, 3000);
-      }
+      setTimeout(logout, 3000);
     }, true, false)
     show_wait_modal(true);
   });
