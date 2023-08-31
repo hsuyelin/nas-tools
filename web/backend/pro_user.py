@@ -312,7 +312,7 @@ class ProUser(UserMixin):
 2. 如果从未修改: 请去 https://github.com/hsuyelin/nas-tools/issues 创建issue，并附上报错信息
 ----------------------------------------------------------------------------------------------------------
             """
-            log.info(recovery_msg)
+            log.info(f"【User】\n{recovery_msg}")
             return {}, [], {}
 
     def get_indexer(self, 
