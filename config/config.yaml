@@ -167,6 +167,13 @@ openai:
   # 【openai api url】：自定义openai请求地址
   api_url:
 
+# 【BaiduOCR】：可在 https://console.bce.baidu.com/ai/#/ai/ocr/app/list 查看
+baiduocr:
+  # 【baiduocr api key】: BaiduOCR的api key，如果需要正常使用，需要在申请后去 https://console.bce.baidu.com/ai/#/ai/ocr/overview/resource/getFree 领取免费额度
+  api_key:
+  # 【baiduocr secret key】: BaiduOCR的secret key，如果需要正常使用，需要在申请后去 https://console.bce.baidu.com/ai/#/ai/ocr/overview/resource/getFree 领取免费额度
+  secret_key:
+
 # 【配置安全】
 security:
   # 【媒体服务器webhook允许ip范围】：即只有如下范围的IP才允许调用webhook

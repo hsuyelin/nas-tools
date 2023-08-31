@@ -664,6 +664,26 @@
           </div>
           <div class="card-body">
             <div class="row">
+              <div class="col-lg">
+                <div class="mb-3">
+                  <label class="form-label">Baidu OCR API Key <span class="form-help"
+                                                                   title="BaiduOCR的api key，可去 https://console.bce.baidu.com/ 申请, 在 https://console.bce.baidu.com/ai/#/ai/ocr/app/list 查看, 该项可辅助站点签到验证码识别"
+                                                                   data-bs-toggle="tooltip">?</span></label>
+                  <input type="text" value="{{ Config.baiduocr.api_key or '' }}" class="form-control"
+                         id="baiduocr.api_key" placeholder="" autocomplete="off">
+                </div>
+              </div>
+              <div class="col-lg">
+                <div class="mb-3">
+                  <label class="form-label">Baidu OCR Secret Key <span class="form-help"
+                                                                   title="BaiduOCR的secret key，可去 https://console.bce.baidu.com/ 申请, 在 https://console.bce.baidu.com/ai/#/ai/ocr/app/list 查看, 该项可辅助站点签到验证码识别"
+                                                                   data-bs-toggle="tooltip">?</span></label>
+                  <input type="text" value="{{ Config.baiduocr.secret_key or '' }}" class="form-control"
+                         id="baiduocr.secret_key" placeholder="" autocomplete="off">
+                </div>
+              </div>
+            </div>
+            <div class="row">
               <div class="col-12 col-xl-3">
                 <div class="mb-3">
                   <label class="form-check form-switch">
