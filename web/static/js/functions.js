@@ -316,7 +316,7 @@ function get_message(lst_time) {
 //检查系统是否在线
 function check_system_online() {
   ajax_post("refresh_process", {type: "restart"}, function (ret) {
-    if (ret.code === 1) {
+    if (ret.code === -1) {
       logout();
     } else {
       setTimeout("check_system_online()", 1000);
@@ -353,6 +353,9 @@ function update(version) {
   show_confirm_modal(title, function () {
     hide_confirm_modal();
     ajax_post("update_system", {}, function (ret) {
+      if (ret.code === 0) {
+        setTimeout("window_history_refresh()", 2000);
+      }
     }, true, false)
     show_wait_modal(true);
     setTimeout("check_system_online()", 5000);
