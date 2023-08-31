@@ -3,16 +3,17 @@ import datetime
 import hashlib
 import random
 import re
+import os
 from urllib import parse
 
 import cn2an
 import dateparser
 import dateutil.parser
+import zhconv
 
 from app.utils.exception_utils import ExceptionUtils
 from app.utils.types import MediaType
 from config import Config
-
 
 class StringUtils:
 
@@ -126,7 +127,7 @@ class StringUtils:
             return True
         else:
             return False
-
+            
     @staticmethod
     def xstr(s):
         """
@@ -151,11 +152,8 @@ class StringUtils:
         int_val = 0
         if not text:
             return int_val
-        text_val = text.strip().replace(',', '')
-        if not StringUtils.is_int_or_float(text_val):
-            return int_val
         try:
-            int_val = int(text_val)
+            int_val = int(text.strip().replace(',', ''))
         except Exception as e:
             ExceptionUtils.exception_traceback(e)
 
@@ -171,11 +169,12 @@ class StringUtils:
         float_val = 0.0
         if not text:
             return 0.0
-        text_val = text.strip().replace(',', '')
-        if not StringUtils.is_int_or_float(text_val):
-            return float_val
         try:
-            float_val = float(text_val)
+            text = text.strip().replace(',', '')
+            if text:
+                float_val = float(text)
+            else:
+                float_val = 0.0
         except Exception as e:
             ExceptionUtils.exception_traceback(e)
         return float_val
@@ -483,6 +482,30 @@ class StringUtils:
         return hashlib.md5(str(data).encode()).hexdigest()
 
     @staticmethod
+    def md5_hash_file(file_path):
+        """
+        MD5 HASH 指定文件
+        """
+        if not os.path.exists(file_path):
+            return ""
+        md5_hash = hashlib.md5()
+        with open(file_path, "rb") as file:
+            while chunk := file.read(8192):
+                md5_hash.update(chunk)
+        return md5_hash.hexdigest()
+
+    @staticmethod
+    def verify_integrity(file_path, original_md5):
+        """
+        校验文件是否匹配指定的md5
+        """
+        md5 = StringUtils.md5_hash_file(file_path)
+        if not StringUtils.is_string_and_not_empty(md5) or \
+        not StringUtils.is_string_and_not_empty(original_md5):
+            return True
+        return md5 == original_md5
+
+    @staticmethod
     def str_timehours(minutes):
         """
         将分钟转换成小时和分钟
@@ -589,3 +612,27 @@ class StringUtils:
             return True
         else:
             return False
+
+    @staticmethod
+    def is_chinese_word(string: str, mode: int = 1):
+        """
+        判断是否包含中文
+        :param string 需要判断的字符
+        :param mode 模式 1匹配简体和繁体 2只匹配简体 3只匹配繁体
+        :return True or False
+        """
+        for ch in string:
+            if mode == 1:
+                if "\u4e00" <= ch <= "\u9FFF":
+                    return True
+            elif mode == 2:
+                if "\u4e00" <= ch <= "\u9FFF":
+                    if zhconv.convert(ch, "zh-cn") == ch:
+                        return True
+            elif mode == 3:
+                if "\u4e00" <= ch <= "\u9FFF":
+                    if zhconv.convert(ch, "zh-cn") != ch:
+                        return True
+        if re.search(pattern="^[0-9]+$", string=string):
+            return True
+        return False

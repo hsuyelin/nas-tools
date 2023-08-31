@@ -1,2 +1,0 @@
-fastapi<1
-uvicorn<1

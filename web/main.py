@@ -21,6 +21,7 @@ from flask_compress import Compress
 from flask_login import LoginManager, login_user, login_required, current_user
 from flask_sock import Sock
 from icalendar import Calendar, Event, Alarm
+from simple_websocket import ConnectionClosed
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import log
@@ -28,7 +29,7 @@ from app.brushtask import BrushTask
 from app.conf import ModuleConf, SystemConfig
 from app.downloader import Downloader
 from app.filter import Filter
-from app.helper import SecurityHelper, MetaHelper, ChromeHelper, ThreadHelper, FfmpegHelper
+from app.helper import SecurityHelper, MetaHelper, ChromeHelper, ThreadHelper
 from app.indexer import Indexer
 from app.media.meta import MetaInfo
 from app.mediaserver import MediaServer
@@ -45,7 +46,7 @@ from config import PT_TRANSFER_INTERVAL, Config, TMDB_API_DOMAINS
 from web.action import WebAction
 from web.apiv1 import apiv1_bp
 from web.backend.WXBizMsgCrypt3 import WXBizMsgCrypt
-from web.backend.user import User
+from web.backend.pro_user import ProUser
 from web.backend.wallpaper import get_login_wallpaper
 from web.backend.web_utils import WebUtils
 from web.security import require_auth
@@ -99,7 +100,7 @@ def add_header(r):
 # 定义获取登录用户的方法
 @LoginManager.user_loader
 def load_user(user_id):
-    return User().get(user_id)
+    return ProUser().get(user_id)
 
 
 # 页面不存在
@@ -182,7 +183,7 @@ def login():
         remember = request.form.get('remember')
         if not username:
             return redirect_to_login('请输入用户名')
-        user_info = User().get_user(username)
+        user_info = ProUser().get_user(username)
         if not user_info:
             return redirect_to_login('用户名或密码错误')
         # 校验密码
@@ -255,19 +256,20 @@ def index():
     # 磁盘空间
     LibrarySpaces = WebAction().get_library_spacesize()
 
-    # 我的媒体库是否精简显示
-    mediaLibraryIsSimpleShow = Config().get_config("laboratory").get('simplify_my_media_library')
-
     # 媒体库
-    Librarys = [] if mediaLibraryIsSimpleShow else MediaServer().get_libraries()
+    Librarys = MediaServer().get_libraries()
     LibrarySyncConf = SystemConfig().get(SystemConfigKey.SyncLibrary) or []
+    AllLibraryModule = [MyMediaLibraryType.MINE, MyMediaLibraryType.WATCHING, MyMediaLibraryType.NEWESTADD]
+    LibraryManageConf = SystemConfig().get(SystemConfigKey.LibraryDisplayModule) or []
+    if not LibraryManageConf:
+        for index, item in enumerate(AllLibraryModule):
+            LibraryManageConf.append({"id": index, "name": item.value, "selected": True})
 
     # 继续观看
     Resumes = MediaServer().get_resume()
 
     # 最近添加
-    Latests = [] if mediaLibraryIsSimpleShow else MediaServer().get_latest()
-
+    Latests = MediaServer().get_latest()
 
     return render_template("index.html",
                            ServerSucess=ServerSucess,
@@ -284,9 +286,9 @@ def index():
                            MediaServerType=MSType,
                            Librarys=Librarys,
                            LibrarySyncConf=LibrarySyncConf,
+                           LibraryManageConf=LibraryManageConf,
                            Resumes=Resumes,
-                           Latests=Latests,
-                           mediaLibraryIsSimpleShow=mediaLibraryIsSimpleShow
+                           Latests=Latests
                            )
 
 
@@ -297,7 +299,7 @@ def search():
     # 权限
     if current_user.is_authenticated:
         username = current_user.username
-        pris = User().get_user(username).get("pris")
+        pris = ProUser().get_user(username).get("pris")
     else:
         pris = ""
     # 结果
@@ -393,7 +395,7 @@ def sites():
 @App.route('/sitelist', methods=['POST', 'GET'])
 @login_required
 def sitelist():
-    IndexerSites = Indexer().get_indexer_dict(check=False, public=True, plugins=True)
+    IndexerSites = Indexer().get_indexer_dict(check=False, public=False, plugins=False)
     return render_template("site/sitelist.html",
                            Sites=IndexerSites,
                            Count=len(IndexerSites))
@@ -404,22 +406,23 @@ def sitelist():
 def open_app():
     return render_template("openapp.html")
 
+
 # 站点资源页面
 @App.route('/resources', methods=['POST', 'GET'])
 @login_required
 def resources():
-    site_id = request.args.get("site")
+    site_domain = request.args.get("site")
     site_name = request.args.get("title")
     page = request.args.get("page") or 0
     keyword = request.args.get("keyword")
     Results = WebAction().list_site_resources({
-        "id": site_id,
+        "site": site_domain,
         "page": page,
         "keyword": keyword
     }).get("data") or []
     return render_template("site/resources.html",
                            Results=Results,
-                           SiteId=site_id,
+                           SiteDomain=site_domain,
                            Title=site_name,
                            KeyWord=keyword,
                            TotalCount=len(Results),
@@ -851,7 +854,6 @@ def basic():
     RmtModeDict = WebAction().get_rmt_modes()
     CustomScriptCfg = SystemConfig().get(SystemConfigKey.CustomScript)
     ScraperConf = SystemConfig().get(SystemConfigKey.UserScraperConf) or {}
-    support_ffmpeg = FfmpegHelper.is_ffmpeg_supported()
     return render_template("setting/basic.html",
                            Config=Config().get_config(),
                            Proxy=proxy,
@@ -860,8 +862,7 @@ def basic():
                            CurrentUser=current_user,
                            ScraperNfo=ScraperConf.get("scraper_nfo") or {},
                            ScraperPic=ScraperConf.get("scraper_pic") or {},
-                           TmdbDomains=TMDB_API_DOMAINS,
-                           support_ffmpeg=support_ffmpeg)
+                           TmdbDomains=TMDB_API_DOMAINS)
 
 
 # 自定义识别词设置页面
@@ -1705,6 +1706,7 @@ def stream_logging():
     """
     实时日志EventSources响应
     """
+
     def __logging(_source=""):
         """
         实时日志
@@ -1738,6 +1740,7 @@ def stream_progress():
     """
     实时日志EventSources响应
     """
+
     def __progress(_type):
         """
         实时日志
@@ -1761,7 +1764,11 @@ def message_handler(ws):
     消息中心WebSocket
     """
     while True:
-        data = ws.receive()
+        try:
+            data = ws.receive(timeout=10)
+        except ConnectionClosed:
+            print("WebSocket连接已关闭！")
+            break
         if not data:
             continue
         try:

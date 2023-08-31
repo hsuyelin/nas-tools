@@ -9,7 +9,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
 from app.utils import RequestUtils
-from app.helper import IndexerConf
+from app.indexer.indexerConf import IndexerConf
 from app.utils import ExceptionUtils, DomUtils, StringUtils
 
 from app.plugins import EventManager
@@ -28,9 +28,9 @@ class Jackett(_IPluginModule):
     # 插件版本
     module_version = "1.5"
     # 插件作者
-    module_author = "mattoid"
+    module_author = "hsuyelin"
     # 作者主页
-    author_url = "https://github.com/Mattoids"
+    author_url = "https://github.com/hsuyelin"
     # 插件配置项ID前缀
     module_config_prefix = "jackett_"
     # 加载顺序

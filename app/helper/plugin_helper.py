@@ -10,7 +10,7 @@ class PluginHelper:
         """
         插件安装统计计数
         """
-        return RequestUtils(timeout=5).get(f"https://nastool.cn/plugin/{plugin_id}/install")
+        return RequestUtils(timeout=5).get(f"https://nastool.org/plugin/{plugin_id}/install")
 
     @staticmethod
     def report(plugins):
@@ -18,9 +18,15 @@ class PluginHelper:
         批量上报插件安装统计数据
         """
         return RequestUtils(content_type="application/json",
-                            timeout=5).post(f"https://nastool.cn/plugin/update", json={
-            "plugins": [{"plugin_id": plugin, "count": 1} for plugin in plugins]
-        })
+                            timeout=5).post(f"https://nastool.org/plugin/update",
+                                            json={
+                                                "plugins": [
+                                                    {
+                                                        "plugin_id": plugin,
+                                                        "count": 1
+                                                    } for plugin in plugins
+                                                ]
+                                            })
 
     @staticmethod
     @cached(cache=TTLCache(maxsize=1, ttl=3600))
@@ -29,7 +35,7 @@ class PluginHelper:
         获取插件安装统计数据
         """
         ret = RequestUtils(accept_type="application/json",
-                           timeout=5).get_res("https://nastool.cn/plugin/statistic")
+                           timeout=5).get_res("https://nastool.org/plugin/statistic")
         if ret:
             try:
                 return ret.json()

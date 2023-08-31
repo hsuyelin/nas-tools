@@ -48,7 +48,7 @@ FANART_TV_API_URL = 'https://webservice.fanart.tv/v3/tv/%s?api_key=d2d31f9ecabea
 # 默认背景图地址
 DEFAULT_TMDB_IMAGE = 'https://s3.bmp.ovh/imgs/2022/07/10/77ef9500c851935b.webp'
 # TMDB域名地址
-TMDB_API_DOMAINS = ['api.themoviedb.org', 'api.tmdb.org', 'tmdb.nastool.cn', 'tmdb.nastool.workers.dev']
+TMDB_API_DOMAINS = ['api.themoviedb.org', 'api.tmdb.org', 'tmdb.nastool.org', 't.nastool.workers.dev']
 TMDB_IMAGE_DOMAIN = 'image.tmdb.org'
 # 添加下载时增加的标签，开始只监控NAStool添加的下载时有效
 PT_TAG = "NASTOOL"
@@ -159,9 +159,7 @@ class Config(object):
     def get_config(self, node=None):
         if not node:
             return self._config
-        if isinstance(self._config, dict):
-            return self._config.get(node, {})
-        return None
+        return self._config.get(node, {})
 
     def save_config(self, new_cfg):
         self._config = new_cfg
@@ -184,6 +182,12 @@ class Config(object):
 
     def get_script_path(self):
         return os.path.join(self.get_root_path(), "scripts", "sqls")
+
+    def get_builtin_indexer_path(self):
+        return os.path.join(self.get_root_path(), "app", "indexer", "client", "builtin.py")
+
+    def get_user_sites_bin_path(self):
+        return os.path.join(self.get_root_path(), "web", "backend", "user.sites.bin")
 
     def get_user_plugin_path(self):
         return os.path.join(self.get_config_path(), "plugins")

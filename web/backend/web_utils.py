@@ -65,10 +65,10 @@ class WebUtils:
                 else:
                     version = f"{ver_json['tag_name']} {commit_json['sha'][:7]}"
                 url = ver_json["html_url"]
-                return version, url, True
+                return version, url
         except Exception as e:
             ExceptionUtils.exception_traceback(e)
-        return None, None, False
+        return None, None
 
     @staticmethod
     def get_mediainfo_from_id(mtype, mediaid, wait=False):

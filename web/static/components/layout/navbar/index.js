@@ -19,7 +19,7 @@ export class LayoutNavbar extends CustomElement {
     super();
     this.navbar_list = [];
     this.layout_gopage = "";
-    this.layout_appversion = "v3.0.0";
+    this.layout_appversion = "v3.3.0";
     this._active_name = "";
     this._update_appversion = "";
     this._update_url = "https://github.com/hsuyelin/nas-tools";
@@ -75,7 +75,7 @@ export class LayoutNavbar extends CustomElement {
 
     // 检查更新
     if (this.layout_userlevel > 1 && this.layout_useradmin === "1") {
-      // this._check_new_version();
+      this._check_new_version();
     }
   }
 
@@ -94,7 +94,7 @@ export class LayoutNavbar extends CustomElement {
         if (url) {
           this._update_url = url;
           this._update_appversion = ret.version;
-          this._is_update = true;
+          // this._is_update = true;
         }
       }
     });
@@ -158,8 +158,7 @@ export class LayoutNavbar extends CustomElement {
                 ))}
               </div>
               <div class="d-flex align-items-end">
-                ${this.layout_useradmin === "1" ? html`
-                  ${this.layout_userlevel > 1 ? html`
+                ${html`
                   <!-- 升级提示 -->
                   <span class="d-flex flex-grow-1 justify-content-center border rounded-3 m-3 p-2 ${this._is_update ? "bg-yellow" : ""}">
                     <a href=${this._update_url} class="${this._is_update ? "text-yellow-fg" : "text-muted"}" target="_blank" rel="noreferrer">
@@ -175,13 +174,7 @@ export class LayoutNavbar extends CustomElement {
                     </a>
                     ${this._is_update
                     ? html`
-                      <svg xmlns="http://www.w3.org/2000/svg" class="cursor-pointer icon icon-tabler icon-tabler-arrow-big-up-lines-filled ms-2 text-red" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"
-                        @click=${ (e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          update(this._update_appversion);
-                          return false;
-                        }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="cursor-pointer icon icon-tabler icon-tabler-arrow-big-up-lines-filled ms-2 text-red" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                         <path d="M9 12h-3.586a1 1 0 0 1 -.707 -1.707l6.586 -6.586a1 1 0 0 1 1.414 0l6.586 6.586a1 1 0 0 1 -.707 1.707h-3.586v3h-6v-3z" fill="currentColor"></path>
                         <path d="M9 21h6"></path>
@@ -189,21 +182,7 @@ export class LayoutNavbar extends CustomElement {
                       </svg>`
                     : nothing }
                   </span>
-                  ` : html`
-                    <!-- 用户认证 -->
-                    <button class="btn btn-outline-secondary w-100 m-3 p-2" onclick="show_user_auth_modal()">
-                      <strong>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user-check" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                           <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                           <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
-                           <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
-                           <path d="M16 11l2 2l4 -4"></path>
-                        </svg> 
-                        用户认证
-                      </strong>
-                    </button>
                   ` }
-                ` : nothing }
               </div>
             </div>
           </div>

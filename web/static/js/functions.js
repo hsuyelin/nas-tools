@@ -24,8 +24,6 @@ let ProgressES;
 let LoggingSource = "";
 // 日志EventSource
 let LoggingES;
-// 是否存量消息刷新
-let OldMessageFlag = true;
 // 消息WebSocket
 let MessageWS;
 // 当前协议
@@ -33,6 +31,8 @@ let WSProtocol = "ws://";
 if (window.location.protocol === "https:") {
   WSProtocol = "wss://"
 }
+// 页面加载的时间
+let PageLoadedTime = new Date();
 
 
 /**
@@ -240,8 +240,17 @@ function logger_select(source) {
   start_logging();
 }
 
+// 停止消息服务
+function stop_message() {
+  if (MessageWS) {
+    MessageWS.close();
+    MessageWS = undefined;
+  }
+}
+
 // 连接消息服务
 function connect_message() {
+  stop_message();
   MessageWS = new ReconnectingWebSocket(WSProtocol + window.location.host + '/message');
   MessageWS.onmessage = function (event) {
     render_message(JSON.parse(event.data))
@@ -279,12 +288,14 @@ function render_message(ret) {
       // 滚动到顶部
       $(".offcanvas-body").animate({scrollTop: 0}, 300);
       // 浏览器消息提醒
-      if (!OldMessageFlag && !$("#offcanvasEnd").is(":hidden")) {
-        browserNotification(msg.title, msg.content);
+      if (!$("#offcanvasEnd").is(":hidden")) {
+        // 判断消息时间是否大于页面打开时间
+        let message_time = new Date(msg.time.replace(/-/g, '/'));
+        if (message_time > PageLoadedTime) {
+          browserNotification(msg.title, msg.content);
+        }
       }
     }
-    // 非旧消息
-    OldMessageFlag = false;
   }
   // 下一次处理
   if (lst_time) {
@@ -356,6 +367,7 @@ function show_init_alert_modal() {
     navmenu('basic');
   });
 }
+
 // 停止刷新进度条
 function stop_progress() {
   if (ProgressES) {

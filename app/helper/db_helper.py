@@ -1642,6 +1642,8 @@ class DbHelper:
                 INTEVAL=item.get('interval'),
                 DOWNLOADER=item.get('downloader'),
                 LABEL=item.get('label'),
+                UP_LIMIT=item.get('up_limit'),
+                DL_LIMIT=item.get('dl_limit'),
                 SAVEPATH=item.get('savepath'),
                 TRANSFER=item.get('transfer'),
                 DOWNLOAD_COUNT=0,
@@ -1665,6 +1667,8 @@ class DbHelper:
                     "INTEVAL": item.get('interval'),
                     "DOWNLOADER": item.get('downloader'),
                     "LABEL": item.get('label'),
+                    "UP_LIMIT": item.get('up_limit'),
+                    "DL_LIMIT": item.get('dl_limit'),
                     "SAVEPATH": item.get('savepath'),
                     "TRANSFER": item.get('transfer'),
                     "STATE": item.get('state'),
@@ -2639,7 +2643,7 @@ class DbHelper:
             DATE=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         ))
 
-    def get_indexer_statistics(self, client_id):
+    def get_indexer_statistics(self):
         """
         查询索引器统计
         """
@@ -2651,8 +2655,7 @@ class DbHelper:
             func.sum(case((INDEXERSTATISTICS.RESULT == 'Y', 1),
                           else_=0)).label("SUCCESS"),
             func.avg(INDEXERSTATISTICS.SECONDS).label("AVG"),
-        ).filter(INDEXERSTATISTICS.TYPE == client_id
-                 ).group_by(INDEXERSTATISTICS.INDEXER).all()
+        ).group_by(INDEXERSTATISTICS.INDEXER).all()
 
     @DbPersist(_db)
     def insert_plugin_history(self, plugin_id, key, value):
@@ -2697,48 +2700,3 @@ class DbHelper:
         """
         self._db.query(PLUGINHISTORY).filter(PLUGINHISTORY.PLUGIN_ID == plugin_id,
                                              PLUGINHISTORY.KEY == key).delete()
-    @DbPersist(_db)
-    def insert_indexer_custom_site(self,
-                                  site,
-                                  indexer):
-        """
-        新增自定义索引站点
-        """
-        if self.get_indexer_custom_site(site):
-            self.update_indexer_custom_site(site, indexer)
-        else:
-            self._db.insert(INDEXERCUSTOMSITE(
-                SITE=site,
-                INDEXER=indexer,
-                DATE=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            ))
-
-    @DbPersist(_db)
-    def update_indexer_custom_site(self,
-                                   site,
-                                   indexer):
-        """
-        更新自定义索引站
-        """
-        self._db.query(INDEXERCUSTOMSITE).filter(INDEXERCUSTOMSITE.SITE == site).update(
-            {
-                "INDEXER": indexer,
-                "DATE" : time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            }
-        )
-
-    def get_indexer_custom_site(self, site=None):
-        """
-        查询自定义索引站
-        """
-        if site:
-            return self._db.query(INDEXERCUSTOMSITE).filter(
-                INDEXERCUSTOMSITE.SITE == site
-            ).first()
-        else:
-            return self._db.query(INDEXERCUSTOMSITE).all()
-
-    @DbPersist(_db)
-    def delete_indexer_custom_site(self, id=None):
-        print(id)
-        self._db.query(INDEXERCUSTOMSITE).filter(INDEXERCUSTOMSITE.ID == id).delete()

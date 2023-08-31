@@ -1,15 +1,18 @@
 {% import 'macro/svg.html' as SVG %}
 {% import 'macro/oops.html' as OOPS %}
-{% if not mediaLibraryIsSimpleShow %}
 <div class="container-xl">
   <!-- Page title -->
   <div class="page-header d-print-none">
     <div class="row align-items-center">
-      <div class="col">
-        <h2 class="page-title">
-          我的媒体库
-        </h2>
-      </div>
+      {% for item in LibraryManageConf %}
+        {% if item['name'] == '我的媒体库' and item['selected'] %}
+          <div class="col">
+            <h2 class="page-title">
+              我的媒体库
+            </h2>
+          </div>
+        {% endif %}
+      {% endfor %}
       <div class="col-auto ms-auto d-print-none">
         <div class="btn-list">
           <a href="javascript:show_mediasync_modal()" class="btn btn-primary d-none d-sm-inline-block">
@@ -33,14 +36,23 @@
           <button class="btn d-sm-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-index-playhistory">
             {{ SVG.history() }}
           </button>
+          <button class="btn d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-index-librarymanage">
+            {{ SVG.menu_2() }}
+            显示管理
+          </button>
+          <button class="btn d-sm-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-index-librarymanage">
+            {{ SVG.menu_2() }}
+          </button>
         </div>
       </div>
     </div>
   </div>
 </div>
-{% endif %}
+
 {% if ServerSucess %}
 {% with curdomainleft = request.host.split(':')[0] %}
+{% for item in LibraryManageConf %}
+{% if item['name'] == '我的媒体库' and item['selected'] %}
 <div class="page-body">
   <div class="container-xl">
     <div class="d-grid gap-3 grid-normal-card">
@@ -71,7 +83,12 @@
     </div>
   </div>
 </div>
+{% endif %}
+{% endfor %}
+
 {% if Resumes %}
+{% for item in LibraryManageConf %}
+{% if item['name'] == '正在观看' and item['selected'] %}
 <div class="container-xl">
   <div class="page-header d-print-none">
     <div class="row align-items-center">
@@ -117,7 +134,12 @@
   </div>
 </div>
 {% endif %}
-{% if Latests and not mediaLibraryIsSimpleShow %}
+{% endfor %}
+{% endif %}
+
+{% if Latests %}
+{% for item in LibraryManageConf %}
+{% if item['name'] == '最新入库' and item['selected'] %}
 <div class="container-xl">
   <div class="page-header d-print-none">
     <div class="row align-items-center">
@@ -154,6 +176,8 @@
     </div>
   </div>
 </div>
+{% endif %}
+{% endfor %}
 {% endif %}
 {% endwith %}
 {% else %}
@@ -196,6 +220,41 @@
           <a href="javascript:save_media_config()" id="save_mediasync_btn" class="card-btn">保存</a>
           <a href="javascript:start_media_sync(true)" id="mediasync_btn" class="card-btn">开始同步</a>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal modal-blur fade" id="modal-index-librarymanage" tabindex="-1" role="dialog" aria-hidden="true"
+  data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">显示管理</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="table-responsive table-modal-body">
+        <table class="table table-vcenter card-table table-hover table-striped">
+          <thead>
+            <tr>
+              <th colspan="2">模块</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for Library in LibraryManageConf %}
+            <tr>
+                <td class="w-1">
+                    <input class="form-check-input m-0 align-middle" name="library_item" value="{{ Library }}" type="checkbox"
+                           {% if Library.selected %} checked {% endif %}>
+                </td>
+                <td><span>{{ Library.name }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-link me-auto" data-bs-dismiss="modal">取消</button>
+        <button id="library_manage_confirm_btn" class="btn btn-primary">确定</button>
       </div>
     </div>
   </div>
@@ -501,6 +560,21 @@
         chart_statistics.resize();
       }
     };
+  });
+
+</script>
+<script type="text/javascript">
+
+  $("#library_manage_confirm_btn").unbind("click").click(async function () {
+    let btn_obj = $(this);
+    let selected_library_items = select_GetSelectedVAL("library_item");
+    let unselected_library_items = select_GetUnselectedVAL("library_item");
+    ajax_post("start_mediaDisplayModuleSync", {"selected": selected_library_items, "unselected": unselected_library_items}, function(ret) {
+      if (ret.code == 0) {
+        window_history_refresh();
+      }
+      $("#modal-index-librarymanage").modal('hide');
+    });
   });
 
 </script>

@@ -1,3 +1,0 @@
-env_variables:
-  SLACK_BOT_TOKEN: "xoxb-xxx"
-  SLACK_SIGNING_SECRET: "yyy"

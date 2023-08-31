@@ -73,7 +73,7 @@ class DoubanSync(_IPluginModule):
             self._enable = config.get("enable")
             self._onlyonce = config.get("onlyonce")
             self._sync_type = config.get("sync_type")
-            if self._sync_type == '1':
+            if str({self._sync_type}) == '1':
                 self._interval = 0
                 rss_interval = config.get("rss_interval")
                 if rss_interval and str(rss_interval).isdigit():
@@ -132,7 +132,7 @@ class DoubanSync(_IPluginModule):
                 self.update_config({
                     "onlyonce": self._onlyonce,
                     "enable": self._enable,
-                    "sync_type": self._sync_type,
+                    "sync_type": str({self._sync_type}),
                     "interval": self._interval,
                     "rss_interval": self._rss_interval,
                     "auto_search": self._auto_search,
@@ -151,8 +151,8 @@ class DoubanSync(_IPluginModule):
         return self._enable \
                and self._users \
                and self._types \
-            and ((self._sync_type == '1' and self._rss_interval)
-                 or (self._sync_type != '1' and self._interval))
+            and ((str({self._sync_type}) == '1' and self._rss_interval)
+                 or (str({self._sync_type}) != '1' and self._interval))
 
     @staticmethod
     def get_fields():

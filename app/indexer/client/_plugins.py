@@ -17,21 +17,30 @@ class PluginsSpider(object):
         self._plugin = PluginManager().get_plugin_apps(self._level).get(self._indexer.parser)
 
     def status(self, indexer):
-        plugin = PluginManager().get_plugin_apps(self._level).get(indexer.parser)
-        return True if plugin else False
+        try:
+            plugin = PluginManager().get_plugin_apps(self._level).get(indexer.parser)
+            return True if plugin else False
+        except Exception as e:
+            return False
 
     def search(self, keyword, indexer, page=0):
-        result_array = PluginManager().run_plugin_method(pid=indexer.parser, method='search', keyword=keyword, indexer=indexer, page=page)
-        if not result_array:
+        try:
+            result_array = PluginManager().run_plugin_method(pid=indexer.parser, method='search', keyword=keyword, indexer=indexer, page=page)
+            if not result_array:
+                return False, []
+            return True, result_array
+        except Exception as e:
             return False, []
-        return True, result_array
 
     def sites(self):
         result = []
-        plugins = PluginManager().get_plugin_apps(self._level)
-        for key in plugins:
-            if plugins.get(key)['installed']:
-                result_array = PluginManager().run_plugin_method(pid=plugins.get(key)['id'], method='get_indexers')
-                if result_array:
-                    result.extend(result_array)
+        try:
+            plugins = PluginManager().get_plugin_apps(self._level)
+            for key in plugins:
+                if plugins.get(key)['installed']:
+                    result_array = PluginManager().run_plugin_method(pid=plugins.get(key)['id'], method='get_indexers')
+                    if result_array:
+                        result.extend(result_array)
+        except Exception as e:
+            pass
         return result

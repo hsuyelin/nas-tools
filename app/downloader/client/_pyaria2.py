@@ -1,14 +1,23 @@
 # -*- coding: utf-8 -*-
 
+import json
+import requests
 import xmlrpc.client
+from base64 import b64encode
+
+import log
+from app.utils import Torrent
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 6800
-SERVER_URI_FORMAT = '%s:%s/rpc'
+SERVER_URI_FORMAT = '%s:%s/jsonrpc'
 
 
 class PyAria2(object):
     _secret = None
+    _server_uri = None
+    _headers = {}
+    _id = None
 
     def __init__(self, secret=None, host=DEFAULT_HOST, port=DEFAULT_PORT):
         """
@@ -19,9 +28,36 @@ class PyAria2(object):
         port: integer, aria2 rpc port, default is 6800
         session: string, aria2 rpc session saving.
         """
-        server_uri = SERVER_URI_FORMAT % (host, port)
+        self._server_uri = SERVER_URI_FORMAT % (host, port)
         self._secret = "token:%s" % (secret or "")
-        self.server = xmlrpc.client.ServerProxy(server_uri, allow_none=True)
+        self._headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._secret}" if self._secret else None
+        }
+        self._id = 0
+
+    def _send_request(self, method, params=None):
+        self._id = (self._id + 1) % 9999
+        if params is None:
+            params = []
+        if self._secret and self._secret not in params:
+            params.insert(0, self._secret)
+        payload = {
+            "jsonrpc": "2.0",
+            "id": self._id,
+            "method": method,
+            "params": params or [],
+        }
+        response = requests.post(
+            self._server_uri,
+            data=json.dumps(payload),
+            headers=self._headers,
+            auth=(self._secret, ""),
+        )
+        response_data = response.json()
+        if "error" in response_data:
+            raise Exception(response_data["error"]["message"])
+        return response_data.get("result")
 
     def addUri(self, uris, options=None, position=None):
         """
@@ -33,7 +69,7 @@ class PyAria2(object):
 
         return: This method returns GID of registered download.
         """
-        return self.server.aria2.addUri(self._secret, uris, options, position)
+        return self._send_request("aria2.addUri", [uris, options or {}])
 
     def addTorrent(self, torrent, uris=None, options=None, position=None):
         """
@@ -46,7 +82,8 @@ class PyAria2(object):
 
         return: This method returns GID of registered download.
         """
-        return self.server.aria2.addTorrent(self._secret, xmlrpc.client.Binary(torrent), uris, options, position)
+        magnet_link = Torrent.binary_data_to_magnet_link(torrent)
+        return self._send_request("aria2.addUri", [[magnet_link], options or {}])
 
     def addMetalink(self, metalink, options=None, position=None):
         """
@@ -58,8 +95,7 @@ class PyAria2(object):
 
         return: This method returns list of GID of registered download.
         """
-        return self.server.aria2.addMetalink(self._secret, xmlrpc.client.Binary(open(metalink, 'rb').read()), options,
-                                             position)
+        return self._send_request("aria2.addMetalink", [metalink, options or {}, position])
 
     def remove(self, gid):
         """
@@ -69,7 +105,7 @@ class PyAria2(object):
 
         return: This method returns GID of removed download.
         """
-        return self.server.aria2.removeDownloadResult(self._secret, gid)
+        return self._send_request("aria2.remove", [gid])
 
     def forceRemove(self, gid):
         """
@@ -79,7 +115,7 @@ class PyAria2(object):
 
         return: This method returns GID of removed download.
         """
-        return self.server.aria2.forceRemove(self._secret, gid)
+        return self._send_request("aria2.forceRemove", [gid])
 
     def pause(self, gid):
         """
@@ -89,7 +125,7 @@ class PyAria2(object):
 
         return: This method returns GID of paused download.
         """
-        return self.server.aria2.pause(self._secret, gid)
+        return self._send_request("aria2.pause", [gid])
 
     def pauseAll(self):
         """
@@ -97,7 +133,7 @@ class PyAria2(object):
 
         return: This method returns OK for success.
         """
-        return self.server.aria2.pauseAll(self._secret)
+        return self._send_request("aria2.pauseAll")
 
     def forcePause(self, gid):
         """
@@ -107,7 +143,7 @@ class PyAria2(object):
 
         return: This method returns GID of paused download.
         """
-        return self.server.aria2.forcePause(self._secret, gid)
+        return self._send_request("aria2.forcePause", [gid])
 
     def forcePauseAll(self):
         """
@@ -115,7 +151,7 @@ class PyAria2(object):
 
         return: This method returns OK for success.
         """
-        return self.server.aria2.forcePauseAll()
+        return self._send_request("aria2.forcePauseAll")
 
     def unpause(self, gid):
         """
@@ -125,7 +161,7 @@ class PyAria2(object):
 
         return: This method returns GID of unpaused download.
         """
-        return self.server.aria2.unpause(self._secret, gid)
+        return self._send_request("aria2.unpause", [gid])
 
     def unpauseAll(self):
         """
@@ -133,7 +169,7 @@ class PyAria2(object):
 
         return: This method returns OK for success.
         """
-        return self.server.aria2.unpauseAll()
+        return self._send_request("aria2.unpauseAll")
 
     def tellStatus(self, gid, keys=None):
         """
@@ -144,7 +180,10 @@ class PyAria2(object):
 
         return: The method response is of type dict and it contains following keys.
         """
-        return self.server.aria2.tellStatus(self._secret, gid, keys)
+        params = [gid]
+        if keys:
+            params.append(keys)
+        return self._send_request("aria2.tellStatus", params)
 
     def getUris(self, gid):
         """
@@ -154,7 +193,8 @@ class PyAria2(object):
 
         return: The method response is of type list and its element is of type dict and it contains following keys.
         """
-        return self.server.aria2.getUris(self._secret, gid)
+        params = [gid]
+        return self._send_request("aria2.getUris", params)
 
     def getFiles(self, gid):
         """
@@ -164,7 +204,8 @@ class PyAria2(object):
 
         return: The method response is of type list and its element is of type dict and it contains following keys.
         """
-        return self.server.aria2.getFiles(self._secret, gid)
+        params = [gid]
+        return self._send_request("aria2.getFiles", params)
 
     def getPeers(self, gid):
         """
@@ -174,7 +215,9 @@ class PyAria2(object):
 
         return: The method response is of type list and its element is of type dict and it contains following keys.
         """
-        return self.server.aria2.getPeers(self._secret, gid)
+        params = [gid]
+        return self._send_request("aria2.getPeers", params)
+
 
     def getServers(self, gid):
         """
@@ -184,7 +227,8 @@ class PyAria2(object):
 
         return: The method response is of type list and its element is of type dict and it contains following keys.
         """
-        return self.server.aria2.getServers(self._secret, gid)
+        params = [gid]
+        return self._send_request("aria2.getServers", params)
 
     def tellActive(self, keys=None):
         """
@@ -194,7 +238,10 @@ class PyAria2(object):
 
         return: The method response is of type list and its element is of type dict and it contains following keys.
         """
-        return self.server.aria2.tellActive(self._secret, keys)
+        params = []
+        if keys:
+            params.append(keys)
+        return self._send_request("aria2.tellActive", params)
 
     def tellWaiting(self, offset, num, keys=None):
         """
@@ -206,7 +253,10 @@ class PyAria2(object):
 
         return: The method response is of type list and its element is of type dict and it contains following keys.
         """
-        return self.server.aria2.tellWaiting(self._secret, offset, num, keys)
+        params = [offset, num]
+        if keys:
+            params.append(keys)
+        return self._send_request("aria2.tellWaiting", params)
 
     def tellStopped(self, offset, num, keys=None):
         """
@@ -218,7 +268,10 @@ class PyAria2(object):
 
         return: The method response is of type list and its element is of type dict and it contains following keys.
         """
-        return self.server.aria2.tellStopped(self._secret, offset, num, keys)
+        params = [offset, num]
+        if keys:
+            params.append(keys)
+        return self._send_request("aria2.tellStopped", params)
 
     def changePosition(self, gid, pos, how):
         """
@@ -233,7 +286,7 @@ class PyAria2(object):
 
         return: The response is of type integer, and it is the destination position.
         """
-        return self.server.aria2.changePosition(self._secret, gid, pos, how)
+        return self._send_request("aria2.changePosition", [gid, pos, how])
 
     def changeUri(self, gid, fileIndex, delUris, addUris, position=None):
         """
@@ -247,7 +300,10 @@ class PyAria2(object):
 
         return: This method returns a list which contains 2 integers. The first integer is the number of URIs deleted. The second integer is the number of URIs added.
         """
-        return self.server.aria2.changeUri(self._secret, gid, fileIndex, delUris, addUris, position)
+        params = [gid, fileIndex, delUris, addUris]
+        if position is not None:
+            params.append(position)
+        return self._send_request("aria2.changeUri", params)
 
     def getOption(self, gid):
         """
@@ -257,7 +313,7 @@ class PyAria2(object):
 
         return: The response is of type dict.
         """
-        return self.server.aria2.getOption(self._secret, gid)
+        return self._send_request("aria2.getOption", [gid])
 
     def changeOption(self, gid, options):
         """
@@ -268,7 +324,7 @@ class PyAria2(object):
 
         return: This method returns OK for success.
         """
-        return self.server.aria2.changeOption(self._secret, gid, options)
+        return self._send_request("aria2.changeOption", [gid, options])
 
     def getGlobalOption(self):
         """
@@ -276,7 +332,7 @@ class PyAria2(object):
 
         return: The method response is of type dict.
         """
-        return self.server.aria2.getGlobalOption(self._secret)
+        return self._send_request("aria2.getGlobalOption")
 
     def changeGlobalOption(self, options):
         """
@@ -286,7 +342,7 @@ class PyAria2(object):
 
         return: This method returns OK for success.
         """
-        return self.server.aria2.changeGlobalOption(self._secret, options)
+        return self._send_request("aria2.changeGlobalOption", [options])
 
     def getGlobalStat(self):
         """
@@ -294,7 +350,7 @@ class PyAria2(object):
 
         return: The method response is of type struct and contains following keys.
         """
-        return self.server.aria2.getGlobalStat(self._secret)
+        return self._send_request("aria2.getGlobalStat")
 
     def purgeDownloadResult(self):
         """
@@ -302,7 +358,7 @@ class PyAria2(object):
 
         return: This method returns OK for success.
         """
-        return self.server.aria2.purgeDownloadResult(self._secret)
+        return self._send_request("aria2.purgeDownloadResult")
 
     def removeDownloadResult(self, gid):
         """
@@ -310,7 +366,7 @@ class PyAria2(object):
 
         return: This method returns OK for success.
         """
-        return self.server.aria2.removeDownloadResult(self._secret, gid)
+        return self._send_request("aria2.removeDownloadResult", [gid])
 
     def getVersion(self):
         """
@@ -318,7 +374,7 @@ class PyAria2(object):
 
         return: The method response is of type dict and contains following keys.
         """
-        return self.server.aria2.getVersion(self._secret)
+        return self._send_request("aria2.getVersion")
 
     def getSessionInfo(self):
         """
@@ -326,7 +382,7 @@ class PyAria2(object):
 
         return: The response is of type dict.
         """
-        return self.server.aria2.getSessionInfo(self._secret)
+        return self._send_request("aria2.getSessionInfo")
 
     def shutdown(self):
         """
@@ -334,7 +390,7 @@ class PyAria2(object):
 
         return: This method returns OK for success.
         """
-        return self.server.aria2.shutdown(self._secret)
+        return self._send_request("aria2.shutdown")
 
     def forceShutdown(self):
         """
@@ -342,4 +398,4 @@ class PyAria2(object):
 
         return: This method returns OK for success.
         """
-        return self.server.aria2.forceShutdown(self._secret)
+        return self._send_request("aria2.forceShutdown")

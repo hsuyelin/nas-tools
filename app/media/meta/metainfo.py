@@ -7,9 +7,9 @@ from app.media.meta.metaanime import MetaAnime
 from app.media.meta.metavideo import MetaVideo
 from app.utils.types import MediaType
 from app.utils import StringUtils
-from config import RMT_MEDIAEXT
-from config import Config
+from config import Config, RMT_MEDIAEXT
 from app.helper import FfmpegHelper
+
 
 def MetaInfo(title, subtitle=None, mtype=None, filePath=None):
     """
@@ -21,18 +21,19 @@ def MetaInfo(title, subtitle=None, mtype=None, filePath=None):
     """
 
     # 使用ffmpeg获取视频元数据状态
-    _ffmpeg_video_meta_enable = Config().get_config('media').get("ffmpeg_video_meta", False) or False
-
+    media = Config().get_config('media')
+    ffmpeg_video_meta_enable = False
+    if media:
+        ffmpeg_video_meta_enable = media.get('ffmpeg_video_meta', False) or False
     # 记录原始名称
     org_title = title
     # 应用自定义识别词，获取识别词处理后名称
     rev_title, msg, used_info = WordsHelper().process(title)
-    if rev_title and _ffmpeg_video_meta_enable and FfmpegHelper.is_ffmpeg_supported() and filePath:
+    if rev_title and ffmpeg_video_meta_enable and filePath:
         rev_title = __complete_rev_title(rev_title, filePath)
-
     if subtitle:
         subtitle, _, _ = WordsHelper().process(subtitle)
-    
+
     if msg:
         for msg_item in msg:
             log.warn("【Meta】%s" % msg_item)

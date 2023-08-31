@@ -1,4 +1,4 @@
-FROM python:3.10.10-alpine AS Builder
+FROM python:3.10.11-alpine AS Builder
 
 ARG branch
 
@@ -10,7 +10,7 @@ RUN pip install --upgrade pip setuptools
 RUN pip install wheel cython pyinstaller==5.7.0
 RUN git clone --depth=1 -b ${branch} https://github.com/hsuyelin/nas-tools --recurse-submodule /nas-tools
 WORKDIR /nas-tools
-RUN pip install -r requirements.txt
+RUN pip install -r package/requirements.txt
 RUN pip install pyparsing
 RUN cp ./package/rely/hook-cn2an.py ${py_site_packages}/PyInstaller/hooks/ && \
     cp ./package/rely/hook-zhconv.py ${py_site_packages}/PyInstaller/hooks/ && \

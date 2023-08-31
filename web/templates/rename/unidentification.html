@@ -197,7 +197,6 @@
     });
   }
 
-
   //批量删除
   function delete_checked_unknown() {
     let logids = select_GetSelectedVAL("unknow_record");
@@ -216,7 +215,7 @@
   function truncate_unknown_all() {
     show_confirm_modal("该操作仅会清空所有手动转移记录，但不会删除源文件，是否确认？", function () {
       hide_confirm_modal();
-      ajax_post("truncate_filetransfer_unknown", {}, function (ret) {
+      ajax_post("truncate_transfer_unknown", {}, function (ret) {
         show_success_modal("清理所有转移记录成功");
         window_history_refresh();
       });

@@ -7,7 +7,7 @@ from app.sites import Sites
 from app.utils import TokenCache
 from config import Config
 from web.action import WebAction
-from web.backend.user import User
+from web.backend.pro_user import ProUser
 from web.security import require_auth, login_required, generate_access_token
 
 apiv1_bp = Blueprint("apiv1",
@@ -87,7 +87,7 @@ class UserLogin(Resource):
         password = args.get('password')
         if not username or not password:
             return {"code": 1, "success": False, "message": "用户名或密码错误"}
-        user_info = User().get_user(username)
+        user_info = ProUser().get_user(username)
         if not user_info:
             return {"code": 1, "success": False, "message": "用户名或密码错误"}
         # 校验密码
@@ -95,14 +95,13 @@ class UserLogin(Resource):
             return {"code": 1, "success": False, "message": "用户名或密码错误"}
         # 缓存Token
         token = generate_access_token(username)
-        apikey = Config().get_config("security").get("api_key")
-        TokenCache.set(apikey, token)
+        TokenCache.set(token, token)
         return {
             "code": 0,
             "success": True,
             "data": {
                 "token": token,
-                "apikey": apikey,
+                "apikey": Config().get_config("security").get("api_key"),
                 "userinfo": {
                     "userid": user_info.id,
                     "username": user_info.username,
@@ -124,7 +123,7 @@ class UserInfo(ClientResource):
         """
         args = self.parser.parse_args()
         username = args.get('username')
-        user_info = User().get_user(username)
+        user_info = ProUser().get_user(username)
         if not user_info:
             return {"code": 1, "success": False, "message": "用户名不正确"}
         return {
@@ -161,6 +160,20 @@ class UserList(ClientResource):
         查询所有用户
         """
         return WebAction().api_action(cmd='get_users')
+
+
+@user.route('/auth')
+class UserAuth(ClientResource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('site', type=str, help='合作站点', location='form', required=True)
+    parser.add_argument('params', type=str, help='认证参数', location='form', required=True)
+
+    @user.doc(parser=parser)
+    def post(self):
+        """
+        用户认证
+        """
+        return WebAction().api_action(cmd='auth_user_level', data=self.parser.parse_args())
 
 
 @service.route('/mediainfo')

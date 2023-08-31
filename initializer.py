@@ -13,7 +13,7 @@ from app.plugins import PluginManager
 from app.media import Category
 from app.utils import ConfigLoadCache, CategoryLoadCache, ExceptionUtils, StringUtils
 from app.utils.commons import INSTANCES
-from app.utils.types import SystemConfigKey
+from app.utils.types import SystemConfigKey, BuiltinIndexerFileMd5
 from config import Config
 from web.action import WebAction
 
@@ -68,6 +68,18 @@ def check_config():
             log.info(f"已启用https，请使用 https://IP:{str(web_port)} 访问管理页面")
     else:
         log.error("【Config】配置文件格式错误，找不到app配置项！")
+
+    builtin_indexer_path = Config().get_builtin_indexer_path()
+    builtin_indexer_verify_result = StringUtils.verify_integrity(builtin_indexer_path, BuiltinIndexerFileMd5)
+    if not builtin_indexer_verify_result:
+        recovery_msg = """
+------------------------------------------------------------------
+【Config】内置索引文件被改动，为保证稳定性，请检查是否安装第三方插件或者人为修改
+1. 如果为docker容器/套件，请删除容器/套件重新添加
+2. 如果为其他版本，请重新下载
+------------------------------------------------------------------
+        """
+        log.error(recovery_msg)
 
 
 def update_config():
@@ -327,7 +339,7 @@ def update_config():
     try:
         tmdb_proxy = Config().get_config('laboratory').get("tmdb_proxy")
         if tmdb_proxy:
-            _config['app']['tmdb_domain'] = 'tmdb.nastool.cn'
+            _config['app']['tmdb_domain'] = 'tmdb.nastool.org'
             _config['laboratory'].pop("tmdb_proxy")
             overwrite_cofig = True
     except Exception as e:

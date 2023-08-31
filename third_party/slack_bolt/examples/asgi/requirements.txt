@@ -1,2 +1,0 @@
-uvicorn<1
-aiohttp>=3,<4

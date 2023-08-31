@@ -15,7 +15,6 @@ RUN apk add --no-cache --virtual .build-deps \
     && pip install -r https://raw.githubusercontent.com/hsuyelin/nas-tools/master/requirements.txt \
     && apk del --purge .build-deps \
     && rm -rf /tmp/* /root/.cache /var/cache/apk/*
-COPY --chmod=755 ./rootfs /
 ENV S6_SERVICES_GRACETIME=30000 \
     S6_KILL_GRACETIME=60000 \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
@@ -26,7 +25,7 @@ ENV S6_SERVICES_GRACETIME=30000 \
     LANG="C.UTF-8" \
     TZ="Asia/Shanghai" \
     NASTOOL_CONFIG="/config/config.yaml" \
-    NASTOOL_AUTO_UPDATE=true \
+    NASTOOL_AUTO_UPDATE=false \
     NASTOOL_CN_UPDATE=true \
     NASTOOL_VERSION=master \
     PS1="\u@\h:\w \$ " \
@@ -50,8 +49,8 @@ RUN mkdir ${HOME} \
     && echo "nt ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
     && git config --global pull.ff only \
     && git clone -b master ${REPO_URL} ${WORKDIR} --depth=1 --recurse-submodule \
-    && git config --global --add safe.directory ${WORKDIR} \
-    && chmod +x /nas-tools/docker/entrypoint.sh
+    && git config --global --add safe.directory ${WORKDIR}
+COPY --chmod=755 ./rootfs /
 EXPOSE 3000
 VOLUME ["/config"]
 ENTRYPOINT [ "/init" ]

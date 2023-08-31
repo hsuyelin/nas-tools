@@ -1,3 +1,0 @@
-slack_bolt
-fastapi<1
-aiohttp>=3,<4

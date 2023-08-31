@@ -1,2 +1,0 @@
-Django>=3.2,<4
-slack-bolt>=1.7,<2

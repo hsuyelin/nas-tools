@@ -60,7 +60,6 @@ class FileTransfer:
         self.init_config()
 
     def init_config(self):
-        self._simplify_library_notification = Config().get_config("laboratory").get("simplify_library_notification")
         self.media = Media()
         self.message = Message()
         self.category = Category()
@@ -69,6 +68,10 @@ class FileTransfer:
         self.dbhelper = DbHelper()
         self.progress = ProgressHelper()
         self.eventmanager = EventManager()
+
+        laboratory = Config().get_config("laboratory")
+        if laboratory:
+            self._simplify_library_notification = laboratory.get("simplify_library_notification", False) or False
 
         media = Config().get_config('media')
         if media:

@@ -16,7 +16,7 @@ class WeChat(_IMessageClient):
     _expires_in = None
     _access_token_time = None
     _default_proxy = False
-    _default_proxy_url = 'https://wechat.nastool.cn'
+    _default_proxy_url = 'https://wechat.nastool.org'
     _client_config = {}
     _corpid = None
     _corpsecret = None

@@ -1,7 +1,7 @@
 import re
 
 from config import SPLIT_CHARS
-import log
+
 
 class Tokens:
     _text = ""

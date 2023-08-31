@@ -32,8 +32,6 @@ class TMDb(object):
         self.obj_cached = obj_cached
         if os.environ.get(self.TMDB_LANGUAGE) is None:
             os.environ[self.TMDB_LANGUAGE] = "zh"
-        if os.environ.get(self.TMDB_INCLUDE_ADULT) is None:
-            os.environ[self.TMDB_INCLUDE_ADULT] = "False"
         if not os.environ.get(self.TMDB_DOMAIN):
             os.environ[self.TMDB_DOMAIN] = "https://api.themoviedb.org/3"
 

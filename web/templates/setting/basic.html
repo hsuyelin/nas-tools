@@ -167,9 +167,8 @@
               <div class="col-lg">
                 <div class="mb-3">
                   <label class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="app.releases_update_only" {% if
-                      Config.app.releases_update_only %}checked{% endif %}>
-                    <span class="form-check-label">仅检查Releases更新 <span class="form-help" title="开启后，只有Releases更新，才会有更新提示" data-bs-toggle="tooltip">?</span></span>
+                    <input class="form-check-input" type="checkbox" id="app.releases_update_only" {% if Config.app.releases_update_only %}checked{% endif %}>
+                    <span class="form-check-label">仅检查Release更新 <span class="form-help" title="开启后，只有Release更新才会有更新提示" data-bs-toggle="tooltip">?</span></span>
                   </label>
                 </div>
               </div>
@@ -412,68 +411,65 @@
               <div class="col-lg">
                   <div class="mb-3">
                     <label class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" id="media.include_adult"
-                             {% if Config.media.include_adult %}checked{% endif %}>
+                      <input class="form-check-input" type="checkbox" id="media.tmdb_include_adult"
+                             {% if Config.media.tmdb_include_adult %}checked{% endif %}>
                       <span class="form-check-label">搜索结果中包含成人内容条目 <span class="form-help"
                                                                             title="开启该选项后将会在刮削或者检索时包含成人内容，请谨慎打开"
                                                                             data-bs-toggle="tooltip">?</span></span>
                     </label>
                   </div>
                 </div>
-            </div>
-            <div class="row">
-              {% if support_ffmpeg %}
-              <div class="col-lg">
-                <div class="mb-3">
-                  <label class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="media.ffmpeg_video_meta" {% if
-                      Config.media.ffmpeg_video_meta %}checked{% endif %}>
-                    <span class="form-check-label">刮削视频元数据 <span class="form-help"
-                                                                        title="开启后，通过ffmpeg获取视频文件真实的元数据，将会大幅增加转移时间，低配置机器不建议开启"
-                                                                        data-bs-toggle="tooltip">?</span></span>
-                  </label>
-                </div>
-              </div>
-              {% endif %}
-              <div class="col-lg">
-                <div class="mb-3">
-                  <label class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="media.filename_prefer_barre" {% if
-                      Config.media.filename_prefer_barre %}checked{% endif %}>
-                    <span class="form-check-label">使用横杠替换冒号 <span class="form-help"
-                                                                        title="开启后，文件名中的中英文冒号将替换为横杠"
-                                                                        data-bs-toggle="tooltip">?</span></span>
-                  </label>
-                </div>
-              </div>
-              <div class="col-lg">
-                <div class="mb-3" style="display:none;">
-                  <h1>占位元素 </h1>
-                </div>
-              </div>
-            </div>
           </div>
-          <div class="card-footer">
-            <div class="row align-items-center">
-              <div class="col-auto">
-                <a href="javascript:void(0)" class="btn d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-scraper">
-                  刮削设置
-                </a>
-                <a href="javascript:void(0)" class="btn d-sm-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-scraper" title="刮削设置">
-                  {{ SVG.slideshow() }}
-                </a>
+          <div class="row">
+            <div class="col-lg">
+              <div class="mb-3">
+                <label class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="media.filename_prefer_barre" {% if
+                    Config.media.filename_prefer_barre %}checked{% endif %}>
+                  <span class="form-check-label">使用横杠替换冒号 <span class="form-help"
+                                                                      title="开启后，文件名中的中英文冒号将替换为横杠"
+                                                                      data-bs-toggle="tooltip">?</span></span>
+                </label>
               </div>
-              <div class="col"></div>
-              <div class="col-auto">
-                <a id="basic_media_btn" href="javascript:save_basic_config('basic_media')" class="btn btn-primary">
-                  保存
-                </a>
+            </div>
+            <div class="col-lg">
+              <div class="mb-3">
+                <label class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="media.ffmpeg_video_meta" {% if
+                    Config.media.ffmpeg_video_meta %}checked{% endif %}>
+                  <span class="form-check-label">刮削视频元数据 <span class="form-help"
+                                                                      title="开启后，通过ffmpeg获取视频文件真实的元数据，将会大幅增加转移时间，低配置机器不建议开启"
+                                                                      data-bs-toggle="tooltip">?</span></span>
+                </label>
+              </div>
+            </div>
+            <div class="col-lg">
+              <div class="mb-3" style="display:none;">
+                <h1>占位元素 </h1>
               </div>
             </div>
           </div>
         </div>
+          <div class="card-footer">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <a href="javascript:void(0)" class="btn d-none d-sm-inline-block" data-bs-toggle="modal" data-bs-target="#modal-scraper">
+                            刮削设置
+                        </a>
+                        <a href="javascript:void(0)" class="btn d-sm-none btn-icon" data-bs-toggle="modal" data-bs-target="#modal-scraper" title="刮削设置">
+                            {{ SVG.slideshow() }}
+                        </a>
+                    </div>
+                    <div class="col"></div>
+                    <div class="col-auto">
+                        <a id="basic_media_btn" href="javascript:save_basic_config('basic_media')" class="btn btn-primary">
+                            保存
+                        </a>
+                    </div>
+                </div>
+            </div>
       </div>
-      {% if CurrentUser.level >= 2 %}
+      </div>
       <div class="col-md-12">
         <div class="card" id="basic_service">
           <div class="card-header">
@@ -566,7 +562,6 @@
           </div>
         </div>
       </div>
-    {% endif %}
       <div class="col-md-12">
         <div class="card" id="security">
           <div class="card-header">
@@ -662,7 +657,6 @@
           </div>
         </div>
       </div>
-      {% if CurrentUser.level >= 2 %}
       <div class="col-md-12">
         <div class="card" id="laboratory">
           <div class="card-header">
@@ -747,7 +741,7 @@
                     <input class="form-check-input" type="checkbox" id="laboratory.show_more_sites" {% if
                       Config.laboratory and Config.laboratory.show_more_sites %}checked{% endif %}>
                     <span class="form-check-label">展示更多站点 <span class="form-help"
-                                                                            title="开启后会展示更多站点(例如：索引器公开站点会增加内置站点，关闭后将不会显示内置站点等)"
+                                                                            title="开启后会展示更多内置站点"
                                                                             data-bs-toggle="tooltip">?</span>
                     </span>
                   </label>
@@ -758,20 +752,8 @@
                   <label class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="laboratory.simplify_library_notification" {% if
                       Config.laboratory and Config.laboratory.simplify_library_notification %}checked{% endif %}>
-                    <span class="form-check-label">入库通知精简 <span class="form-help"
-                                                                            title="开启后入库通知推送消息会精简"
-                                                                            data-bs-toggle="tooltip">?</span>
-                    </span>
-                  </label>
-                </div>
-              </div>
-              <div class="col-12 col-xl-3">
-                <div class="mb-3">
-                  <label class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="laboratory.simplify_my_media_library" {% if
-                      Config.laboratory and Config.laboratory.simplify_my_media_library %}checked{% endif %}>
-                    <span class="form-check-label">我的媒体库精简 <span class="form-help"
-                                                                            title="开启后我的媒体库仅会显示正在观看"
+                    <span class="form-check-label">简化入库推送通知 <span class="form-help"
+                                                                            title="开启后会简化入库推送通知"
                                                                             data-bs-toggle="tooltip">?</span>
                     </span>
                   </label>
@@ -791,7 +773,6 @@
           </div>
         </div>
       </div>
-    {% endif %}
     </div>
   </div>
 </div>

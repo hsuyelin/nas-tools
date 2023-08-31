@@ -5,7 +5,7 @@ from app.utils import RequestUtils
 
 class OcrHelper:
 
-    _ocr_b64_url = "https://nastool.cn/captcha/base64"
+    _ocr_b64_url = "https://nastool.org/captcha/base64"
 
     def get_captcha_text(self, image_url=None, image_b64=None, cookie=None, ua=None):
         """

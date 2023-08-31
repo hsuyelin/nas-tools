@@ -7,8 +7,6 @@ from functools import lru_cache
 from random import choice
 from urllib import parse
 
-import log
-
 import requests
 
 from app.utils import RequestUtils

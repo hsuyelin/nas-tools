@@ -1,3 +1,8 @@
 from ._requests import RequestsDownloader
 from ._requests import RequestsSessionDownloader
-from ._selenium import SeleniumDownloader
+
+# 下面是非必要依赖
+try:
+    from ._selenium import SeleniumDownloader
+except ModuleNotFoundError:
+    pass

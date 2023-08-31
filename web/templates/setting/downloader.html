@@ -331,9 +331,6 @@
 
   // 新增/编辑下载器
   function add_or_edit_or_test_downloader(action) {
-    let downloaderConf = {{ DownloaderConf|tojson|safe }};
-    let items = Object.entries(downloaderConf);
-    console.log(items);
     let type = $('input:radio[name=downloader_type]:checked').val();
     let config = {};
     let transfer = 0;

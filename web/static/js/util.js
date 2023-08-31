@@ -59,8 +59,6 @@ function ajax_post(cmd, params, handler, aync = true, show_progress = true) {
       }
       if (xhr && xhr.status === 200) {
         handler({code: 0});
-      } else {
-        handler({code: -99, msg: "网络中断！如设置了反向代理，请检查代理的超时时间设置。"});
       }
     }
   });
@@ -191,6 +189,20 @@ function select_SelectPart(condition, name) {
       $(this).prop("checked", false);
     }
   });
+}
+
+/**
+ * 获取选中input所有元素value
+ * @param: name 被管理checkbox的name
+ **/
+function select_GetUnselectedVAL(name) {
+  let selectedVAL = [];
+  $(`input[${select_name(name)}][type=checkbox]`).each(function () {
+    if (!($(this).prop("checked"))) {
+      selectedVAL.push($(this).val());
+    }
+  });
+  return selectedVAL;
 }
 
 /**
