@@ -316,7 +316,7 @@ function get_message(lst_time) {
 //检查系统是否在线
 function check_system_online() {
   ajax_post("refresh_process", {type: "restart"}, function (ret) {
-    if (ret.code === -1) {
+    if (ret.code === 1) {
       logout();
     } else {
       setTimeout("check_system_online()", 1000);
