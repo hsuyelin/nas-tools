@@ -336,6 +336,9 @@ function restart() {
   show_confirm_modal("立即重启系统？", function () {
     hide_confirm_modal();
     ajax_post("restart", {}, function (ret) {
+      if (ret.code === 0) {
+        setTimeout("window_history_refresh()", 2000);
+      }
     }, true, false);
     show_wait_modal(true);
     setTimeout("check_system_online()", 5000);
