@@ -1,3 +1,12 @@
+import os
+import sys
+
+# # 获取当前文件所在目录的上层目录，即项目根目录
+# project_root = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+# # 将项目根目录添加到模块搜索路径中
+# sys.path.append(project_root)
+
+# from app.helper import OcrHelper
 from tests_utils import TestUtils
 
 def main():
@@ -50,6 +59,9 @@ def main():
     # print(TestUtils.guess_movie_info(movie5))
     # print(TestUtils.guess_movie_info(movie6))
     # print(TestUtils.guess_movie_info(movie7))
+    
+    # ocr_result = OcrHelper().get_captcha_text(image_url="https://www.yht7.com/upload/image/20191109/1735560-20191109220533186-1855679599.jpg")
+    # print(ocr_result)
 
 if __name__ == "__main__":
     main()
