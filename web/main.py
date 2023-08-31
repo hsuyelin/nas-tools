@@ -1077,8 +1077,30 @@ def dirlist():
             if not f:
                 f = ff
             if os.path.isdir(ff):
-                r.append('<li class="directory collapsed"><a rel="%s/">%s</a></li>' % (
-                    ff.replace("\\", "/"), f.replace("\\", "/")))
+                # 对硬链接同步目录进行标识处理
+                sync_class = ""
+                link_path = ""
+                link_direction = ""
+                sync_dirs = Sync().get_hardlinks_sync_dirs()     
+                for dir in sync_dirs:
+                    if ff.startswith(dir[0]):
+                        if ff == dir[0]:
+                            link_path = f'<span class="link-folder">{SystemUtils.shorten_path(dir[1])}</span>'
+                            link_direction = '<span class="link-direction" direction="→">→</span>'
+                        sync_class = "sync-src"
+                        break
+                    elif ff.startswith(dir[1]):
+                        if ff == dir[1]:
+                            link_path = f'<span class="link-folder">{SystemUtils.shorten_path(dir[0])}</span>'
+                            link_direction = '<span class="link-direction" direction="←">←</span>'
+                        sync_class = "sync-dest"
+                        break
+                
+                # 获取文件夹路径的MD5存为id，用于前端选择后更新文件夹硬链接同步标识
+                path = ff.replace("\\", "/") + "/"
+                id = hashlib.md5(path.encode()).hexdigest()                
+                r.append('<li id="%s" class="directory %s collapsed"><a rel="%s">%s%s%s</a></li>' % (
+                    id, sync_class, path, f.replace("\\", "/"), link_direction, link_path))
             else:
                 if ft != "HIDE_FILES_FILTER":
                     e = os.path.splitext(f)[1][1:]
