@@ -337,7 +337,7 @@ function restart() {
     hide_confirm_modal();
     ajax_post("restart", {}, function (ret) {
       if (ret.code === 0) {
-        setTimeout("window_history_refresh()", 2000);
+        setTimeout("logout()", 3000);
       }
     }, true, false);
     show_wait_modal(true);
@@ -357,7 +357,7 @@ function update(version) {
     hide_confirm_modal();
     ajax_post("update_system", {}, function (ret) {
       if (ret.code === 0) {
-        setTimeout("window_history_refresh()", 2000);
+        setTimeout("logout()", 3000);
       }
     }, true, false)
     show_wait_modal(true);
