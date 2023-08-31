@@ -30,8 +30,6 @@ body, .page {
 
 #mediafile_tree {
     overflow: auto !important;
-    max-width: 300px;
-    max-height: 600px;
 }
 
 .jqueryFileTree {
