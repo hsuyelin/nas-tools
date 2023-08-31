@@ -24,6 +24,8 @@ def check_config():
     """
     检查配置文件，如有错误进行日志输出
     """
+    # 如果重启进度未被清空，清空重启进度
+    ProgressHelper().end(ProgressKey.Restart)
     # 检查日志输出
     if Config().get_config('app'):
         logtype = Config().get_config('app').get('logtype')

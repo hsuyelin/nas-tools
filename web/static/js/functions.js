@@ -313,10 +313,23 @@ function get_message(lst_time) {
   MessageWS.send(JSON.stringify({"lst_time": lst_time}));
 }
 
+//检查系统是否在线
+function check_system_online() {
+  ajax_post("refresh_process", {type: "restart"}, function (ret) {
+    if (ret.code == 0 && ret.value == 100) {
+      logout();
+    } else {
+      setTimeout("check_system_online()", 1000);
+    }
+  }, true, false)
+}
+
 //注销
 function logout() {
   ajax_post("logout", {}, function (ret) {
-    window.location.href = "/";
+    ajax_post("end_restart", {}, function (ret) {
+      window.location.href = "/";
+    });
   });
 }
 
@@ -325,9 +338,9 @@ function restart() {
   show_confirm_modal("立即重启系统？", function () {
     hide_confirm_modal();
     ajax_post("restart", {}, function (ret) {
-      setTimeout(logout, 3000);
     }, true, false);
     show_wait_modal(true);
+    check_system_online();
   });
 }
 
@@ -342,9 +355,9 @@ function update(version) {
   show_confirm_modal(title, function () {
     hide_confirm_modal();
     ajax_post("update_system", {}, function (ret) {
-      setTimeout(logout, 3000);
     }, true, false)
     show_wait_modal(true);
+    check_system_online();
   });
 }
 

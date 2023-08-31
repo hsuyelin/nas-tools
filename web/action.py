@@ -78,6 +78,7 @@ class WebAction:
             "del_site": self.__del_site,
             "get_site_favicon": self.__get_site_favicon,
             "restart": self.__restart,
+            "end_restart": self.__end_restart,
             "update_system": self.update_system,
             "reset_db_version": self.__reset_db_version,
             "logout": self.__logout,
@@ -346,6 +347,8 @@ class WebAction:
         """
         停止进程
         """
+        # 开始进度
+        ProgressHelper().start(ProgressKey.Restart)
         # 关闭服务
         self.stop_service()
         # 重启进程
@@ -359,6 +362,8 @@ class WebAction:
                 os.system("pm2 restart NAStool")
             else:
                 os.system("pkill -f 'python3 run.py'")
+        time.sleep(5)
+        ProgressHelper().update(ptype=ProgressKey.Restart, value=100, text="重启成功")
 
     def handle_message_job(self, msg, in_from=SearchType.OT, user_id=None, user_name=None):
         """
@@ -1185,6 +1190,13 @@ class WebAction:
         # 退出主进程
         self.restart_server()
         return {"code": 0}
+
+
+    def __end_restart(self):
+        """
+        重启完成，清空进度条
+        """
+        ProgressHelper().end(ProgressKey.Restart)
 
     def update_system(self):
         """
