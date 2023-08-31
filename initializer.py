@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash
 
 import log
 from app.conf import SystemConfig
-from app.helper import DbHelper, PluginHelper
+from app.helper import DbHelper, PluginHelper, ProgressHelper
 from app.plugins import PluginManager
 from app.media import Category
 from app.utils import ConfigLoadCache, CategoryLoadCache, ExceptionUtils, StringUtils
