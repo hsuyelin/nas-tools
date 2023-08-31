@@ -164,7 +164,7 @@ export class LayoutSearchbar extends CustomElement {
                   注销 <span class="text-muted mx-3">${this.layout_username}</span>
                 </a>
                 <div class="dropdown-divider"></div>
-                <a href="https://wiki.nastool.org" target="_blank" class="dropdown-item">帮助中心</a>
+                <a href="https://github.com/hsuyelin/nas-tools/blob/master/README.md" target="_blank" class="dropdown-item">帮助中心</a>
               </div>
             </div>
           </div>

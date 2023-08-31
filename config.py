@@ -48,7 +48,7 @@ FANART_TV_API_URL = 'https://webservice.fanart.tv/v3/tv/%s?api_key=d2d31f9ecabea
 # 默认背景图地址
 DEFAULT_TMDB_IMAGE = 'https://s3.bmp.ovh/imgs/2022/07/10/77ef9500c851935b.webp'
 # TMDB域名地址
-TMDB_API_DOMAINS = ['api.themoviedb.org', 'api.tmdb.org', 'tmdb.nastool.org', 't.nastool.workers.dev']
+TMDB_API_DOMAINS = ['api.themoviedb.org', 'api.tmdb.org']
 TMDB_IMAGE_DOMAIN = 'image.tmdb.org'
 # 添加下载时增加的标签，开始只监控NAStool添加的下载时有效
 PT_TAG = "NASTOOL"

@@ -129,7 +129,7 @@ class ModuleConf(object):
                         "title": "消息推送代理",
                         "tooltip": "由于微信官方限制，2022年6月20日后创建的企业微信应用需要有固定的公网IP地址并加入IP白名单后才能发送消息，使用有固定公网IP的代理服务器转发可解决该问题；代理服务器需自行搭建，搭建方法可参考项目主页说明",
                         "type": "text",
-                        "placeholder": "https://wechat.nastool.org"
+                        "placeholder": "消息推送代理的网址"
                     },
                     "token": {
                         "id": "wechat_token",

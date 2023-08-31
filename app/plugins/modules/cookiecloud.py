@@ -71,7 +71,7 @@ class CookieCloud(_IPluginModule):
                             'content': [
                                 {
                                     'id': 'server',
-                                    'placeholder': 'https://nastool.org/cookiecloud'
+                                    'placeholder': 'https://movie-pilot.org/cookiecloud'
                                 }
                             ]
 

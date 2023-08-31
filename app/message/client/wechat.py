@@ -3,7 +3,7 @@ import threading
 from datetime import datetime
 
 from app.message.client._base import _IMessageClient
-from app.utils import RequestUtils, ExceptionUtils
+from app.utils import RequestUtils, ExceptionUtils, StringUtils
 
 lock = threading.Lock()
 
@@ -16,7 +16,7 @@ class WeChat(_IMessageClient):
     _expires_in = None
     _access_token_time = None
     _default_proxy = False
-    _default_proxy_url = 'https://wechat.nastool.org'
+    _default_proxy_url = ''
     _client_config = {}
     _corpid = None
     _corpsecret = None
@@ -38,7 +38,7 @@ class WeChat(_IMessageClient):
             self._agent_id = self._client_config.get('agentid')
             self._default_proxy = self._client_config.get('default_proxy')
         if self._default_proxy:
-            if isinstance(self._default_proxy, bool):
+            if isinstance(self._default_proxy, bool) and StringUtils.is_string_and_not_empty(self._default_proxy_url):
                 self._send_msg_url = f"{self._default_proxy_url}/cgi-bin/message/send?access_token=%s"
                 self._token_url = f"{self._default_proxy_url}/cgi-bin/gettoken?corpid=%s&corpsecret=%s"
             else:
