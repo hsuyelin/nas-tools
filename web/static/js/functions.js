@@ -313,17 +313,6 @@ function get_message(lst_time) {
   MessageWS.send(JSON.stringify({"lst_time": lst_time}));
 }
 
-//检查系统是否在线
-function check_system_online() {
-  ajax_post("refresh_process", {type: "restart"}, function (ret) {
-    if (ret.code === -1) {
-      logout();
-    } else {
-      setTimeout("check_system_online()", 1000);
-    }
-  }, true, false)
-}
-
 //注销
 function logout() {
   ajax_post("logout", {}, function (ret) {
@@ -337,11 +326,10 @@ function restart() {
     hide_confirm_modal();
     ajax_post("restart", {}, function (ret) {
       if (ret.code === 0) {
-        setTimeout("logout()", 3000);
+        setTimeout(logout, 3000);
       }
     }, true, false);
     show_wait_modal(true);
-    setTimeout("check_system_online()", 5000);
   });
 }
 
@@ -357,11 +345,10 @@ function update(version) {
     hide_confirm_modal();
     ajax_post("update_system", {}, function (ret) {
       if (ret.code === 0) {
-        setTimeout("logout()", 3000);
+        setTimeout(logout, 3000);
       }
     }, true, false)
     show_wait_modal(true);
-    setTimeout("check_system_online()", 5000);
   });
 }
 
