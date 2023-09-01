@@ -29,7 +29,17 @@ body, .page {
 }
 
 #mediafile_tree {
-    overflow: auto !important;
+    overflow: scroll !important;
+    width: auto;
+    height: auto;
+}
+
+#mediafile_tree::-webkit-scrollbar {
+    display: none;
+}
+
+#mediafile_file_container_father::-webkit-scrollbar {
+    display: none;
 }
 
 .jqueryFileTree {
