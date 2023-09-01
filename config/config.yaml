@@ -167,12 +167,14 @@ openai:
   # 【openai api url】：自定义openai请求地址
   api_url:
 
-# 【BaiduOCR】：可在 https://console.bce.baidu.com/ai/#/ai/ocr/app/list 查看
-baiduocr:
+# 【OCR】
+ocr:
+  # 【custom_ocr_url】: 默认使用 https://github.com/jxxghp/MoviePilot-OCR 自建OCR本地后端，用于辅助站点签到验证码识别，需要添加http/https，如果baidu ocr填写优先使用baidu
+  custom_ocr_url:
   # 【baiduocr api key】: BaiduOCR的api key，如果需要正常使用，需要在申请后去 https://console.bce.baidu.com/ai/#/ai/ocr/overview/resource/getFree 领取免费额度
-  api_key:
+  baiduocr_api_key:
   # 【baiduocr secret key】: BaiduOCR的secret key，如果需要正常使用，需要在申请后去 https://console.bce.baidu.com/ai/#/ai/ocr/overview/resource/getFree 领取免费额度
-  secret_key:
+  baiduocr_api_key:
 
 # 【配置安全】
 security:

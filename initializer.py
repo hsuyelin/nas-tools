@@ -347,13 +347,20 @@ def update_config():
     except Exception as e:
         ExceptionUtils.exception_traceback(e)
 
-    # 新增baiduocr配置文件，如果以前没有需要新增
+    # baiduocr配置文件迁移
     try:
+        ocr = Config().get_config('ocr')
+        if not ocr:
+            _config['ocr'] = {}
+            _config['ocr']['custom_ocr_url'] = ''
+            _config['ocr']['baiduocr_api_key'] = ''
+            _config['ocr']['baiduocr_secret_key'] = ''
+            overwrite_cofig = True
         baidu_ocr = Config().get_config('baiduocr')
-        if not baidu_ocr:
-            _config['baiduocr'] = {}
-            _config['baiduocr']['api_key'] = ''
-            _config['baiduocr']['secret_key'] = ''
+        if baidu_ocr:
+            _config['ocr']['baiduocr_api_key'] = baidu_ocr.get('api_key', '') or ''
+            _config['ocr']['baiduocr_secret_key'] = baidu_ocr.get('secret_key', '') or ''
+            _config.pop("baiduocr")
             overwrite_cofig = True
     except Exception as e:
         ExceptionUtils.exception_traceback(e)
