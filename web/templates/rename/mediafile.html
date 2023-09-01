@@ -18,7 +18,7 @@
               <input type="text" id="mediafile_path" value="{{ Dir }}" class="form-control" placeholder="/"
                      aria-label="目录路径">
             </div>
-            <a href="javascript:return_to_parentdir()" style="margin-bottom: 10px">
+            <a href="javascript:return_to_parentdir()" style="display:block;margin-bottom: 5px">
               {{ SVG.arrow_back_up() }}
               上级目录
             </a>
@@ -50,8 +50,8 @@
           <div class="card-body border-0">
             <input type="hidden" id="mediafile_current_dir">
             <input type="hidden" id="mediafile_current_files">
-            <div class="row row-cards" id="mediafile_file_container_father" style="overflow-y: auto; overflow-x: hidden">
-              <div class="col" id="mediafile_file_container"></div>
+            <div class="row row-cards">
+              <div class="col" id="mediafile_file_container" style="overflow-y: auto; overflow-x: hidden"></div>
             </div>
           </div>
         </div>
@@ -424,7 +424,7 @@
   // 计算高度
   function init_mediafile_height() {
     $("#mediafile_tree").css("height", $(window).height() - 225);
-    $("#mediafile_file_container").css("height", $(window).height() - 160);
+    $("#mediafile_file_container").css("height", $(window).height() - 170);
   }
 
   // 初始列表
