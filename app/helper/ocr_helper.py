@@ -14,13 +14,13 @@ class OcrHelper:
     _baiduocr_secret_key = None
 
     def __init__(self):
-        baidu_ocr = Config().get_config('ocr')
-        if baidu_ocr:
-            self._baiduocr_api_key = baidu_ocr.get('baiduocr_api_key', '') or ''
-            self._baiduocr_secret_key = baidu_ocr.get('baiduocr_secret_key', '') or ''
-            custom_oc_url = baidu_ocr.get('custom_ocr_url', '') or ''
+        ocr = Config().get_config('ocr')
+        if ocr:
+            self._baiduocr_api_key = ocr.get('baiduocr_api_key', '') or ''
+            self._baiduocr_secret_key = ocr.get('baiduocr_secret_key', '') or ''
+            custom_oc_url = ocr.get('custom_ocr_url', '') or ''
             if StringUtils.is_string_and_not_empty(custom_oc_url):
-                self._ocr_b64_url = custom_oc_url
+                self._ocr_b64_url = custom_oc_url.rstrip('/')
 
     def get_captcha_text(self, image_url=None, image_b64=None, cookie=None, ua=None):
         """
