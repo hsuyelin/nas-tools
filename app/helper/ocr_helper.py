@@ -9,7 +9,7 @@ from app.utils import RequestUtils, StringUtils
 
 class OcrHelper:
 
-    _ocr_b64_url = "https://movie-pilot.org/captcha/base64"
+    _ocr_b64_url = None
     _baiduocr_api_key = None
     _baiduocr_secret_key = None
 
@@ -47,6 +47,9 @@ class OcrHelper:
         if StringUtils.is_string_and_not_empty(captcha):
             return captcha
 
+        if not self.custom_server_avaliable():
+            return ""
+
         ret = RequestUtils(content_type="application/json").post_res(
             url=self._ocr_b64_url,
             json={"base64_img": image_b64})
@@ -80,7 +83,7 @@ class OcrHelper:
                 else:
                     return ""
             else:
-                log.error(f"【OCR】验证码识别失败, 原始返回: {response}")
+                log.error(f"【OCR】验证码识别失败, 原始返回: {response.json()}")
                 return ""
         except Exception as e:
             log.error(f"【OCR】验证码识别失败: {str(e)}")
@@ -100,3 +103,9 @@ class OcrHelper:
         判断百度OCR是否可用
         """
         return StringUtils.is_string_and_not_empty(self._baiduocr_api_key) and StringUtils.is_string_and_not_empty(self._baiduocr_secret_key)
+
+    def custom_server_avaliable(self):
+        """
+        判断自建服务端OCR是否可用
+        """
+        return StringUtils.is_string_and_not_empty(self._ocr_b64_url)

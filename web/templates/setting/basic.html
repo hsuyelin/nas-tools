@@ -670,7 +670,7 @@
                                                                    title="默认使用 https://github.com/jxxghp/MoviePilot-OCR 自建OCR本地后端，用于辅助站点签到验证码识别，需要添加http/https，如果baidu ocr填写优先使用baidu"
                                                                    data-bs-toggle="tooltip">?</span></label>
                   <input type="text" value="{% if Config.ocr.custom_ocr_url %}{{ Config.ocr.custom_ocr_url or '' }}{% endif %}" class="form-control"
-                         id="ocr.custom_ocr_url" placeholder="https://movie-pilot.org/captcha/base64" autocomplete="off">
+                         id="ocr.custom_ocr_url" placeholder="" autocomplete="off">
                 </div>
               </div>
               <div class="col-lg">
