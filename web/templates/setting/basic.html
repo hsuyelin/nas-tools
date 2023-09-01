@@ -658,19 +658,28 @@
         </div>
       </div>
       <div class="col-md-12">
-        <div class="card" id="laboratory">
+        <div class="card" id="advanced_ocr">
           <div class="card-header">
-            <h3 class="card-title"><strong>实验室</strong></h3>
+            <h3 class="card-title"><strong>OCR</strong></h3>
           </div>
           <div class="card-body">
             <div class="row">
               <div class="col-lg">
                 <div class="mb-3">
+                  <label class="form-label">自定义OCR 后端地址 <span class="form-help"
+                                                                   title="默认使用 https://github.com/jxxghp/MoviePilot-OCR 自建OCR本地后端，用于辅助站点签到验证码识别，需要添加http/https，如果baidu ocr填写优先使用baidu"
+                                                                   data-bs-toggle="tooltip">?</span></label>
+                  <input type="text" value="{% if Config.ocr.custom_ocr_url %}{{ Config.ocr.custom_ocr_url or '' }}{% endif %}" class="form-control"
+                         id="ocr.custom_ocr_url" placeholder="https://movie-pilot.org/captcha/base64" autocomplete="off">
+                </div>
+              </div>
+              <div class="col-lg">
+                <div class="mb-3">
                   <label class="form-label">Baidu OCR API Key <span class="form-help"
                                                                    title="BaiduOCR的api key，可去 https://console.bce.baidu.com/ 申请, 在 https://console.bce.baidu.com/ai/#/ai/ocr/app/list 查看, 该项可辅助站点签到验证码识别"
                                                                    data-bs-toggle="tooltip">?</span></label>
-                  <input type="text" value="{{ Config.baiduocr.api_key or '' }}" class="form-control"
-                         id="baiduocr.api_key" placeholder="" autocomplete="off">
+                  <input type="text" value="{% if Config.ocr.baiduocr_api_key %}{{ Config.ocr.baiduocr_api_key or '' }}{% endif %}" class="form-control"
+                         id="ocr.baiduocr_api_key" placeholder="" autocomplete="off">
                 </div>
               </div>
               <div class="col-lg">
@@ -678,11 +687,30 @@
                   <label class="form-label">Baidu OCR Secret Key <span class="form-help"
                                                                    title="BaiduOCR的secret key，可去 https://console.bce.baidu.com/ 申请, 在 https://console.bce.baidu.com/ai/#/ai/ocr/app/list 查看, 该项可辅助站点签到验证码识别"
                                                                    data-bs-toggle="tooltip">?</span></label>
-                  <input type="text" value="{{ Config.baiduocr.secret_key or '' }}" class="form-control"
-                         id="baiduocr.secret_key" placeholder="" autocomplete="off">
+                  <input type="text" value="{% if Config.ocr.baiduocr_secret_key %}{{ Config.ocr.baiduocr_secret_key or '' }}{% endif %}" class="form-control"
+                         id="ocr.baiduocr_secret_key" placeholder="" autocomplete="off">
                 </div>
               </div>
             </div>
+          </div>
+          <div class="card-footer">
+            <div class="row align-items-center">
+              <div class="col"></div>
+              <div class="col-auto">
+                <a id="advanced_ocr_btn" href="javascript:save_basic_config('ocr')" class="btn btn-primary">
+                  保存
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12">
+        <div class="card" id="laboratory">
+          <div class="card-header">
+            <h3 class="card-title"><strong>实验室</strong></h3>
+          </div>
+          <div class="card-body">
             <div class="row">
               <div class="col-12 col-xl-3">
                 <div class="mb-3">
