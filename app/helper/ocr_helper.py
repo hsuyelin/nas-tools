@@ -9,7 +9,7 @@ from app.utils import RequestUtils, StringUtils
 
 class OcrHelper:
 
-    _ocr_b64_url = None
+    _ocr_b64_url = "https://ocr.ddsrem.com"
     _baiduocr_api_key = None
     _baiduocr_secret_key = None
 
