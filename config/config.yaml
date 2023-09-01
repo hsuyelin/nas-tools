@@ -174,7 +174,7 @@ ocr:
   # 【baiduocr api key】: BaiduOCR的api key，如果需要正常使用，需要在申请后去 https://console.bce.baidu.com/ai/#/ai/ocr/overview/resource/getFree 领取免费额度
   baiduocr_api_key:
   # 【baiduocr secret key】: BaiduOCR的secret key，如果需要正常使用，需要在申请后去 https://console.bce.baidu.com/ai/#/ai/ocr/overview/resource/getFree 领取免费额度
-  baiduocr_api_key:
+  baiduocr_secret key:
 
 # 【配置安全】
 security:
