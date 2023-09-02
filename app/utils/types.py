@@ -186,8 +186,6 @@ class ProgressKey(Enum):
     MediaSync = "mediasync"
     # 站点Cookie获取
     SiteCookie = "sitecookie"
-    # 重启
-    Restart = "restart"
 
 
 class RssType(Enum):

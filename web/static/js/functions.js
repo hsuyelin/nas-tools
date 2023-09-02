@@ -314,22 +314,15 @@ function get_message(lst_time) {
 }
 
 //检查系统是否在线
-function check_system_online() {
-  ajax_post("refresh_process", {type: "restart"}, function (ret) {
-    if (ret.code == 0 && ret.value == 100) {
-      logout();
-    } else {
-      setTimeout("check_system_online()", 1000);
-    }
-  }, true, false)
+function check_system_online(type) {
+  timeout = type === "restart" ? 5000 : 8000;
+  setTimeout("logout", timeout);
 }
 
 //注销
 function logout() {
   ajax_post("logout", {}, function (ret) {
-    ajax_post("end_restart", {}, function (ret) {
-      window.location.href = "/";
-    });
+    window.location.href = "/";
   });
 }
 
