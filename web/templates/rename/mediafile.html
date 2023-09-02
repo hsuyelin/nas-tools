@@ -15,13 +15,31 @@
               <span class="input-icon-addon">
                 {{ SVG.folders() }}
               </span>
-              <input type="text" id="mediafile_path" value="{{ Dir }}" class="form-control" placeholder="/"
-                     aria-label="目录路径">
-            </div>
-            <a href="javascript:return_to_parentdir()" style="display:block;margin-bottom: 5px">
-              {{ SVG.arrow_back_up() }}
-              上级目录
-            </a>
+              <div>
+                <input type="text" id="mediafile_path" value="{{ Dir }}" class="form-control" placeholder="/" aria-label="目录路径">
+                <div id="special_folder" style="display:none"><div><span></span><a href="javascript:return_to_parentdir()">{{ SVG.x() }}</a></div></div>
+              </div>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <a href="javascript:return_to_parentdir()">
+                  {{ SVG.arrow_back_up() }}
+                  上级目录
+                </a>
+                <div style="display: inline-flex; gap: 5px;">
+                  <a href="javascript:jump_sync_folders()">
+                    {{ SVG.refresh() }}
+                    同步
+                  </a>
+                  <a href="javascript:jump_media_folders()">
+                    {{ SVG.player_play() }}
+                    媒体
+                  </a>
+                  <a href="javascript:jump_download_folders()">
+                    {{ SVG.download() }}
+                    下载
+                  </a>
+                </div>
+              </div>
             <div id="mediafile_tree" style="overflow-y: auto; overflow-x: hidden"></div>
           </div>
         </div>
@@ -41,7 +59,7 @@
                   硬链接
                 </a>
                 <a href="javascript:mediafile_scraper_all()" class="btn" title="刮削当前目录">
-                  {{ SVG.link() }}
+                  {{ SVG.download() }}
                   刮削
                 </a>
               </div>
@@ -146,13 +164,13 @@
   //刷新文件列表
   function refresh_files(folder) {
     // 获取文件夹路径的MD5找到目录树节点
-    let node = $(`#mediafile_tree #${CryptoJS.MD5(folder).toString()}`);
-    if (node && node.hasClass("sync-src")) {
-      $("#mediafile_folder_sync").attr("direction", "→").text("硬链接同步来源目录");
-    } else if (node && node.hasClass("sync-dest")) {
-      $("#mediafile_folder_sync").attr("direction", "←").text("硬链接同步目标目录");
+    let node = $(`#mediafile_tree a[rel='${folder}']`);
+    if (node && node.parent().hasClass("sync-src")) {
+      $("#mediafile_folder_sync").attr("data-direction", "→").text("硬链接同步来源目录");
+    } else if (node && node.parent().hasClass("sync-dest")) {
+      $("#mediafile_folder_sync").attr("data-direction", "←").text("硬链接同步目标目录");
     } else {
-      $("#mediafile_folder_sync").removeAttr("direction").text("");
+      $("#mediafile_folder_sync").removeAttr("data-direction").text("");
     }
 
     if (folder) {
@@ -187,8 +205,15 @@
           ajax_post("get_hardlinks", { filepath: filepath }, function (ret) {
             if (ret.data) {
               for (let j = 0; j < ret.data.hardlinks.length; j++) {
-                $(`#mediafile_file_container #${ret.data.linkid}`).append(`<li><span direction="${ret.data.direction}">${ret.data.hardlinks[j]}</span></li>`);
+                let $linkFile = $(`<li data-bs-toggle="tooltip" title="${ret.data.hardlinks[j][1]}"><span data-direction="${ret.data.direction}">${ret.data.hardlinks[j][0]}</span></li>`);
+                // 绑定事件，点击时跳转到硬链接文件所在的目录
+                bind_jump_folder($linkFile, ret.data.hardlinks[j][2]);
+                $(`#mediafile_file_container #${ret.data.linkid}`).append($linkFile);              
               }
+              // 刷新tooltip
+              fresh_tooltip();
+              // 未知原因快速切换文件跳转时，会随机出现tooltip未及时移除的情况，在刷新tooltip后再强行移除可消除继续显示的内容
+              $('.bs-tooltip-auto').remove();
             }
           });        
         }
@@ -196,23 +221,51 @@
     });
   }
 
+  // 绑定跳转目录
+  function bind_jump_folder(src, target) {
+    src.on("click", function (event){
+      // 父元素移除时，自动产生的tooltip不会自动移除，须强行销毁
+      $(this).tooltip("dispose");
+      $("#mediafile_path").val(target).show();
+      $("#special_folder").hide().find("span").text("");      
+      init_mediafile_tree();
+    });
+  }
+
   // 初始化文件树
   function init_mediafile_tree() {
-    let ft = $('#mediafile_tree');
-    ft.empty();
+    let ft = $('#mediafile_tree'); 
+    // 销毁之前的实例 
+    ft.removeData("fileTree");
     ft.fileTree(
-        {
-          script: 'dirlist',
-          root: encodeURIComponent($("#mediafile_path").val()),
-          filter: 'HIDE_FILES_FILTER',
-          allowBrowsing: true
-        },
-        function (file) {
-        },
-        function (folder) {
-          refresh_files(folder);
-        });
-    refresh_files($("#mediafile_path").val());
+      {
+        script: 'dirlist',
+        root: encodeURIComponent($("#mediafile_path").val()),
+        onlyFolders: true,
+        multiFolder: false
+      },
+      function (file) {
+      }
+    ).on("filetreeinitiated filetreeexpanded", function(e, data) {
+      // 处理展开目录下的绑定跳转
+      if (ft.attr("data-event-time") != e.timeStamp){
+        ft.attr("data-event-time", e.timeStamp);
+        let $linkFolder = [];
+        if (e.type === "filetreeinitiated"){
+          refresh_files($("#mediafile_path").val());
+          $linkFolder = ft.find("ul .link-folder");
+        }else{
+          refresh_files(data.rel);
+          $linkFolder = $(data.li[0]).find("ul .link-folder");
+        }
+        for (let i=0; i < $linkFolder.length; i++) {
+          // 绑定事件，点击时跳转到硬链接目录
+          bind_jump_folder($($linkFolder[i]), $($linkFolder[i]).attr("data-jump"));
+        }
+        // 刷新tooltip
+        fresh_tooltip();
+      }          
+    });
   }
 
   // 回车响应
@@ -417,7 +470,29 @@
     if (!parentdir) {
       parentdir = "/";
     }
-    $("#mediafile_path").val(parentdir);
+    $("#mediafile_path").val(parentdir).show();
+    $("#special_folder").hide().find("span").text("");
+    init_mediafile_tree();
+  }
+
+  // 跳转同步目录
+  function jump_sync_folders() {
+    $("#mediafile_path").val("[SYNC-FOLDERS]").hide();
+    $("#special_folder").show().find("span").text("同步目录");
+    init_mediafile_tree();
+  }
+
+  // 跳转媒体目录
+  function jump_media_folders() {
+    $("#mediafile_path").val("[MEDIA-FOLDERS]").hide();
+    $("#special_folder").show().find("span").text("媒体目录");
+    init_mediafile_tree();
+  }
+
+  // 跳转下载目录
+  function jump_download_folders() {
+    $("#mediafile_path").val("[DOWNLOAD-FOLDERS]").hide();
+    $("#special_folder").show().find("span").text("下载目录");
     init_mediafile_tree();
   }
 
@@ -452,7 +527,7 @@
           <div class="row">
             <div class="col">
               <h3 class="mb-0"><a href='javascript:mediafile_transfer("{FILENAME}", "{FILEPOS}")'>{FILENAME}</a></h3>
-              <h4 class="mb-0 mediafile_link"><ul id="{LINKID}"></ul></h4>
+              <h4 class="mb-0 mediafile-link"><ul id="{LINKID}"></ul></h4>
               <custom-chips class="mt-1" id="testresults_{FILEPOS}"></custom-chips>
               <input type="hidden" value="{FILEPATH}" id="mediafilepath_{FILEPOS}">
             </div>

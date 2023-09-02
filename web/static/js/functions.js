@@ -1351,10 +1351,10 @@ function fresh_tooltip() {
 }
 
 //打开路径选择框
-function openFileBrowser(el, root, filter, on_folders, on_files, close_on_select) {
+function openFileBrowser(el, root, only_folders, on_folders, on_files, close_on_select) {
   if (on_folders === undefined) on_folders = true;
   if (on_files === undefined) on_files = true;
-  if (!filter && !on_files) filter = 'HIDE_FILES_FILTER';
+  if (!only_folders && !on_files) only_folders = true;
   if (!root.trim()) root = "";
   let p = $(el);
   // Skip is fileTree is already open
@@ -1367,8 +1367,8 @@ function openFileBrowser(el, root, filter, on_folders, on_files, close_on_select
   ft.fileTree({
         script: 'dirlist',
         root: root,
-        filter: filter,
-        allowBrowsing: true
+        onlyFolders: only_folders,
+        multiFolder: false
       },
       function (file) {
         if (on_files) {
@@ -1380,17 +1380,16 @@ function openFileBrowser(el, root, filter, on_folders, on_files, close_on_select
             });
           }
         }
-      },
-      function (folder) {
+      }).on("filetreeinitiated filetreeexpanded", function(e, data) {
         if (on_folders) {
-          p.val(folder);
+          p.val(data.rel);
           p.trigger('change');
           if (close_on_select) {
             $(ft).slideUp('fast', function () {
               $(ft).remove();
             });
           }
-        }
+        }        
       });
   // Format fileTree according to parent position, height and width
   ft.css({'left': p.position().left, 'top': (p.position().top + p.outerHeight()), 'width': (p.parent().width())});
