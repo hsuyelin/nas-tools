@@ -313,17 +313,17 @@ function get_message(lst_time) {
   MessageWS.send(JSON.stringify({"lst_time": lst_time}));
 }
 
-//检查系统是否在线
-function check_system_online(type) {
-  timeout = type === "restart" ? 5000 : 8000;
-  setTimeout("logout", timeout);
-}
-
 //注销
 function logout() {
   ajax_post("logout", {}, function (ret) {
     window.location.href = "/";
   });
+}
+
+//检查系统是否在线
+function check_system_online(type) {
+  timeout = type === "restart" ? 5000 : 8000;
+  setTimeout(logout, timeout);
 }
 
 //重启
