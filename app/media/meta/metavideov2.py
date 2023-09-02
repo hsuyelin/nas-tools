@@ -391,6 +391,10 @@ class MetaVideoV2(MetaBase):
         return name
 
     def __fix_season_info(self):
+        # 仅剧集修复季信息
+        if self.media_type == MediaType.MOVIE:
+            return
+
         # 修正集信息存在，季信息不存在
         if not self.begin_season and self.begin_episode:
             log.warn("【Meta】存在集信息但不存在季信息，开始修正季为第一季")
