@@ -322,7 +322,7 @@ function logout() {
 
 //返回到登录页
 function back_to_login_page(type) {
-  timeout = (type === "restart") ? 5000 : 8000;
+  timeout = (type === "restart") ? 6000 : 9000;
   setTimeout(logout, timeout);
   setTimeout(function() {
     hide_wait_modal();
