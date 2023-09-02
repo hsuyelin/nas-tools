@@ -333,7 +333,7 @@ function restart() {
     ajax_post("restart", {}, function (ret) {
     }, true, false);
     show_wait_modal(true);
-    check_system_online();
+    check_system_online("restart");
   });
 }
 
@@ -350,7 +350,7 @@ function update(version) {
     ajax_post("update_system", {}, function (ret) {
     }, true, false)
     show_wait_modal(true);
-    check_system_online();
+    check_system_online("update_system");
   });
 }
 
