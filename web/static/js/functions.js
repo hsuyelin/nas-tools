@@ -320,10 +320,14 @@ function logout() {
   });
 }
 
-//检查系统是否在线
-function check_system_online(type) {
-  timeout = type === "restart" ? 5000 : 8000;
+//返回到登录页
+function back_to_login_page(type) {
+  timeout = (type === "restart") ? 5000 : 8000;
   setTimeout(logout, timeout);
+  setTimeout(function() {
+    hide_wait_modal();
+    window.location.href = "/";
+  }, timeout);
 }
 
 //重启
@@ -333,7 +337,7 @@ function restart() {
     ajax_post("restart", {}, function (ret) {
     }, true, false);
     show_wait_modal(true);
-    check_system_online("restart");
+    back_to_login_page("restart");
   });
 }
 
@@ -350,7 +354,7 @@ function update(version) {
     ajax_post("update_system", {}, function (ret) {
     }, true, false)
     show_wait_modal(true);
-    check_system_online("update_system");
+    back_to_login_page("update_system");
   });
 }
 
