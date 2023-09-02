@@ -5,6 +5,7 @@ import log
 from app.helper import WordsHelper
 from app.media.meta.metaanime import MetaAnime
 from app.media.meta.metavideo import MetaVideo
+from app.media.meta.metavideov2 import MetaVideoV2
 from app.utils.types import MediaType
 from app.utils import StringUtils
 from config import Config, RMT_MEDIAEXT
@@ -44,10 +45,18 @@ def MetaInfo(title, subtitle=None, mtype=None, filePath=None):
     else:
         fileflag = False
 
-    if mtype == MediaType.ANIME or is_anime(rev_title):
-        meta_info = MetaAnime(rev_title, subtitle, fileflag, filePath)
+    laboratory = Config().get_config('laboratory')
+    recognize_enhance_enable = False
+    if laboratory:
+        recognize_enhance_enable = laboratory.get('recognize_enhance_enable', False) or False
+
+    if recognize_enhance_enable:
+         meta_info = MetaVideoV2(rev_title, subtitle, fileflag, filePath)
     else:
-        meta_info = MetaVideo(rev_title, subtitle, fileflag, filePath)
+        if mtype == MediaType.ANIME or is_anime(rev_title):
+            meta_info = MetaAnime(rev_title, subtitle, fileflag, filePath)
+        else:
+            meta_info = MetaVideo(rev_title, subtitle, fileflag, filePath)
 
     # 设置原始名称
     meta_info.org_string = org_title

@@ -203,6 +203,8 @@ laboratory:
   search_tmdbweb: false
   # 【ChatGPT识别增强】通过ChatGPT识别文件名
   chatgpt_enable: false
+  # 【增强识别V2】：开启后会使用增强识别V2识别，优先级最高，关闭后将使用原版的识别方式识别
+  recognize_enhance_enable: true
   # 【TMDB缓存过期策略】：是否开启TMDB缓存过期策略，默认7天过期，过期缓存将被删除,  7天内访问过期时间可以被刷新
   tmdb_cache_expire: true
   # 【默认搜索豆瓣资源】：开启将使用豆瓣进行电影电视剧的名称搜索，否则使用TMDB的数据

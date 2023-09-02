@@ -409,16 +409,16 @@
                 </div>
               </div>
               <div class="col-lg">
-                  <div class="mb-3">
-                    <label class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" id="media.tmdb_include_adult"
-                             {% if Config.media.tmdb_include_adult %}checked{% endif %}>
-                      <span class="form-check-label">搜索结果中包含成人内容条目 <span class="form-help"
-                                                                            title="开启该选项后将会在刮削或者检索时包含成人内容，请谨慎打开"
-                                                                            data-bs-toggle="tooltip">?</span></span>
-                    </label>
-                  </div>
+                <div class="mb-3">
+                  <label class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="media.ffmpeg_video_meta" {% if
+                      Config.media.ffmpeg_video_meta %}checked{% endif %}>
+                    <span class="form-check-label">刮削视频元数据 <span class="form-help"
+                                                                        title="开启后，通过ffmpeg获取视频文件真实的元数据，将会大幅增加转移时间，低配置机器不建议开启"
+                                                                        data-bs-toggle="tooltip">?</span></span>
+                  </label>
                 </div>
+              </div>
           </div>
           <div class="row">
             <div class="col-lg">
@@ -433,15 +433,15 @@
               </div>
             </div>
             <div class="col-lg">
-              <div class="mb-3">
-                <label class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" id="media.ffmpeg_video_meta" {% if
-                    Config.media.ffmpeg_video_meta %}checked{% endif %}>
-                  <span class="form-check-label">刮削视频元数据 <span class="form-help"
-                                                                      title="开启后，通过ffmpeg获取视频文件真实的元数据，将会大幅增加转移时间，低配置机器不建议开启"
-                                                                      data-bs-toggle="tooltip">?</span></span>
-                </label>
-              </div>
+                <div class="mb-3">
+                  <label class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="media.tmdb_include_adult"
+                           {% if Config.media.tmdb_include_adult %}checked{% endif %}>
+                    <span class="form-check-label">搜索结果中包含成人内容条目 <span class="form-help"
+                                                                          title="开启该选项后将会在刮削或者检索时包含成人内容，请谨慎打开"
+                                                                          data-bs-toggle="tooltip">?</span></span>
+                  </label>
+                </div>
             </div>
             <div class="col-lg">
               <div class="mb-3" style="display:none;">
@@ -743,6 +743,18 @@
                       Config.laboratory and Config.laboratory.chatgpt_enable %}checked{% endif %}>
                     <span class="form-check-label">ChatGPT增强识别 <span class="form-help"
                                                                   title="开启后，通过TMDB的API无法识别到媒体信息时，使用ChatGPT识别匹配，需要先填写OpenAI API Key"
+                                                                  data-bs-toggle="tooltip">?</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <div class="col-12 col-xl-3">
+                <div class="mb-3">
+                  <label class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="laboratory.recognize_enhance_enable" {% if
+                      Config.laboratory and Config.laboratory.recognize_enhance_enable %}checked{% endif %}>
+                    <span class="form-check-label">增强识别V2 <span class="form-help"
+                                                                  title="开启后，会使用增强识别V2功能去识别，优先级最高"
                                                                   data-bs-toggle="tooltip">?</span>
                     </span>
                   </label>

@@ -72,7 +72,6 @@ class TestUtils:
     def guess_movie_info(filename):
         if filename:
             guess = default_api.guessit(filename)
-            print(guess)
-            # print(json.dumps(guess, cls=GuessitEncoder, ensure_ascii=False))
+            return guess
         else:
             return ""
