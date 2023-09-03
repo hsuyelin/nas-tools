@@ -2,7 +2,7 @@
 
 # <<< START ADDED PART
 from PyInstaller.building.build_main import Analysis, PYZ, EXE, COLLECT, BUNDLE, TOC
-
+from PyInstaller.utils.hooks import collect_data_files
 
 def collect_pkg_data(package, include_py_files=False, subdir=None):
     import os
@@ -87,7 +87,7 @@ a = Analysis(
     ['./../run.py'],
     pathex=pathex_tp,
     binaries=[],
-    datas=[],
+    datas=[collect_data_files("babelfish")],
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
