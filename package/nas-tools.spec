@@ -57,6 +57,16 @@ def collect_local_submodules(package):
                 submodules.append(package + '.' + f[:-3])
     return submodules
 
+def collect_sitepackage_submodules():
+    import babelfish
+    submodules = []
+    submodules += 'babelfish.converters.alpha2'
+    submodules += 'babelfish.converters.alpha3b'
+    submodules += 'babelfish.converters.alpha3t'
+    submodules += 'babelfish.converters.name'
+    submodules += 'babelfish.converters.opensubtitles'
+    submodules += 'babelfish.converters.countryname'
+    return submodules
 
 hiddenimports = ['Crypto.Math',
                  'Crypto.Cipher',
@@ -71,6 +81,7 @@ hiddenimports = ['Crypto.Math',
                  'app.downloader.client',
                  'app.plugins.modules',
                  'app.plugins.modules._autosignin']
+hiddenimports += collect_sitepackage_submodules()
 hiddenimports += collect_local_submodules('app.sites.siteuserinfo')
 hiddenimports += collect_local_submodules('app.mediaserver.client')
 hiddenimports += collect_local_submodules('app.message.client')
