@@ -2,7 +2,6 @@
 
 # <<< START ADDED PART
 from PyInstaller.building.build_main import Analysis, PYZ, EXE, COLLECT, BUNDLE, TOC
-from PyInstaller.utils.hooks import collect_submodules
 
 def collect_pkg_data(package, include_py_files=False, subdir=None):
     import os
@@ -79,15 +78,31 @@ hiddenimports += collect_local_submodules('app.indexer.client')
 hiddenimports += collect_local_submodules('app.downloader.client')
 hiddenimports += collect_local_submodules('app.plugins.modules')
 hiddenimports += collect_local_submodules('app.plugins.modules._autosignin')
-hiddenimports += collect_submodules('babelfish')
 # <<< END HIDDENIMPORTS PART
+
+# <<< START DATAS
+def collect_datas():
+    import site
+    import os
+    import babelfish
+    datas = []
+    if os.path.exists(babelfish.__path__[0]):
+        datas.append((babelfish.__path__[0] + '/data', 'babelfish/data'))
+    else:
+        site_packages_path = site.getsitepackages()[0]
+        babelfish_data_path = os.path.join(site_packages_path, 'babelfish', 'data')
+        if os.path.exists(babelfish_data_path):
+            datas.append((babelfish_data_path, 'babelfish/data'))
+    return datas
+datas = collect_datas()
+# <<< END DATAS
 
 block_cipher = None
 a = Analysis(
     ['./../run.py'],
     pathex=pathex_tp,
     binaries=[],
-    datas=[],
+    datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
