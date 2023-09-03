@@ -82,12 +82,13 @@ hiddenimports += collect_local_submodules('app.plugins.modules._autosignin')
 # <<< END HIDDENIMPORTS PART
 
 block_cipher = None
-
+data_files = collect_data_files("babelfish")
+datas = [(path, "") for path, _ in data_files]
 a = Analysis(
     ['./../run.py'],
     pathex=pathex_tp,
     binaries=[],
-    datas=[collect_data_files("babelfish")],
+    datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
