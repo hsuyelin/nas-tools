@@ -1,3 +1,5 @@
+import json
+
 class IndexerConf(object):
 
     def __init__(self,
@@ -54,3 +56,30 @@ class IndexerConf(object):
         self.language = language
         # 索引器优先级
         self.pri = pri if pri else 0
+
+    def to_dict(self):
+        return {
+            "id": self.id or "",
+            "siteid": self.siteid or "",
+            "name": self.name or "",
+            "builtin": self.builtin or True,
+            "domain": self.domain or "",
+            "search": self.search or "",
+            "batch": self.batch or {},
+            "parser": self.parser or "",
+            "render": self.render or False,
+            "browse": self.browse or {},
+            "torrents": self.torrents or {},
+            "category": self.category or {},
+            "cookie": self.cookie or "",
+            "ua": self.ua or "",
+            "rule": self.rule or "",
+            "public": self.public or False,
+            "proxy": self.proxy or "",
+            "pri": self.pri or 0
+        }
+
+    def to_dict_str(self, ensure_ascii=False, formatted=True):
+        if formatted:
+            return json.dumps(self.to_dict(), ensure_ascii=ensure_ascii, indent=4)
+        return json.dumps(self.to_dict(), ensure_ascii=ensure_ascii)
