@@ -1327,6 +1327,7 @@ function search_media_advanced() {
     "sp_state": sp_state,
     "rule": search_rule
   };
+  // FIXME: 需要打印filters，确认search_site中存储的内容 @hsuyelin@163.com
   const param = {"search_word": keyword, "filters": filters, "unident": true};
   $("#modal-search-advanced").modal("hide");
   show_refresh_progress(`正在搜索 ${keyword} ...`, "search");
