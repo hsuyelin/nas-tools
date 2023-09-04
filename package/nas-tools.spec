@@ -91,12 +91,10 @@ def collect_datas():
     import os
     import guessit
     datas = []
-    babelfish_path = babelfish.__path__[0]
-    guessit_path = guessit.__path__[0]
     return [
         (babelfish.__path__[0] + '/data', 'babelfish/data'),
-        (guessit_path.__path__[0] + '/config', 'guessit/config'),
-        (guessit_path.__path__[0] + '/data', 'guessit/data'),
+        (guessit.__path__[0] + '/config', 'guessit/config'),
+        (guessit.__path__[0] + '/data', 'guessit/data'),
     ]
 
 datas = collect_datas()
