@@ -2,6 +2,7 @@
 
 # <<< START ADDED PART
 from PyInstaller.building.build_main import Analysis, PYZ, EXE, COLLECT, BUNDLE, TOC
+import babelfish
 
 def collect_pkg_data(package, include_py_files=False, subdir=None):
     import os
@@ -62,6 +63,12 @@ hiddenimports = ['Crypto.Math',
                  'Crypto.Util',
                  'Crypto.Hash',
                  'Crypto.Protocol',
+                 'babelfish.converters.alpha2',
+                 'babelfish.converters.alpha3b',
+                 'babelfish.converters.alpha3t',
+                 'babelfish.converters.name',
+                 'babelfish.converters.opensubtitles',
+                 'babelfish.converters.countryname',
                  'logging.config',
                  'app.sites.siteuserinfo',
                  'app.mediaserver.client',
@@ -82,15 +89,15 @@ hiddenimports += collect_local_submodules('app.plugins.modules._autosignin')
 # <<< START DATAS
 def collect_datas():
     import os
-    import babelfish
     import guessit
-    from PyInstaller.utils.hooks import collect_data_files
     datas = []
-    babelfish_datas = collect_data_files('babelfish')
-    guessit_datas = collect_data_files('guessit')
-    datas.append(babelfish_datas)
-    datas.append(guessit_datas)
-    return datas
+    babelfish_path = babelfish.__path__[0]
+    guessit_path = guessit.__path__[0]
+    return [
+        (babelfish.__path__[0] + '/data', 'babelfish/data'),
+        (babelfish.__path__[0] + '/config', 'guessit/config'),
+        (babelfish.__path__[0] + '/data', 'guessit/data'),
+    ]
 
 datas = collect_datas()
 # <<< END DATAS
