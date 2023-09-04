@@ -2,6 +2,7 @@
 
 # <<< START ADDED PART
 from PyInstaller.building.build_main import Analysis, PYZ, EXE, COLLECT, BUNDLE, TOC
+import babelfish
 
 def collect_pkg_data(package, include_py_files=False, subdir=None):
     import os
@@ -58,7 +59,6 @@ def collect_local_submodules(package):
     return submodules
 
 def collect_sitepackage_submodules():
-    import babelfish
     submodules = []
     submodules += 'babelfish.converters.alpha2'
     submodules += 'babelfish.converters.alpha3b'
