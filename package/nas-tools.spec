@@ -2,7 +2,6 @@
 
 # <<< START ADDED PART
 from PyInstaller.building.build_main import Analysis, PYZ, EXE, COLLECT, BUNDLE, TOC
-import babelfish
 
 def collect_pkg_data(package, include_py_files=False, subdir=None):
     import os
@@ -58,16 +57,6 @@ def collect_local_submodules(package):
                 submodules.append(package + '.' + f[:-3])
     return submodules
 
-def collect_sitepackage_submodules():
-    submodules = []
-    submodules += 'babelfish.converters.alpha2'
-    submodules += 'babelfish.converters.alpha3b'
-    submodules += 'babelfish.converters.alpha3t'
-    submodules += 'babelfish.converters.name'
-    submodules += 'babelfish.converters.opensubtitles'
-    submodules += 'babelfish.converters.countryname'
-    return submodules
-
 hiddenimports = ['Crypto.Math',
                  'Crypto.Cipher',
                  'Crypto.Util',
@@ -81,7 +70,6 @@ hiddenimports = ['Crypto.Math',
                  'app.downloader.client',
                  'app.plugins.modules',
                  'app.plugins.modules._autosignin']
-hiddenimports += collect_sitepackage_submodules()
 hiddenimports += collect_local_submodules('app.sites.siteuserinfo')
 hiddenimports += collect_local_submodules('app.mediaserver.client')
 hiddenimports += collect_local_submodules('app.message.client')
@@ -93,18 +81,17 @@ hiddenimports += collect_local_submodules('app.plugins.modules._autosignin')
 
 # <<< START DATAS
 def collect_datas():
-    import site
     import os
     import babelfish
+    import guessit
+    from PyInstaller.utils.hooks import collect_data_files
     datas = []
-    if os.path.exists(babelfish.__path__[0]):
-        datas.append((babelfish.__path__[0] + '/data', 'babelfish/data'))
-    else:
-        site_packages_path = site.getsitepackages()[0]
-        babelfish_data_path = os.path.join(site_packages_path, 'babelfish', 'data')
-        if os.path.exists(babelfish_data_path):
-            datas.append((babelfish_data_path, 'babelfish/data'))
+    babelfish_datas = collect_data_files('babelfish')
+    guessit_datas = collect_data_files('guessit')
+    datas.append(babelfish_datas)
+    datas.append(guessit_datas)
     return datas
+
 datas = collect_datas()
 # <<< END DATAS
 
