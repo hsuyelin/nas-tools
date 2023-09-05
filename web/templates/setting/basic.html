@@ -444,9 +444,15 @@
                 </div>
             </div>
             <div class="col-lg">
-              <div class="mb-3" style="display:none;">
-                <h1>占位元素 </h1>
-              </div>
+                <div class="mb-3">
+                  <label class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="media.name_follow_tmdb_changed"
+                           {% if Config.media.name_follow_tmdb_changed %}checked{% endif %}>
+                    <span class="form-check-label">已整理媒体名称跟随TMDB变化 <span class="form-help"
+                                                                          title="开启则会一直与TMDB同步但是会创建多个文件夹；关闭后将会保持与TMDB信息改变之前的名称一致，不会再创建新文件夹"
+                                                                          data-bs-toggle="tooltip">?</span></span>
+                  </label>
+                </div>
             </div>
           </div>
         </div>

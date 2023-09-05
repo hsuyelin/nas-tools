@@ -107,6 +107,8 @@ media:
   filename_prefer_barre: false
   # 【获取视频元数据】：如开启，视频文件名不包含视频元数据的情况，则会通过ffmpeg获取，将会大幅增加转移时间，低配置机器不建议开启
   ffmpeg_video_meta: false
+  # 【已整理媒体名称跟随TMDB变化】：开启则会一直与TMDB同步但是会创建多个文件夹；关闭后将会保持与TMDB信息改变之前的名称一致，不会再创建新文件夹
+  name_follow_tmdb_changed: true
 
 # 配置Emby服务器信息
 emby:
