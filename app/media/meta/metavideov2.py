@@ -210,6 +210,9 @@ class MetaVideoV2(MetaBase):
             else:
                 self.resource_type = None
 
+        if StringUtils.is_string_and_not_empty(self.resource_type):
+            self.resource_type = "WEB-DL" if self.resource_type.lower() == "web" else self.resource_type
+
         title_streaming_services = self._media_item_title.main.streaming_service
         subltitle_streaming_services = self._media_item_subtitle.main.streaming_service
         streaming_services = ""
@@ -226,6 +229,7 @@ class MetaVideoV2(MetaBase):
         if not StringUtils.is_string_and_not_empty(streaming_services):
             return
 
+        streaming_services = "AMZN" if streaming_services.lower() == "amazon prime" else streaming_services
         if StringUtils.is_string_and_not_empty(self.resource_type):
             self.resource_type += f" {streaming_services}"
         else:
@@ -388,10 +392,9 @@ class MetaVideoV2(MetaBase):
     def __fix_title(self, title):
         if not StringUtils.is_string_and_not_empty(title):
             return
+
         title = re.sub(r"[*?\\/\"<>~|]", "", title, flags=re.IGNORECASE) \
-            .replace("-", "：") \
-            .replace(":", "：")
-        title = re.sub(r'\s*：\s*', '：', title, flags=re.IGNORECASE)
+            .replace("-", ".")
         return title
 
     def __fix_name(self, name):
