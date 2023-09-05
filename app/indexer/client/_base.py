@@ -111,11 +111,14 @@ class _IIndexClient(metaclass=ABCMeta):
                     index_rule_fail += 1
                     continue
                 # 识别种子名称
-                imdbid_match = imdbid and match_media.imdb_id and str(imdbid) == str(match_media.imdb_id)
-                name_match = match_media.org_string in torrent_name or \
-                             match_media.original_title in torrent_name or \
-                             match_media.org_string in description or \
-                             match_media.original_title in description
+                imdbid_match = False
+                name_match = False
+                if match_media:
+                    imdbid_match = imdbid and match_media.imdb_id and str(imdbid) == str(match_media.imdb_id)
+                    name_match = match_media.org_string in torrent_name or \
+                                match_media.original_title in torrent_name or \
+                                match_media.org_string in description or \
+                                match_media.original_title in description
                 if (imdbid_match or name_match) and self.recognize_enhance_enable:
                     meta_info = MetaInfo(title=torrent_name,
                                          subtitle=f"{labels} {description}",
