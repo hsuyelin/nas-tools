@@ -109,7 +109,7 @@ class MetaVideoV2(MetaBase):
 
     def __init_year(self):
         year = self._media_item_title.main.year if self._media_item_title.main.year else self._media_item_subtitle.main.year
-        if StringUtils.is_string_and_not_empty(year):
+        if StringUtils.is_string_and_not_empty(year) or self.__is_digit(year):
             self.year = year
 
     def __init_season(self):
