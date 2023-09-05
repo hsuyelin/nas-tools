@@ -146,7 +146,7 @@ class BrushTask(object):
         if taskid:
             return self._brush_tasks.get(str(taskid)) or {}
         else:
-            return self._brush_tasks.values()
+            return self._brush_tasks if isinstance(self._brush_tasks, dict) else {}
 
     def check_task_rss(self, taskid):
         """
