@@ -6,8 +6,7 @@ import log
 from app.media.meta._base import MetaBase
 from app.media.meta.release_groups import ReleaseGroupsMatcher
 from app.media.meta.customization import CustomizationMatcher
-from .mediaItem import MediaMainItem, MediaEpisodeItem, MediaVideoItem,\
-MediaAudioItem, MediaLocalizationItem, MediaOtherItem, MediaItem
+from .mediaItem import MediaItem
 from app.utils import StringUtils
 from app.utils.types import MediaType
 
@@ -17,8 +16,25 @@ class MetaVideoV2(MetaBase):
     _media_item_title = None
     _media_item_subtitle = None
 
-    def __init__(self, title, subtitle=None, fileflag=False, filePath=None):
-        super().__init__(title, subtitle, fileflag)
+    def __init__(self,
+                 title,
+                 subtitle=None,
+                 fileflag=False,
+                 filePath=None,
+                 media_type=None,
+                 cn_name=None,
+                 en_name=None,
+                 tmdb_id=None,
+                 imdb_id=None):
+        super().__init__(title,
+                         subtitle,
+                         fileflag,
+                         filePath,
+                         media_type,
+                         cn_name,
+                         en_name,
+                         tmdb_id,
+                         imdb_id)
 
         original_title = title
 
@@ -54,9 +70,6 @@ class MetaVideoV2(MetaBase):
         # 视频效果
         self.__init_resource_effect()
 
-        # 修正季信息
-        self.__fix_season_info()
-
         # 提取原盘DIY
         if self.resource_type and "BluRay" in self.resource_type:
             if (self.subtitle and re.findall(r'D[Ii]Y', self.subtitle)) \
@@ -83,12 +96,14 @@ class MetaVideoV2(MetaBase):
             self.media_type = MediaType.MOVIE
 
     def __init_name(self):
+        if StringUtils.is_string_and_not_empty(self.cn_name) and StringUtils.is_string_and_not_empty(self.en_name):
+            return
         name = self._media_item_title.main.title if StringUtils.is_string_and_not_empty(self._media_item_title.main.title) else self._media_item_subtitle.main.title
 
         if StringUtils.is_chinese(name):
-            self.cn_name = name
+            self.cn_name = self.cn_name if StringUtils.is_string_and_not_empty(self.cn_name) else name
         else:
-            self.en_name = name
+            self.en_name = self.en_name if StringUtils.is_string_and_not_empty(self.en_name) else name
 
         self.title = self.cn_name if StringUtils.is_string_and_not_empty(self.cn_name) else self.en_name
 
@@ -389,25 +404,6 @@ class MetaVideoV2(MetaBase):
                 name = None
 
         return name
-
-    def __fix_season_info(self):
-        # 仅剧集修复季信息
-        if self.media_type == MediaType.MOVIE:
-            return
-
-        # 修正集信息存在，季信息不存在
-        if not self.begin_season and self.begin_episode:
-            log.warn("【Meta】存在集信息但不存在季信息，开始修正季为第一季")
-            self.begin_season = 1
-        # 修正季信息存在，集信息不存在
-        if not self.begin_episode and self.begin_season:
-            log.warn("【Meta】存在季信息但不存在集信息，修正集为第一集")
-            self.begin_episode = 1
-        # 修正季和集信息都不存在
-        if not self.begin_episode and self.begin_season and self.media_type == MediaType.TV:
-            log.warn("【Meta】不存在季和集信息，但类型为剧集，修正季为第一季，修正集为第一集")
-            self.begin_season = 1
-            self.begin_episode = 1
 
     def __is_digit_array(self, arr):
         if not isinstance(arr, list):
