@@ -1340,7 +1340,8 @@ class Downloader:
         if not config or not dtype:
             return False
         # 测试状态
-        state = self.__build_class(ctype=dtype, conf=config).get_status()
+        download_client = self.__build_class(ctype=dtype, conf=config)
+        state = download_client.get_status() if download_client else False
         if not state:
             log.error(f"【Downloader】下载器连接测试失败")
         return state
