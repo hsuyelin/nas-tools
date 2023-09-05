@@ -663,7 +663,7 @@ def brushtask():
     # 下载器列表
     Downloaders = Downloader().get_downloader_conf_simple()
     # 任务列表
-    Tasks = BrushTask().get_brushtask_info()
+    Tasks = BrushTask().get_brushtask_info().values()
     return render_template("site/brushtask.html",
                            Count=len(Tasks),
                            Sites=CfgSites,
