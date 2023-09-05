@@ -38,7 +38,7 @@ class MetaVideoV2(MetaBase):
 
         original_title = title
 
-        media_item_title, media_item_subtitle = self.guess_media_item(title, subtitle)
+        media_item_title, media_item_subtitle = self.guess_media_item(self.__fix_title(title), subtitle)
         self._media_item_title = media_item_title
         self._media_item_subtitle = media_item_subtitle
 
@@ -384,6 +384,15 @@ class MetaVideoV2(MetaBase):
         media_item_subtitle = MediaItem(datas=default_api.guessit(subtitle or ""))
 
         return media_item_title, media_item_subtitle
+
+    def __fix_title(self, title):
+        if not StringUtils.is_string_and_not_empty(title):
+            return
+        title = re.sub(r"[*?\\/\"<>~|]", "", title, flags=re.IGNORECASE) \
+            .replace("-", "：") \
+            .replace(":", "：")
+        title = ' '.join(title.split())
+        return title
 
     def __fix_name(self, name):
         if not name:
