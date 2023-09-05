@@ -1075,17 +1075,22 @@ def dirlist():
                 sync_class = "sync-dest"
                 break        
         return sync_class, link_path, link_direction
-    
+
+    def add_paths_to_media_dirs(paths, media_dirs):
+        if paths:
+            paths = [item for item in paths if item is not None]
+            media_dirs.extend([path.rstrip('/') for path in paths])
+
     def get_media_dirs():
         media_dirs = []
         movie_path = Config().get_config('media').get('movie_path')
         tv_path = Config().get_config('media').get('tv_path')
         anime_path = Config().get_config('media').get('anime_path')
         unknown_path = Config().get_config('media').get('unknown_path')
-        if movie_path is not None: media_dirs.extend([path.rstrip('/') for path in movie_path])
-        if tv_path is not None: media_dirs.extend([path.rstrip('/') for path in tv_path])
-        if anime_path is not None: media_dirs.extend([path.rstrip('/') for path in anime_path])
-        if unknown_path is not None: media_dirs.extend([path.rstrip('/') for path in unknown_path])   
+        add_paths_to_media_dirs(movie_path, media_dirs)
+        add_paths_to_media_dirs(tv_path, media_dirs)
+        add_paths_to_media_dirs(anime_path, media_dirs)
+        add_paths_to_media_dirs(unknown_path, media_dirs)
         return list(set(media_dirs))
     
     def get_download_dirs():
