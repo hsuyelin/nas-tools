@@ -391,7 +391,7 @@ class MetaVideoV2(MetaBase):
         title = re.sub(r"[*?\\/\"<>~|]", "", title, flags=re.IGNORECASE) \
             .replace("-", "：") \
             .replace(":", "：")
-        title = ' '.join(title.split())
+        title = re.sub(r'\s*：\s*', '：', title, flags=re.IGNORECASE)
         return title
 
     def __fix_name(self, name):
