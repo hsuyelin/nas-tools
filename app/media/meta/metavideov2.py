@@ -2,6 +2,7 @@ import re
 import os
 
 from guessit.api import default_api
+import cn2an
 
 import log
 from config import RMT_MEDIAEXT
@@ -434,6 +435,11 @@ class MetaVideoV2(MetaBase):
             .replace("【",  "[") \
             .replace("】", "]") \
 
+        if title.startswith("["):
+            title = title.replace("[", "", 1)
+        title = title.replace("[", ".")
+        title = title.replace("]", ".")
+
         # 去除多音轨标志
         title = re.sub(r'\d+Audio', '', title)
         # 去掉名称中第1个[]的内容
@@ -444,7 +450,7 @@ class MetaVideoV2(MetaBase):
         title = re.sub(r'[0-9.]+\s*[MGT]i?B(?![A-Z]+)', "", title, flags=re.IGNORECASE)
         # 把年月日去掉
         title = re.sub(r'\d{4}[\s._-]\d{1,2}[\s._-]\d{1,2}', "", title)
-            
+
         return title
 
     def __fix_name(self, name):
