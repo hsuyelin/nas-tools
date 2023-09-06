@@ -100,6 +100,9 @@ class MetaVideoV2(MetaBase):
                     or re.findall(r'-D[Ii]Y@', original_title):
                 self.resource_type = f"{self.resource_type} DIY"
 
+        # 修正年份被识别为季
+        self.__fix_season()
+
         # 去掉名字中不需要的干扰字符，过短的纯数字不要
         self.cn_name = self.__fix_name(self.cn_name)
         self.en_name = StringUtils.str_title(self.__fix_name(self.en_name))
@@ -440,6 +443,64 @@ class MetaVideoV2(MetaBase):
         title = title.replace("[", ".")
         title = title.replace("]", ".")
 
+        # 匹配出季组
+        seasons_match = re.search(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季', title)
+        if seasons_match:
+            seasons_match_text = seasons_match.group(0)
+            seasons = re.findall(r'\d+|[一二三四五六七八九十]+', seasons_match_text)
+            seasons = sorted(seasons)
+            if len(seasons) >= 2:
+                try:
+                    begin_season = int(cn2an.cn2an(seasons[0], "smart"))
+                    end_season = int(cn2an.cn2an(seasons[-1], "smart"))
+                    title = re.sub(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季', f"S{begin_season}-S{end_season}", title)
+                except Exception as e:
+                    pass
+        else:
+            # 匹配出季
+            season_match = re.search(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季', title)
+            if season_match:
+                season_matched_text = season_match.group(0)
+                season = re.findall(r'\d+|[一二三四五六七八九十]+', season_matched_text)[0]
+                if season:
+                    season = re.sub(r'^0+', '', season)
+                    fix_season = cn2an.cn2an(season, "smart")
+                    try:
+                        fix_season = int(fix_season)
+                        title = re.sub(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季', f"S{fix_season}", title)
+                    except Exception as e:
+                        pass
+
+        # 匹配出集组
+        episodes_match = re.search(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)', title)
+        if episodes_match:
+            episodes_match_text = episodes_match.group(0)
+            episodes = re.findall(r'\d+|[一二三四五六七八九十]+', episodes_match_text)
+            episodes = sorted(episodes)
+            if len(episodes) >= 2:
+                try:
+                    begin_episode = int(cn2an.cn2an(episodes[0], "smart"))
+                    end_episode = int(cn2an.cn2an(episodes[-1], "smart"))
+                    title = re.sub(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)', f"E{begin_episode}-E{end_episode}", title)
+                except Exception as e:
+                    pass
+        else:
+            # 匹配出集
+            episode_match = re.search(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)', title)
+            if episode_match:
+                episode_matched_text = episode_match.group(0)
+                episode = re.findall(r'\d+|[一二三四五六七八九十]+', episode_matched_text)[0]
+                if episode:
+                    episode = re.sub(r'^0+', '', episode)
+                    fix_episode = cn2an.cn2an(episode, "smart")
+                    try:
+                        fix_episode = int(fix_episode)
+                        title = re.sub(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)', f"E{fix_episode}", title)
+                    except Exception as e:
+                        pass
+
+        # 替换连续的多个.为一个.
+        title = re.sub(r'\.+', '.', title).rstrip('.')
         # 去除多音轨标志
         title = re.sub(r'\d+Audio', '', title)
         # 去掉名称中第1个[]的内容
@@ -473,6 +534,11 @@ class MetaVideoV2(MetaBase):
             elif self.is_in_episode(int(name)) and not self.begin_season:
                 name = None
         return name
+
+    def __fix_season(self):
+        # 修正年份被识别为季
+        if self.begin_season and self.year and self.begin_season == self.year:
+            self.begin_season = None
 
     def __is_digit_array(self, arr):
         if not isinstance(arr, list):
