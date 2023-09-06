@@ -16,6 +16,18 @@ class MetaVideoV2(MetaBase):
     _media_item_title = None
     _media_item_subtitle = None
 
+    _name_nostring_re = r"^PTS|^JADE|^ViuTV|^AOD|^CHC|^[A-Z]{1,4}TV[\-0-9UVHDK]*" \
+                    r"|HBO$|\s+HBO|\d{1,2}th|\d{1,2}bit|NETFLIX|AMAZON|IMAX|^3D|\s+3D|^BBC\s+|\s+BBC|BBC$|DISNEY\+?|XXX|\s+DC$" \
+                    r"|[第\s共]+[0-9一二三四五六七八九十\-\s]+季" \
+                    r"|[第\s共]+[0-9一二三四五六七八九十百零\-\s]+[集话話]" \
+                    r"|连载|日剧|美剧|电视剧|动画片|动漫|欧美|西德|日韩|超高清|高清|蓝光|翡翠台|梦幻天堂·龙网|★?\d*月?新番" \
+                    r"|最终季|合集|[多中国英葡法俄日韩德意西印s泰台港粤双文语简繁体特效内封官译外挂]+字幕|版本|出品|台版|港版|\w+字幕组" \
+                    r"|未删减版|UNCUT$|UNRATE$|WITH EXTRAS$|RERIP$|SUBBED$|PROPER$|REPACK$|SEASON$|EPISODE$|Complete$|Extended$|Extended Version$" \
+                    r"|S\d{2}\s*-\s*S\d{2}|S\d{2}|\s+S\d{1,2}|EP?\d{2,4}\s*-\s*EP?\d{2,4}|EP?\d{2,4}|\s+EP?\d{1,4}" \
+                    r"|CD[\s.]*[1-9]|DVD[\s.]*[1-9]|DISK[\s.]*[1-9]|DISC[\s.]*[1-9]" \
+                    r"|[248]K|\d{3,4}[PIX]+" \
+                    r"|CD[\s.]*[1-9]|DVD[\s.]*[1-9]|DISK[\s.]*[1-9]|DISC[\s.]*[1-9]"
+
     def __init__(self,
                  title,
                  subtitle=None,
@@ -79,6 +91,10 @@ class MetaVideoV2(MetaBase):
         # 去掉名字中不需要的干扰字符，过短的纯数字不要
         self.cn_name = self.__fix_name(self.cn_name)
         self.en_name = StringUtils.str_title(self.__fix_name(self.en_name))
+        
+        # 处理part
+        if self.part and self.part.upper() == "PART":
+            self.part = None
 
         # 制作组/字幕组
         self.resource_team = ReleaseGroupsMatcher().match(title=original_title) or None
@@ -104,8 +120,6 @@ class MetaVideoV2(MetaBase):
             self.cn_name = self.cn_name if StringUtils.is_string_and_not_empty(self.cn_name) else name
         else:
             self.en_name = self.en_name if StringUtils.is_string_and_not_empty(self.en_name) else name
-
-        self.title = self.cn_name if StringUtils.is_string_and_not_empty(self.cn_name) else self.en_name
 
     def __init_year(self):
         year = self._media_item_title.main.year if self._media_item_title.main.year else self._media_item_subtitle.main.year
@@ -394,13 +408,18 @@ class MetaVideoV2(MetaBase):
             return
 
         title = re.sub(r"[*?\\/\"<>~|]", "", title, flags=re.IGNORECASE) \
-            .replace("-", ".")
+            .replace("-", ".") \
+            .replace("【",  "[") \
+            .replace("】", "]") \
+            
         return title
 
     def __fix_name(self, name):
         if not name:
             return name
-
+        name = re.sub(r'%s' % self._name_nostring_re, '', name,
+                      flags=re.IGNORECASE).strip()
+        name = re.sub(r'\s+', ' ', name)
         if name.isdigit() \
                 and int(name) < 1800 \
                 and not self.year \
@@ -414,7 +433,6 @@ class MetaVideoV2(MetaBase):
                 name = None
             elif self.is_in_episode(int(name)) and not self.begin_season:
                 name = None
-
         return name
 
     def __is_digit_array(self, arr):
