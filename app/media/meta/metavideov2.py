@@ -31,6 +31,15 @@ class MetaVideoV2(MetaBase):
                     r"|CD[\s.]*[1-9]|DVD[\s.]*[1-9]|DISK[\s.]*[1-9]|DISC[\s.]*[1-9]" \
                     r"|[248]K|\d{3,4}[PIX]+" \
                     r"|CD[\s.]*[1-9]|DVD[\s.]*[1-9]|DISK[\s.]*[1-9]|DISC[\s.]*[1-9]"
+    _release_group_re = r"\[.*(?:字幕组|字幕社|发布组|手抄部|手抄组|压制|动漫|新番|合集|连载|日剧|美剧|电视剧|动画片|动漫|欧美|西德|日韩|超高清|高清|蓝光|翡翠台|梦幻天堂·龙网|喵萌奶茶屋|Sub|LoliHouse|毀片黨|毁片党|论坛|Raws)\]"
+    _seasons_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季"
+    _season_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季"
+    _episodes_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
+    _episode_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
+    _numbers_re = r"\d+|[一二三四五六七八九十]+"
+    _years_re = r"(\d{4})\s*.\s*(\d{4})"
+    _release_date_re = r"\d{2,4}年\d+(?:月)?(?:新番|合集|)"
+    _other_re = r"\[(?:★|❤|GB|JP|KR|CN|TW|US|SG|招募翻译(?:校对)?|招募翻譯(?:校對)?|)\]"
 
     def __init__(self,
                  title,
@@ -438,69 +447,96 @@ class MetaVideoV2(MetaBase):
             .replace("【",  "[") \
             .replace("】", "]") \
 
+        # 将开头字幕组信息移动至字符串末尾
+        release_group_match = re.search(r'%s' % self._release_group_re, title, flags=re.IGNORECASE)
+        # 去除其他不重要的信息
+        title = re.sub(r'%s' % self._other_re, '', title, flags=re.IGNORECASE)
+        # 中括号里单独的数字大概率是集数
+        title = re.sub(r'\[(\d+)\]', r'[E\1]', title, flags=re.IGNORECASE)
+        if release_group_match:
+            tag = release_group_match.group()
+            modified_string = title.replace(tag, '').strip()
+            modified_string += '.' + tag
+            title = modified_string
+
         if title.startswith("["):
             title = title.replace("[", "", 1)
         title = title.replace("[", ".")
         title = title.replace("]", ".")
 
         # 匹配出季组
-        seasons_match = re.search(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季', title)
+        seasons_match = re.search(r'%s' % self._seasons_re, title)
         if seasons_match:
             seasons_match_text = seasons_match.group(0)
-            seasons = re.findall(r'\d+|[一二三四五六七八九十]+', seasons_match_text)
+            seasons = re.findall(r'%s' % self._numbers_re, seasons_match_text)
             seasons = sorted(seasons)
             if len(seasons) >= 2:
                 try:
                     begin_season = int(cn2an.cn2an(seasons[0], "smart"))
                     end_season = int(cn2an.cn2an(seasons[-1], "smart"))
-                    title = re.sub(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季', f"S{begin_season}-S{end_season}", title)
+                    title = re.sub(r'%s' % self._seasons_re, f"S{begin_season}-S{end_season}", title)
                 except Exception as e:
                     pass
         else:
             # 匹配出季
-            season_match = re.search(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季', title)
+            season_match = re.search(r'%s' % self._season_re, title)
             if season_match:
                 season_matched_text = season_match.group(0)
-                season = re.findall(r'\d+|[一二三四五六七八九十]+', season_matched_text)[0]
+                season = re.findall(r'%s' % self._numbers_re, season_matched_text)[0]
                 if season:
                     season = re.sub(r'^0+', '', season)
                     fix_season = cn2an.cn2an(season, "smart")
                     try:
                         fix_season = int(fix_season)
-                        title = re.sub(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季', f"S{fix_season}", title)
+                        title = re.sub(r'%s' % self._season_re, f"S{fix_season}", title)
                     except Exception as e:
                         pass
 
         # 匹配出集组
-        episodes_match = re.search(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)', title)
+        episodes_match = re.search(r'%s' % self._episodes_re, title)
         if episodes_match:
             episodes_match_text = episodes_match.group(0)
-            episodes = re.findall(r'\d+|[一二三四五六七八九十]+', episodes_match_text)
+            episodes = re.findall(r'%s' % self._numbers_re, episodes_match_text)
             episodes = sorted(episodes)
             if len(episodes) >= 2:
                 try:
                     begin_episode = int(cn2an.cn2an(episodes[0], "smart"))
                     end_episode = int(cn2an.cn2an(episodes[-1], "smart"))
-                    title = re.sub(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)', f"E{begin_episode}-E{end_episode}", title)
+                    title = re.sub(r'%s' % self._episodes_re, f"E{begin_episode}-E{end_episode}", title)
                 except Exception as e:
                     pass
         else:
             # 匹配出集
-            episode_match = re.search(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)', title)
+            episode_match = re.search(r'%s' % self._episode_re, title)
             if episode_match:
                 episode_matched_text = episode_match.group(0)
-                episode = re.findall(r'\d+|[一二三四五六七八九十]+', episode_matched_text)[0]
+                episode = re.findall(r'%s' % self._numbers_re, episode_matched_text)[0]
                 if episode:
                     episode = re.sub(r'^0+', '', episode)
                     fix_episode = cn2an.cn2an(episode, "smart")
                     try:
                         fix_episode = int(fix_episode)
-                        title = re.sub(r'(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)', f"E{fix_episode}", title)
+                        title = re.sub(r'%s' % self._episode_re, f"E{fix_episode}", title)
                     except Exception as e:
                         pass
 
+        # 匹配出年份范围
+        years_match = re.search(r'%s' % self._years_re, title)
+        if years_match:
+            begin_year = years_match.group(1)
+            end_year = years_match.group(2)
+            try:
+                begin_year_number = int(cn2an.cn2an(begin_year))
+                end_year_number = int(cn2an.cn2an(end_year))
+                max_year_number = end_year_number if end_year_number >= begin_year_number else begin_year_number
+                title = re.sub(r'%s' % self._years_re, f"{max_year_number}", title)
+            except Exception as e:
+                pass
+
         # 替换连续的多个.为一个.
-        title = re.sub(r'\.+', '.', title).rstrip('.')
+        title = re.sub(r'\.{2,}', '.', title).rstrip('.')
+        # 去除XX月新番
+        title = re.sub(r'%s' % self._release_date_re, '', title)
         # 去除多音轨标志
         title = re.sub(r'\d+Audio', '', title)
         # 去掉名称中第1个[]的内容
