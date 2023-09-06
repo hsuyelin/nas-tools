@@ -393,6 +393,10 @@ class Downloader:
                         tags = tag
                     else:
                         tags = [tag]
+            # 添加站点tag
+            site_tags = self.sites.get_site_download_tags(media_info.site)
+            if tags:
+                tags.extend(str(site_tags).split(";"))
 
             # 暂停
             if is_paused is None:
