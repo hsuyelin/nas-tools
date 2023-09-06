@@ -1,21 +1,24 @@
 import re
+import os
 
 from guessit.api import default_api
 
 import log
+from config import RMT_MEDIAEXT
 from app.media.meta._base import MetaBase
 from app.media.meta.release_groups import ReleaseGroupsMatcher
 from app.media.meta.customization import CustomizationMatcher
 from .mediaItem import MediaItem
 from app.utils import StringUtils
 from app.utils.types import MediaType
-
+from app.utils.tokens import Tokens
         
 class MetaVideoV2(MetaBase):
 
     _media_item_title = None
     _media_item_subtitle = None
 
+    _name_no_begin_re = r"^\[.+?]"
     _name_nostring_re = r"^PTS|^JADE|^ViuTV|^AOD|^CHC|^[A-Z]{1,4}TV[\-0-9UVHDK]*" \
                     r"|HBO$|\s+HBO|\d{1,2}th|\d{1,2}bit|NETFLIX|AMAZON|IMAX|^3D|\s+3D|^BBC\s+|\s+BBC|BBC$|DISNEY\+?|XXX|\s+DC$" \
                     r"|[第\s共]+[0-9一二三四五六七八九十\-\s]+季" \
@@ -49,6 +52,14 @@ class MetaVideoV2(MetaBase):
                          imdb_id)
 
         original_title = title
+
+        # 判断是否纯数字命名
+        if os.path.splitext(title)[-1] in RMT_MEDIAEXT \
+                and os.path.splitext(title)[0].isdigit() \
+                and len(os.path.splitext(title)[0]) < 5:
+            self.begin_episode = int(os.path.splitext(title)[0])
+            self.type = MediaType.TV
+            return
 
         media_item_title, media_item_subtitle = self.guess_media_item(self.__fix_title(title), subtitle)
         self._media_item_title = media_item_title
@@ -115,11 +126,22 @@ class MetaVideoV2(MetaBase):
         if StringUtils.is_string_and_not_empty(self.cn_name) and StringUtils.is_string_and_not_empty(self.en_name):
             return
         name = self._media_item_title.main.title if StringUtils.is_string_and_not_empty(self._media_item_title.main.title) else self._media_item_subtitle.main.title
-
-        if StringUtils.is_chinese(name):
-            self.cn_name = self.cn_name if StringUtils.is_string_and_not_empty(self.cn_name) else name
-        else:
-            self.en_name = self.en_name if StringUtils.is_string_and_not_empty(self.en_name) else name
+        if not StringUtils.is_string_and_not_empty(name):
+            return
+        tokens = Tokens(name)
+        token = tokens.get_next()
+        chinese_name = ""
+        eng_name = ""
+        while token:
+            if StringUtils.is_chinese(token):
+                chinese_name += f"{token} "
+            else:
+                eng_name += f"{token} "
+            token = tokens.get_next()
+        chinese_name = chinese_name.strip()
+        eng_name = eng_name.strip()
+        self.cn_name = chinese_name if StringUtils.is_string_and_not_empty(chinese_name) else self.cn_name
+        self.en_name = eng_name if StringUtils.is_string_and_not_empty(eng_name) else self.en_name
 
     def __init_year(self):
         year = self._media_item_title.main.year if self._media_item_title.main.year else self._media_item_subtitle.main.year
@@ -280,11 +302,6 @@ class MetaVideoV2(MetaBase):
                 self.resource_pix = subltitle_resource_pixs
             else:
                 self.resource_pix = None
-        if StringUtils.is_string_and_not_empty(self.resource_pix):
-            self.resource_pix.replace("i", "p")
-            self.resource_pix.replace("1440p", "2K")
-            self.resource_pix.replace("2160p", "4K")
-            self.resource_pix.replace("4320p", "8K")
 
     def __init_edition(self):
         title_editions = self._media_item_title.other.edition
@@ -416,6 +433,17 @@ class MetaVideoV2(MetaBase):
             .replace("-", ".") \
             .replace("【",  "[") \
             .replace("】", "]") \
+
+        # 去除多音轨标志
+        title = re.sub(r'\d+Audio', '', title)
+        # 去掉名称中第1个[]的内容
+        title = re.sub(r'%s' % self._name_no_begin_re, "", title, count=1)
+        # 把xxxx-xxxx年份换成前一个年份，常出现在季集上
+        title = re.sub(r'([\s.]+)(\d{4})-(\d{4})', r'\1\2', title)
+        # 把大小去掉
+        title = re.sub(r'[0-9.]+\s*[MGT]i?B(?![A-Z]+)', "", title, flags=re.IGNORECASE)
+        # 把年月日去掉
+        title = re.sub(r'\d{4}[\s._-]\d{1,2}[\s._-]\d{1,2}', "", title)
             
         return title
 
