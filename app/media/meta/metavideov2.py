@@ -280,6 +280,11 @@ class MetaVideoV2(MetaBase):
                 self.resource_pix = subltitle_resource_pixs
             else:
                 self.resource_pix = None
+        if StringUtils.is_string_and_not_empty(self.resource_pix):
+            self.resource_pix.replace("i", "p")
+            self.resource_pix.replace("1440p", "2K")
+            self.resource_pix.replace("2160p", "4K")
+            self.resource_pix.replace("4320p", "8K")
 
     def __init_edition(self):
         title_editions = self._media_item_title.other.edition
