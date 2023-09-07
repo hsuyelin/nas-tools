@@ -37,7 +37,7 @@ class MetaVideoV2(MetaBase):
     _episodes_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
     _episode_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
     _numbers_re = r"\d+|[一二三四五六七八九十]+"
-    _years_re = r"(\d{4})\s*.\s*(\d{4})"
+    _years_re = r"\d{4}(?![pP])\s*\.\s*\d{4}(?![pP])"
     _release_date_re = r"\d{2,4}年\d+(?:月)?(?:新番|合集|)"
     _other_re = r"\[(?:★|❤|GB|JP|KR|CN|TW|US|SG|招募翻译(?:校对)?|招募翻譯(?:校對)?|)\]"
 
@@ -526,8 +526,8 @@ class MetaVideoV2(MetaBase):
             begin_year = years_match.group(1)
             end_year = years_match.group(2)
             try:
-                begin_year_number = int(cn2an.cn2an(begin_year))
-                end_year_number = int(cn2an.cn2an(end_year))
+                begin_year_number = int(cn2an.cn2an(begin_year, "smart"))
+                end_year_number = int(cn2an.cn2an(end_year, "smart"))
                 max_year_number = end_year_number if end_year_number >= begin_year_number else begin_year_number
                 title = re.sub(r'%s' % self._years_re, f"{max_year_number}", title)
             except Exception as e:
