@@ -127,7 +127,7 @@ class Media:
         file_name = StringUtils.handler_special_chars(file_name).upper()
         for tmdb_name in tmdb_names:
             tmdb_name = StringUtils.handler_special_chars(tmdb_name).strip().upper()
-            if file_name == tmdb_name:
+            if file_name == tmdb_name or (StringUtils.is_eng_media_name_format(file_name) and file_name in tmdb_name):
                 return True
         return False
 
