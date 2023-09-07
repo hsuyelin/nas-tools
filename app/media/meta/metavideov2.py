@@ -71,7 +71,9 @@ class MetaVideoV2(MetaBase):
             self.type = MediaType.TV
             return
 
-        media_item_title, media_item_subtitle = self.guess_media_item(self.__fix_title(title), subtitle)
+        _fixed_title = self.__fix_title(title)
+        log.debug(f"【Meta】使用增强识别V2修正的名称: {_fixed_title}")
+        media_item_title, media_item_subtitle = self.guess_media_item(_fixed_title, subtitle)
         self._media_item_title = media_item_title
         self._media_item_subtitle = media_item_subtitle
 
