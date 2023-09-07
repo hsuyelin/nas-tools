@@ -1327,7 +1327,6 @@ function search_media_advanced() {
     "sp_state": sp_state,
     "rule": search_rule
   };
-  // FIXME: 需要打印filters，确认search_site中存储的内容 @hsuyelin@163.com
   const param = {"search_word": keyword, "filters": filters, "unident": true};
   $("#modal-search-advanced").modal("hide");
   show_refresh_progress(`正在搜索 ${keyword} ...`, "search");
@@ -1352,10 +1351,10 @@ function fresh_tooltip() {
 }
 
 //打开路径选择框
-function openFileBrowser(el, root, only_folders, on_folders, on_files, close_on_select) {
+function openFileBrowser(el, root, filter, on_folders, on_files, close_on_select) {
   if (on_folders === undefined) on_folders = true;
   if (on_files === undefined) on_files = true;
-  if (!only_folders && !on_files) only_folders = true;
+  if (!filter && !on_files) filter = 'HIDE_FILES_FILTER';
   if (!root.trim()) root = "";
   let p = $(el);
   // Skip is fileTree is already open
@@ -1368,8 +1367,8 @@ function openFileBrowser(el, root, only_folders, on_folders, on_files, close_on_
   ft.fileTree({
         script: 'dirlist',
         root: root,
-        onlyFolders: only_folders,
-        multiFolder: false
+        filter: filter,
+        allowBrowsing: true
       },
       function (file) {
         if (on_files) {
@@ -1381,16 +1380,17 @@ function openFileBrowser(el, root, only_folders, on_folders, on_files, close_on_
             });
           }
         }
-      }).on("filetreeinitiated filetreeexpanded", function(e, data) {
+      },
+      function (folder) {
         if (on_folders) {
-          p.val(data.rel);
+          p.val(folder);
           p.trigger('change');
           if (close_on_select) {
             $(ft).slideUp('fast', function () {
               $(ft).remove();
             });
           }
-        }        
+        }
       });
   // Format fileTree according to parent position, height and width
   ft.css({'left': p.position().left, 'top': (p.position().top + p.outerHeight()), 'width': (p.parent().width())});
