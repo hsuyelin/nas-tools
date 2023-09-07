@@ -32,7 +32,7 @@ class DoubanSync(_IPluginModule):
     # 主题色
     module_color = "#05B711"
     # 插件版本
-    module_version = "1.1"
+    module_version = "1.2"
     # 插件作者
     module_author = "jxxghp"
     # 作者主页
@@ -117,7 +117,8 @@ class DoubanSync(_IPluginModule):
                 self._scheduler.add_job(self.sync, 'interval',
                                         hours=self._interval)
             if self._rss_interval:
-                self.info(f"豆瓣近期动态同步服务启动，周期：{self._rss_interval} 秒，类型：{self._types}，用户：{self._users}")
+                self.info(
+                    f"豆瓣近期动态同步服务启动，周期：{self._rss_interval} 秒，类型：{self._types}，用户：{self._users}")
                 self._scheduler.add_job(self.sync, 'interval',
                                         seconds=self._rss_interval)
 
@@ -149,8 +150,8 @@ class DoubanSync(_IPluginModule):
 
     def get_state(self):
         return self._enable \
-               and self._users \
-               and self._types \
+            and self._users \
+            and self._types \
             and ((self._sync_type == '1' and self._rss_interval)
                  or (self._sync_type != '1' and self._interval))
 
@@ -395,7 +396,7 @@ class DoubanSync(_IPluginModule):
               $("#douban_history_" + id).remove();
             });
           }
-          
+
           // 同步方式切换
           function DoubanSync_sync_rss_change(obj){
             if ($(obj).val() == '1') {
@@ -408,7 +409,7 @@ class DoubanSync(_IPluginModule):
                 $('#doubansync_days').parent().parent().show();
             }
           }
-          
+
           // 初始化完成后执行的方法
           function DoubanSync_PluginInit(){
             DoubanSync_sync_rss_change('#doubansync_sync_type');
@@ -573,7 +574,7 @@ class DoubanSync(_IPluginModule):
         获取每一个用户的每一个类型的豆瓣标记
         :return: 搜索到的媒体信息列表（不含TMDB信息）
         """
-        self.info(f"同步方式：{'近期动态' if self._sync_type == '1' else '全量同步'}")
+        self.info(f"同步方式：{'近期动态' if str({self._sync_type}) == '1' else '全量同步'}")
 
         # 返回媒体列表
         media_list = []
@@ -589,7 +590,7 @@ class DoubanSync(_IPluginModule):
             if userinfo:
                 user_name = userinfo.get("name")
 
-            if self._sync_type != '1':
+            if str({self._sync_type}) == '1':
                 # 每页条数
                 perpage_number = 15
                 # 所有类型成功数量
