@@ -82,8 +82,7 @@ class Search(TMDb):
         return self._get_obj(self._call(self._urls["tv_shows"], urlencode(params)))
 
     def __update_language(self, params):
-        # 优先搜索使用英文就不在使用关键字里的语言
-        if self.language == "en" or not isinstance(params, dict):
+        if not isinstance(params, dict):
             return
         query = params.get("query", "") or ""
         if not StringUtils.is_string_and_not_empty(query):

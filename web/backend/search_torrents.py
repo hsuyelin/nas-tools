@@ -90,17 +90,8 @@ def search_medias_for_web(content, ident_flag=True, filters=None, tmdbid=None, m
                     if en_title:
                         search_en_name = en_title
             # 两次搜索名称
-            second_search_name = None
-            if Config().get_config("laboratory").get("search_en_title"):
-                if search_en_name:
-                    first_search_name = search_en_name
-                    second_search_name = search_cn_name
-                else:
-                    first_search_name = search_cn_name
-            else:
-                first_search_name = search_cn_name
-                if search_en_name:
-                    second_search_name = search_en_name
+            first_search_name = search_cn_name
+            second_search_name = search_en_name if StringUtils.is_string_and_not_empty(search_en_name) else None
 
             filter_args = {"season": search_season,
                            "episode": search_episode,
