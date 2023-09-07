@@ -111,7 +111,7 @@ class StringUtils:
         return True
     @staticmethod
     def is_eng_media_name_format(word):
-        pattern = r'^[a-zA-Z0-9_:@!]+$'
+        pattern = r'^[a-zA-Z]+[a-zA-Z0-9\s._:@!@]*$'
         return bool(re.match(pattern, word))
 
     @staticmethod

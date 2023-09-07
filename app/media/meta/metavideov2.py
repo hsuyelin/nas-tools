@@ -33,11 +33,15 @@ class MetaVideoV2(MetaBase):
                     r"|CD[\s.]*[1-9]|DVD[\s.]*[1-9]|DISK[\s.]*[1-9]|DISC[\s.]*[1-9]"
     _release_group_re = r"\[.*(?:字幕组|字幕社|发布组|手抄部|手抄组|压制|动漫|新番|合集|连载|日剧|美剧|电视剧|动画片|动漫|欧美|西德|日韩|超高清|高清|蓝光|翡翠台|梦幻天堂·龙网|喵萌奶茶屋|Sub|LoliHouse|毀片黨|毁片党|论坛|Raws)\]"
     _seasons_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季"
+    _seasons_re_2 = r"(?:[Ss]0*|Season|season)([0-9]+)\s*\.\s*(?:[Ss]0*|Season|season)([0-9]+)"
     _season_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季"
+    _season_re_2 = r"(?i)[sS](eason)?\s*0*\d+"
     _episodes_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
+    _episodes_re_2 = r"(?:[Ee]0*|episode|ep)([0-9]+)\s*\.\s*(?:[Ee]0*|episode|ep)([0-9]+)"
     _episode_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
+    _episode_re_2 = r"(?i)(?:e|ep|episode)\s*0*\d+"
     _numbers_re = r"\d+|[一二三四五六七八九十]+"
-    _years_re = r"\d{4}(?![pP])\s*\.\s*\d{4}(?![pP])"
+    _years_re = r"(\d{4}(?!p|P))\s*\.\s*(\d{4})(?![pP])"
     _release_date_re = r"\d{2,4}年\d+(?:月)?(?:新番|合集|)"
     _other_re = r"\[(?:★|❤|GB|JP|KR|CN|TW|US|SG|招募翻译(?:校对)?|招募翻譯(?:校對)?|)\]"
 
@@ -141,6 +145,12 @@ class MetaVideoV2(MetaBase):
             return
         name = self._media_item_title.main.title if StringUtils.is_string_and_not_empty(self._media_item_title.main.title) else self._media_item_subtitle.main.title
         if not StringUtils.is_string_and_not_empty(name):
+            return
+        if StringUtils.is_eng_media_name_format(name):
+            self.en_name = name
+            return
+        if StringUtils.is_all_chinese(name):
+            self.cn_name = name
             return
         tokens = Tokens(name)
         token = tokens.get_next()
@@ -466,58 +476,62 @@ class MetaVideoV2(MetaBase):
         title = title.replace("]", ".")
 
         # 匹配出季组
-        seasons_match = re.search(r'%s' % self._seasons_re, title)
+        seasons_pattern = f"({self._seasons_re}|{self._seasons_re_2})"
+        seasons_match = re.search(r'%s' % seasons_pattern, title, flags=re.IGNORECASE)
         if seasons_match:
             seasons_match_text = seasons_match.group(0)
-            seasons = re.findall(r'%s' % self._numbers_re, seasons_match_text)
+            seasons = re.findall(r'%s' % self._numbers_re, seasons_match_text, flags=re.IGNORECASE)
             seasons = sorted(seasons)
             if len(seasons) >= 2:
                 try:
                     begin_season = int(cn2an.cn2an(seasons[0], "smart"))
                     end_season = int(cn2an.cn2an(seasons[-1], "smart"))
-                    title = re.sub(r'%s' % self._seasons_re, f"S{begin_season}-S{end_season}", title)
+                    title = re.sub(r'%s' % seasons_pattern, f".S{begin_season}-S{end_season}", title, flags=re.IGNORECASE)
                 except Exception as e:
                     pass
         else:
             # 匹配出季
-            season_match = re.search(r'%s' % self._season_re, title)
+            seasons_pattern = f"({self._season_re}|{self._season_re_2})"
+            season_match = re.search(r'%s' % seasons_pattern, title, flags=re.IGNORECASE)
             if season_match:
                 season_matched_text = season_match.group(0)
-                season = re.findall(r'%s' % self._numbers_re, season_matched_text)[0]
+                season = re.findall(r'%s' % self._numbers_re, season_matched_text, flags=re.IGNORECASE)[0]
                 if season:
                     season = re.sub(r'^0+', '', season)
                     fix_season = cn2an.cn2an(season, "smart")
                     try:
                         fix_season = int(fix_season)
-                        title = re.sub(r'%s' % self._season_re, f"S{fix_season}", title)
+                        title = re.sub(r'%s' % seasons_pattern, f".S{fix_season}", title, flags=re.IGNORECASE)
                     except Exception as e:
                         pass
 
         # 匹配出集组
-        episodes_match = re.search(r'%s' % self._episodes_re, title)
+        episodes_pattern = f"({self._episodes_re}|{self._episodes_re_2})"
+        episodes_match = re.search(r'%s' % episodes_pattern, title, flags=re.IGNORECASE)
         if episodes_match:
             episodes_match_text = episodes_match.group(0)
-            episodes = re.findall(r'%s' % self._numbers_re, episodes_match_text)
+            episodes = re.findall(r'%s' % self._numbers_re, episodes_match_text, flags=re.IGNORECASE)
             episodes = sorted(episodes)
             if len(episodes) >= 2:
                 try:
                     begin_episode = int(cn2an.cn2an(episodes[0], "smart"))
                     end_episode = int(cn2an.cn2an(episodes[-1], "smart"))
-                    title = re.sub(r'%s' % self._episodes_re, f"E{begin_episode}-E{end_episode}", title)
+                    title = re.sub(r'%s' % episodes_pattern, f".E{begin_episode}-E{end_episode}", title, flags=re.IGNORECASE)
                 except Exception as e:
                     pass
         else:
             # 匹配出集
-            episode_match = re.search(r'%s' % self._episode_re, title)
+            episode_pattern = f"({self._episode_re}|{self._episode_re_2})"
+            episode_match = re.search(r'%s' % episode_pattern, title, flags=re.IGNORECASE)
             if episode_match:
                 episode_matched_text = episode_match.group(0)
-                episode = re.findall(r'%s' % self._numbers_re, episode_matched_text)[0]
+                episode = re.findall(r'%s' % self._numbers_re, episode_matched_text, flags=re.IGNORECASE)[0]
                 if episode:
                     episode = re.sub(r'^0+', '', episode)
                     fix_episode = cn2an.cn2an(episode, "smart")
                     try:
                         fix_episode = int(fix_episode)
-                        title = re.sub(r'%s' % self._episode_re, f"E{fix_episode}", title)
+                        title = re.sub(r'%s' % episode_pattern, f".E{fix_episode}", title, flags=re.IGNORECASE)
                     except Exception as e:
                         pass
 
