@@ -103,34 +103,56 @@ class Scheduler:
                         except Exception as e:
                             log.info("豆瓣同步服务启动失败：%s" % str(e))
                             mediasync_interval = 0
-                if mediasync_interval:
+                if mediasync_interval and self._is_scheduler_valid():
                     self.SCHEDULER.add_job(MediaServer().sync_mediaserver, 'interval', hours=mediasync_interval)
                     log.info("媒体库同步服务启动")
+                else:
+                    log.error("【SCHEDULE】sync_mediaserver 任务调度器未成功初始化或已关闭，无法添加新任务")
 
         # 元数据定时保存
-        self.SCHEDULER.add_job(MetaHelper().save_meta_data, 'interval', seconds=METAINFO_SAVE_INTERVAL)
+        if self._is_scheduler_valid():
+            self.SCHEDULER.add_job(MetaHelper().save_meta_data, 'interval', seconds=METAINFO_SAVE_INTERVAL)
+        else:
+            log.error("【SCHEDULE】save_meta_data 任务调度器未成功初始化或已关闭，无法添加新任务")
 
         # 定时把队列中的监控文件转移走
-        self.SCHEDULER.add_job(Sync().transfer_mon_files, 'interval', seconds=SYNC_TRANSFER_INTERVAL)
+        if self._is_scheduler_valid():
+            self.SCHEDULER.add_job(Sync().transfer_mon_files, 'interval', seconds=SYNC_TRANSFER_INTERVAL)
+        else:
+            log.error("【SCHEDULE】transfer_mon_files 任务调度器未成功初始化或已关闭，无法添加新任务")
 
         # RSS队列中搜索
-        self.SCHEDULER.add_job(Subscribe().subscribe_search, 'interval', seconds=RSS_CHECK_INTERVAL)
+        if self._is_scheduler_valid():
+            self.SCHEDULER.add_job(Subscribe().subscribe_search, 'interval', seconds=RSS_CHECK_INTERVAL)
+        else:
+            log.error("【SCHEDULE】subscribe_search 任务调度器未成功初始化或已关闭，无法添加新任务")
 
         # 豆瓣RSS转TMDB，定时更新TMDB数据
-        self.SCHEDULER.add_job(Subscribe().refresh_rss_metainfo, 'interval', hours=RSS_REFRESH_TMDB_INTERVAL)
+        if self._is_scheduler_valid():
+            self.SCHEDULER.add_job(Subscribe().refresh_rss_metainfo, 'interval', hours=RSS_REFRESH_TMDB_INTERVAL)
+        else:
+            log.error("【SCHEDULE】refresh_rss_metainfo 任务调度器未成功初始化或已关闭，无法添加新任务")
 
         # 定时清除未识别的缓存
-        self.SCHEDULER.add_job(MetaHelper().delete_unknown_meta, 'interval', hours=META_DELETE_UNKNOWN_INTERVAL)
+        if self._is_scheduler_valid():
+            self.SCHEDULER.add_job(MetaHelper().delete_unknown_meta, 'interval', hours=META_DELETE_UNKNOWN_INTERVAL)
+        else:
+            log.error("【SCHEDULE】refresh_rss_metainfo 任务调度器未成功初始化或已关闭，无法添加新任务")
 
         # 定时刷新壁纸
-        self.SCHEDULER.add_job(get_login_wallpaper,
-                               'interval',
-                               hours=REFRESH_WALLPAPER_INTERVAL,
-                               next_run_time=datetime.datetime.now())
+        if self._is_scheduler_valid():
+            self.SCHEDULER.add_job(get_login_wallpaper, 'interval', hours=REFRESH_WALLPAPER_INTERVAL, next_run_time=datetime.datetime.now())
+        else:
+            log.error("【SCHEDULE】get_login_wallpaper 任务调度器未成功初始化或已关闭，无法添加新任务")
 
-        self.SCHEDULER.print_jobs()
+        if self._is_scheduler_valid():
+            self.SCHEDULER.print_jobs()
+            self.SCHEDULER.start()
+        else:
+            log.error("【SCHEDULE】任务调度器未成功初始化或已关闭，无法执行打印job任务和开始任务")
 
-        self.SCHEDULER.start()
+    def _is_scheduler_valid(self):
+        return self.SCHEDULER and not self.SCHEDULER.state == 'shutdown'
 
     def stop_service(self):
         """
