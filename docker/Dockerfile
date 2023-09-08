@@ -24,6 +24,7 @@ ENV S6_SERVICES_GRACETIME=30000 \
     PATH=${PATH}:/usr/lib/chromium \
     LANG="C.UTF-8" \
     TZ="Asia/Shanghai" \
+    FLASK_APP="/web/main.py" \
     NASTOOL_CONFIG="/config/config.yaml" \
     NASTOOL_AUTO_UPDATE=false \
     NASTOOL_CN_UPDATE=true \
@@ -50,6 +51,7 @@ RUN mkdir ${HOME} \
     && git config --global pull.ff only \
     && git clone -b master ${REPO_URL} ${WORKDIR} --depth=1 --recurse-submodule \
     && git config --global --add safe.directory ${WORKDIR}
+RUN sysctl -p 2>/dev/null || echo "You do not have sufficient permissions to run sysctl -p"
 COPY --chmod=755 ./rootfs /
 EXPOSE 3000
 VOLUME ["/config"]
