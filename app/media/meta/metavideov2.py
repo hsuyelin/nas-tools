@@ -486,7 +486,7 @@ class MetaVideoV2(MetaBase):
                 try:
                     begin_season = int(cn2an.cn2an(seasons[0], "smart"))
                     end_season = int(cn2an.cn2an(seasons[-1], "smart"))
-                    title = re.sub(r'%s' % seasons_pattern, f".S{begin_season}-S{end_season}", title, flags=re.IGNORECASE)
+                    title = re.sub(r'%s' % seasons_pattern, f".S{begin_season}-S{end_season}.", title, flags=re.IGNORECASE)
                 except Exception as e:
                     pass
         else:
@@ -501,7 +501,7 @@ class MetaVideoV2(MetaBase):
                     fix_season = cn2an.cn2an(season, "smart")
                     try:
                         fix_season = int(fix_season)
-                        title = re.sub(r'%s' % seasons_pattern, f".S{fix_season}", title, flags=re.IGNORECASE)
+                        title = re.sub(r'%s' % seasons_pattern, f".S{fix_season}.", title, flags=re.IGNORECASE)
                     except Exception as e:
                         pass
 
@@ -516,7 +516,7 @@ class MetaVideoV2(MetaBase):
                 try:
                     begin_episode = int(cn2an.cn2an(episodes[0], "smart"))
                     end_episode = int(cn2an.cn2an(episodes[-1], "smart"))
-                    title = re.sub(r'%s' % episodes_pattern, f".E{begin_episode}-E{end_episode}", title, flags=re.IGNORECASE)
+                    title = re.sub(r'%s' % episodes_pattern, f".E{begin_episode}-E{end_episode}.", title, flags=re.IGNORECASE)
                 except Exception as e:
                     pass
         else:
@@ -531,7 +531,7 @@ class MetaVideoV2(MetaBase):
                     fix_episode = cn2an.cn2an(episode, "smart")
                     try:
                         fix_episode = int(fix_episode)
-                        title = re.sub(r'%s' % episode_pattern, f".E{fix_episode}", title, flags=re.IGNORECASE)
+                        title = re.sub(r'%s' % episode_pattern, f".E{fix_episode}.", title, flags=re.IGNORECASE)
                     except Exception as e:
                         pass
 
