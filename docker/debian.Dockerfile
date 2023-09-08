@@ -47,7 +47,6 @@ ENV S6_SERVICES_GRACETIME=30000 \
     TERM="xterm" \
     PATH=${PATH}:/usr/lib/chromium:/command \
     TZ="Asia/Shanghai" \
-    FLASK_APP="/web/main.py" \
     NASTOOL_CONFIG="/config/config.yaml" \
     NASTOOL_AUTO_UPDATE=false \
     NASTOOL_CN_UPDATE=true \
