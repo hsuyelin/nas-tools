@@ -289,11 +289,14 @@ class MetaVideoV2(MetaBase):
         if not StringUtils.is_string_and_not_empty(streaming_services):
             return
 
-        streaming_services = "AMZN" if streaming_services.lower() == "amazon prime" else streaming_services
         if StringUtils.is_string_and_not_empty(self.resource_type):
             self.resource_type += f" {streaming_services}"
         else:
             self.resource_type = streaming_services
+
+        self.resource_type = re.sub(r'\+', '', self.resource_type)
+        self.resource_type = re.sub(r'(?i)amazon prime', 'AMZN', self.resource_type)
+        self.resource_type = re.sub(r'(?i)disney', 'DSNP', self.resource_type)
 
     def __init_resource_effect(self):
         title_resource_effects = self._media_item_title.other.other
