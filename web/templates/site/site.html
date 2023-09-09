@@ -661,6 +661,19 @@
     ajax_post("update_site", data, function (ret) {
       $("#add_or_edit_site_btn").attr("disabled", false).text("新增");
       $("#modal-site").modal("hide");
+      if (ret === undefined) {
+        show_fail_modal("！", function () {
+          GlobalModalAbort = true;
+          window_history_refresh();
+        });
+      }
+
+      if (ret.code !== "200") {
+        show_fail_modal(ret.msg, function () {
+          GlobalModalAbort = true;
+          navmenu('site');
+        });
+      }
       //刷新页面
       window_history_refresh();
     });

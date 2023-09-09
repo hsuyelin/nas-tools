@@ -1119,8 +1119,10 @@ class WebAction:
                                   cookie=cookie,
                                   note=note,
                                   rss_uses=rss_uses)
-
-        return {"code": ret}
+        if ret:
+            return {"code": "200"}
+        else:
+            return {"code": "400", "msg": "更新数据库失败，请重试"}
 
     @staticmethod
     def __get_site(data):
