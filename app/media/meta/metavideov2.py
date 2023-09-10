@@ -18,6 +18,8 @@ class MetaVideoV2(MetaBase):
 
     _media_item_title = None
     _media_item_subtitle = None
+    _original_title = None
+    _original_subtitle = None
 
     _name_no_begin_re = r"^\[.+?]"
     _name_nostring_re = r"^PTS|^JADE|^ViuTV|^AOD|^CHC|^[A-Z]{1,4}TV[\-0-9UVHDK]*" \
@@ -32,11 +34,11 @@ class MetaVideoV2(MetaBase):
                     r"|[248]K|\d{3,4}[PIX]+" \
                     r"|CD[\s.]*[1-9]|DVD[\s.]*[1-9]|DISK[\s.]*[1-9]|DISC[\s.]*[1-9]"
     _release_group_re = r"\[.*(?:字幕组|字幕社|发布组|手抄部|手抄组|压制|动漫|新番|合集|连载|日剧|美剧|电视剧|动画片|动漫|欧美|西德|日韩|超高清|高清|蓝光|翡翠台|梦幻天堂·龙网|喵萌奶茶屋|Sub|LoliHouse|毀片黨|毁片党|论坛|Raws)\]"
-    _seasons_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季"
+    _seasons_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季?\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季"
     _seasons_re_2 = r"(?:[Ss]0*|Season|season)([0-9]+)\s*\.\s*(?:[Ss]0*|Season|season)([0-9]+)"
     _season_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季"
     _season_re_2 = r"(?<![a-zA-Z0-9_])(?i)[sS](eason)?\s*0*\d+"
-    _episodes_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
+    _episodes_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)?\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
     _episodes_re_2 = r"(?:[Ee]0*|episode|ep)([0-9]+)\s*\.\s*(?:[Ee]0*|episode|ep)([0-9]+)"
     _episode_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
     _episode_re_2 = r"(?<![a-zA-Z0-9_])(?i)(?:e|ep|episode)\s*0*\d+"
@@ -44,6 +46,8 @@ class MetaVideoV2(MetaBase):
     _years_re = r"(\d{4}(?!p|P))\s*\.\s*(\d{4})(?![pP])"
     _release_date_re = r"\d{2,4}年\d+(?:月)?(?:新番|合集|)"
     _other_re = r"\[(?:★|❤|GB|JP|KR|CN|TW|US|SG|招募翻译(?:校对)?|招募翻譯(?:校對)?|)\]"
+    _special_resource_team = r"(?i)(HDCTV)"
+    _special_streaming_service = r"(?i)(Jade|ViuTv)"
 
     def __init__(self,
                  title,
@@ -65,7 +69,8 @@ class MetaVideoV2(MetaBase):
                          tmdb_id,
                          imdb_id)
 
-        original_title = title
+        self._original_title = title
+        self._original_subtitle = subtitle
 
         # 判断是否纯数字命名
         if os.path.splitext(title)[-1] in RMT_MEDIAEXT \
@@ -111,7 +116,7 @@ class MetaVideoV2(MetaBase):
         # 提取原盘DIY
         if self.resource_type and "BluRay" in self.resource_type:
             if (self.subtitle and re.findall(r'D[Ii]Y', self.subtitle)) \
-                    or re.findall(r'-D[Ii]Y@', original_title):
+                    or re.findall(r'-D[Ii]Y@', self._original_title):
                 self.resource_type = f"{self.resource_type} DIY"
 
         # 修正年份被识别为季
@@ -126,10 +131,10 @@ class MetaVideoV2(MetaBase):
             self.part = None
 
         # 制作组/字幕组
-        self.resource_team = ReleaseGroupsMatcher().match(title=original_title) or None
+        self.resource_team = ReleaseGroupsMatcher().match(title=self._original_title) or None
         self.__fix_resource_team()
         # 自定义占位符
-        self.customization = CustomizationMatcher().match(title=original_title) or None
+        self.customization = CustomizationMatcher().match(title=self._original_title) or None
 
     def __init_type(self):
         media_type = self._media_item_title.main.media_type if self._media_item_title.main.media_type else self._media_item_subtitle.main.media_type
@@ -298,6 +303,19 @@ class MetaVideoV2(MetaBase):
         self.resource_type = re.sub(r'(?i)amazon prime', 'AMZN', self.resource_type)
         self.resource_type = re.sub(r'(?i)disney', 'DSNP', self.resource_type)
 
+        if re.findall(r'%s' % self._special_resource_team, self._original_title):
+            self.resource_type = re.sub(r'(?i)ctv', '', self.resource_type)
+
+        special_streaming_services_matches = re.findall(r'%s' % self._special_streaming_service, self._original_title)
+        special_streaming_services_text = None
+        if len(special_streaming_services_matches) > 1:
+            special_streaming_services_text = ' '.join(special_streaming_services_matches)
+        else:
+            special_streaming_services_text = special_streaming_services_matches[0] if special_streaming_services_matches else ""
+        if special_streaming_services_text:
+            self.resource_type += special_streaming_services_text
+            self.resource_type = self.resource_type.rstrip()
+
     def __init_resource_effect(self):
         title_resource_effects = self._media_item_title.other.other
         subltitle_resource_effects = self._media_item_subtitle.other.other
@@ -441,7 +459,17 @@ class MetaVideoV2(MetaBase):
             elif StringUtils.is_string_and_not_empty(subltitle_resource_teams):
                 self.resource_team = subltitle_resource_teams
             else:
-                self.resource_team = None 
+                self.resource_team = None
+
+        special_resource_team_matches = re.findall(r'%s' % self._special_resource_team, self._original_title)
+        special_resource_team_text = None
+        if len(special_resource_team_matches) > 1:
+            special_resource_team_text = ' '.join(special_resource_team_matches)
+        else:
+            special_resource_team_text = special_resource_team_matches[0] if special_resource_team_matches else ""
+        if special_resource_team_text:
+            self.resource_team += special_resource_team_text
+            self.resource_team = self.resource_team.rstrip()
 
     def guess_media_item(self, title, subtitle):
         """
@@ -565,6 +593,8 @@ class MetaVideoV2(MetaBase):
         title = re.sub(r'[0-9.]+\s*[MGT]i?B(?![A-Z]+)', "", title, flags=re.IGNORECASE)
         # 把年月日去掉
         title = re.sub(r'\d{4}[\s._-]\d{1,2}[\s._-]\d{1,2}', "", title)
+        # 替换 - 为 .
+        title = title.replace("-", ".")
 
         return title
 
@@ -593,6 +623,51 @@ class MetaVideoV2(MetaBase):
         # 修正年份被识别为季
         if self.begin_season and self.year and self.begin_season == self.year:
             self.begin_season = None
+
+        if not self.media_type == MediaType.TV:
+            return
+
+        if self.begin_episode or self.end_episode:
+            return
+
+        if not StringUtils.is_string_and_not_empty(self._original_subtitle):
+            return
+
+        # 匹配出集组
+        fixed_subtitle = self._original_subtitle.replace("-", ".")
+        log.info(f"【Meta】正在通过 {fixed_subtitle} 匹配缺失的集信息")
+        episodes_pattern = f"({self._episodes_re}|{self._episodes_re_2})"
+        episodes_match = re.search(r'%s' % episodes_pattern, fixed_subtitle, flags=re.IGNORECASE)
+        if episodes_match:
+            episodes_match_text = episodes_match.group(0)
+            episodes = re.findall(r'%s' % self._numbers_re, episodes_match_text, flags=re.IGNORECASE)
+            episodes = sorted(episodes)
+            if len(episodes) >= 2:
+                try:
+                    begin_episode = int(cn2an.cn2an(episodes[0], "smart"))
+                    end_episode = int(cn2an.cn2an(episodes[-1], "smart"))
+                    self.begin_episode = begin_episode
+                    self.end_episode = end_episode
+                    self.total_episodes = begin_episode if begin_episode == end_episode else end_episode
+                except Exception as e:
+                    pass
+        else:
+            # 匹配出集
+            episode_pattern = f"({self._episode_re}|{self._episode_re_2})"
+            episode_match = re.search(r'%s' % episode_pattern, fixed_subtitle, flags=re.IGNORECASE)
+            if episode_match:
+                episode_matched_text = episode_match.group(0)
+                episode = re.findall(r'%s' % self._numbers_re, episode_matched_text, flags=re.IGNORECASE)[0]
+                if episode:
+                    episode = re.sub(r'^0+', '', episode)
+                    fix_episode = cn2an.cn2an(episode, "smart")
+                    try:
+                        fix_episode = int(fix_episode)
+                        self.begin_episode = fix_episode
+                        self.end_episode = None
+                        self.total_episodes = 1
+                    except Exception as e:
+                        pass
 
     def __is_digit_array(self, arr):
         if not isinstance(arr, list):
