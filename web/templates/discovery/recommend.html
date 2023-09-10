@@ -83,6 +83,15 @@
     })
   }
 
+  // 修正图片地址如果是qnmob3返回为img1
+  function fix_card_image_url(url) {
+    if (!url || url.toLowerCase() === "none") {
+      return "";
+    }
+    var regex = /qnmob3/i;
+    var fixedUrl = url.replace(regex, 'img1');
+    return fixedUrl;
+  }
 
   //状态标记
   var loading = false;
@@ -122,7 +131,7 @@
                       card-tmdbId="${item.id}"
                       card-mediatype="${item.type}"
                       card-showSub="1"
-                      card-image=${'/img?url='+item.image}
+                      card-image=${'/img?url='+this.fix_card_image_url(item.image)}
                       card-weekday="${item.weekday}"
                       card-fav="${item.fav}"
                       card-vote="${item.vote}"

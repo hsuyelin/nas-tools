@@ -124,6 +124,15 @@ export class PageDiscovery extends CustomElement {
     }
   }
 
+  _fix_card_image_url(url) {
+    if (!url || url.toLowerCase() === "none") {
+      return "";
+    }
+    var regex = /qnmob3/i;
+    var fixedUrl = url.replace(regex, 'img1');
+    return fixedUrl;
+  }
+
   render() {
     return html`
       <div class="container-xl">
@@ -144,7 +153,7 @@ export class PageDiscovery extends CustomElement {
                   card-tmdbid=${card.id}
                   card-mediatype=${card.type}
                   card-showsub=1
-                  card-image=${'/img?url='+card.image}
+                  card-image=${'/img?url='+this._fix_card_image_url(card.image)}
                   card-fav=${card.fav}
                   card-vote=${card.vote}
                   card-year=${card.year}

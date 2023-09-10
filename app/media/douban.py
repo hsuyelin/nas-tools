@@ -31,7 +31,7 @@ class DouBan:
         self.doubanapi = DoubanApi()
         self.doubanweb = DoubanWeb()
         try:
-            res = RequestUtils(timeout=5).get_res("https://www.douban.com/")
+            res = RequestUtils(referer="https://www.douban.com", timeout=5).get_res("https://www.douban.com/")
             if res:
                 self.cookie = StringUtils.str_from_cookiejar(res.cookies)
         except Exception as err:
