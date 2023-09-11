@@ -55,7 +55,7 @@ from web.security import require_auth
 flask_dir = Path(__file__).resolve().parent.parent
 flask_env_path = flask_dir / ".flaskenv"
 if flask_env_path.is_file():
-    print(f"flask env path: {str(flask_env_path)}")
+    print(f"正在加载flask环境变量: {str(flask_env_path)}")
     load_dotenv(dotenv_path=flask_env_path)
 else:
     print("flask.env 文件不存在")
