@@ -718,6 +718,28 @@ class MetaVideoV2(MetaBase):
                 except Exception as e:
                     pass
 
+        # 如果副标题没有总集数，从主标题在匹配一遍看是否有总集数，以免遗漏
+        fixed_title = self._original_title.replace("-", ".")
+        episode_all_by_title_match = re.search(r'%s' % self._episode_all_re, fixed_title, flags=re.IGNORECASE)
+        if episode_all_by_title_match:
+            episode_all = None
+            if episode_all_by_title_match.group(1):
+                episode_all = re.search(r'([0-9一二三四五六七八九十百零]+)\s*集|話|话\s*全',
+                                            episode_all_by_title_match.group(1)).group(1)
+            else:
+                episode_all = re.search(r'(?:全|共)\s*([0-9一二三四五六七八九十百零]+)\s*集|話|話',
+                                                    episode_all_by_title_match.group(2)).group(1)
+            if episode_all:
+                episode_all = re.sub(r'^0+', '', episode_all)
+                fix_episode_all = cn2an.cn2an(episode_all, "smart")
+                try:
+                    fix_episode_all = int(fix_episode_all)
+                    self.begin_episode = 1
+                    self.end_episode = fix_episode_all
+                    self.total_episodes = fix_episode_all
+                except Exception as e:
+                    pass
+
         if self.begin_season or self.begin_episode:
             self.media_type = MediaType.TV
             self.type = MediaType.TV
