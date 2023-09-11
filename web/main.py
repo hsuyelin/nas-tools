@@ -15,6 +15,7 @@ from threading import Lock
 from urllib import parse
 from urllib.parse import unquote
 
+from dotenv import load_dotenv
 from flask import Flask, request, json, render_template, make_response, session, send_from_directory, send_file, \
     redirect, Response
 from flask_compress import Compress
@@ -50,6 +51,14 @@ from web.backend.pro_user import ProUser
 from web.backend.wallpaper import get_login_wallpaper
 from web.backend.web_utils import WebUtils
 from web.security import require_auth
+
+flask_dir = Path(__file__).resolve().parent.parent
+flask_env_path = flask_dir / ".flaskenv"
+if flask_env_path.is_file():
+    print(f"flask env path: {str(flask_env_path)}")
+    load_dotenv(dotenv_path=flask_env_path)
+else:
+    print("flask.env 文件不存在")
 
 # 配置文件锁
 ConfigLock = Lock()
