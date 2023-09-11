@@ -638,7 +638,7 @@ class Subscribe:
                 # 设置总集数的，不更新集数
                 if total_ep:
                     total_episode = total_ep
-                if total_episode and (name != media_info.title or total != total_episode):
+                if total_episode and (name != media_info.title or total != total_episode) and name_follow_tmdb_changed:
                     # 新的缺失集数
                     lack_episode = total_episode - (total - lack)
                     log.info(
