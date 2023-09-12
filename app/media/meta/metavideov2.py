@@ -128,7 +128,7 @@ class MetaVideoV2(MetaBase):
         self.en_name = StringUtils.str_title(self.__fix_name(self.en_name))
         
         # 处理part
-        if self.part and self.part.upper() == "PART":
+        if StringUtils.is_string_and_not_empty(self.part) and self.part.upper() == "PART":
             self.part = None
 
         # 制作组/字幕组
