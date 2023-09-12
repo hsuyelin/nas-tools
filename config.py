@@ -15,7 +15,7 @@ RMT_MEDIAEXT = ['.mp4', '.mkv', '.ts', '.iso',
                 '.rmvb', '.avi', '.mov', '.mpeg',
                 '.mpg', '.wmv', '.3gp', '.asf',
                 '.m4v', '.flv', '.m2ts', '.strm',
-                '.tp']
+                '.tp', '.f4v']
 # 支持的字幕文件后缀格式
 RMT_SUBEXT = ['.srt', '.ass', '.ssa']
 # 支持的音轨文件后缀格式
