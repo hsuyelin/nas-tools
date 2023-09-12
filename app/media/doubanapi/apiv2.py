@@ -6,10 +6,12 @@ from datetime import datetime
 from functools import lru_cache
 from random import choice
 from urllib import parse
+import json
+import re
 
 import requests
 
-from app.utils import RequestUtils
+from app.utils import RequestUtils, StringUtils
 from app.utils.commons import singleton
 
 
@@ -173,7 +175,15 @@ class DoubanApi(object):
         headers = {'User-Agent': choice(cls._user_agents)}
         resp = RequestUtils(headers=headers, session=cls._session).get_res(url=req_url, params=params)
 
-        return resp.json() if resp else {}
+        resp_json = resp.json() if resp else {}
+        resp_json_str = json.dumps(resp_json)
+        if StringUtils.is_string_and_not_empty(resp_json_str):
+            resp_json_str = re.sub(r'qnmob\d+', 'img1', resp_json_str)
+
+        try:
+            return json.loads(resp_json_str)
+        except json.JSONDecodeError as e:
+            return {}
 
     def search(self, keyword, start=0, count=20, ts=datetime.strftime(datetime.now(), '%Y%m%d')):
         return self.__invoke(self._urls["search"], q=keyword, start=start, count=count, _ts=ts)
