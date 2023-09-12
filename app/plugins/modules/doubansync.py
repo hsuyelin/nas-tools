@@ -590,7 +590,7 @@ class DoubanSync(_IPluginModule):
             if userinfo:
                 user_name = userinfo.get("name")
 
-            if str({self._sync_type}) == '1':
+            if self._sync_type == '0':
                 # 每页条数
                 perpage_number = 15
                 # 所有类型成功数量

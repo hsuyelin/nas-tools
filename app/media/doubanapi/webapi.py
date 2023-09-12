@@ -82,7 +82,7 @@ class DoubanWeb(object):
             }
         },
         "collect": {
-            "list": "//div[@class='grid-view']/div[@class='item']",
+            "list": "//div[@class='grid-view']/div[contains(@class, 'item')]",
             "dates": "//div[@class='info']//span[@class='date']/text()",
             "item": {
                 "title": "./div[@class='info']/ul/li[@class='title']/a/em/text()",
@@ -91,7 +91,7 @@ class DoubanWeb(object):
             }
         },
         "wish": {
-            "list": "//div[@class='grid-view']/div[@class='item']",
+            "list": "//div[@class='grid-view']/div[contains(@class, 'item')]",
             "item": {
                 "title": "./div[@class='info']/ul/li[@class='title']/a/em/text()",
                 "cover": "./div[@class='pic']/a/img/@src",
@@ -100,7 +100,7 @@ class DoubanWeb(object):
             }
         },
         "do": {
-            "list": "//div[@class='grid-view']/div[@class='item']",
+            "list": "//div[@class='grid-view']/div[contains(@class, 'item')]",
             "item": {
                 "title": "./div[@class='info']/ul/li[@class='title']/a/em/text()",
                 "cover": "./div[@class='pic']/a/img/@src",
