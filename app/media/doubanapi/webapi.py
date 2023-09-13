@@ -87,7 +87,8 @@ class DoubanWeb(object):
             "item": {
                 "title": "./div[@class='info']/ul/li[@class='title']/a/em/text()",
                 "cover": "./div[@class='pic']/a/img/@src",
-                "url": "./div[@class='info']/ul/li[@class='title']/a/@href"
+                "url": "./div[@class='info']/ul/li[@class='title']/a/@href",
+                "date": "./div[@class='info']//span[@class='date']/text()"
             }
         },
         "wish": {
