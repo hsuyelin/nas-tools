@@ -700,7 +700,9 @@ class FileTransfer:
                         log.error("【Rmt】%s 无法识别媒体信息！" % file_name)
                     continue
                 # 当前文件大小
-                media.size = os.path.getsize(file_item)
+                media.size = 0
+                if os.path.exists(file_item):
+                    media.size = os.path.getsize(file_item)
                 # 目的目录，有输入target_dir时，往这个目录放
                 if target_dir:
                     dist_path = target_dir

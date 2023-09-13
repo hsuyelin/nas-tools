@@ -14,6 +14,7 @@ from app.utils import RequestUtils, StringUtils
 from config import Config
 from web.backend.pro_user import ProUser
 from app.indexer.indexerConf import IndexerConf
+import re
 
 class CookieCloudRunResult:
 
@@ -35,7 +36,7 @@ class CookieCloud(_IPluginModule):
     # 主题色
     module_color = "#77B3D4"
     # 插件版本
-    module_version = "1.1"
+    module_version = "1.2"
     # 插件作者
     module_author = "jxxghp"
     # 作者主页
@@ -69,6 +70,10 @@ class CookieCloud(_IPluginModule):
     _event = Event()
     # 需要忽略的Cookie
     _ignore_cookies = ['CookieAutoDeleteBrowsingDataCleanup']
+    # 黑白名单
+    _synchronousMode = 'all_mode'
+    _black_list = None
+    _white_list = None
 
     @staticmethod
     def get_fields():
@@ -101,6 +106,23 @@ class CookieCloud(_IPluginModule):
                                 {
                                     'id': 'cron',
                                     'placeholder': '0 0 0 ? *',
+                                }
+                            ]
+                        },
+                        {
+                            'title': '同步模式',
+                            'required': "",
+                            'tooltip': '选择Cookie同步模式',
+                            'type': 'select',
+                            'content': [
+                                {
+                                    'id': 'synchronousMode',
+                                    'options': {
+                                        'all_mode':'全部',
+                                        'black_mode': '黑名单',
+                                        'white_mode': '白名单'
+                                    },
+                                    'default': 'all_mode'
                                 }
                             ]
                         },
@@ -157,6 +179,38 @@ class CookieCloud(_IPluginModule):
                             'tooltip': '打开后立即运行一次（点击此对话框的确定按钮后即会运行，周期未设置也会运行），关闭后将仅按照定时周期运行（同时上次触发运行的任务如果在运行中也会停止）',
                             'type': 'switch',
                             'id': 'onlyonce',
+                        },
+                    ]
+                ]
+            },
+            {
+                'type': 'div',
+                'content': [
+                    # 同一行
+                    [
+                        {
+                            'title': '黑名单列表',
+                            'required': "",
+                            'tooltip': '黑名单列表（需开启黑名单模式，以","或换行分隔）',
+                            'type': 'textarea',
+                            'content':
+                                {
+                                    'id': 'black_list',
+                                    'placeholder': '',
+                                    'rows': 5
+                                }
+                        },
+                        {
+                            'title': '白名单列表',
+                            'required': "",
+                            'tooltip': '白名单列表（需开启白名单模式，以","或换行分隔）',
+                            'type': 'textarea',
+                            'content':
+                                {
+                                    'id': 'white_list',
+                                    'placeholder': '',
+                                    'rows': 5
+                                }
                         }
                     ]
                 ]
@@ -214,12 +268,16 @@ class CookieCloud(_IPluginModule):
             self._password = config.get("password")
             self._notify = config.get("notify")
             self._onlyonce = config.get("onlyonce")
+            self._synchronousMode = config.get("synchronousMode", "all_mode") or "all_mode"
+            self._black_list = config.get("black_list", "") or ""
+            self._white_list = config.get("white_list", "") or ""
             self._req = RequestUtils(content_type="application/json")
             if self._server:
                 if not self._server.startswith("http"):
                     self._server = "http://%s" % self._server
                 if self._server.endswith("/"):
                     self._server = self._server[:-1]
+            
 
             # 测试
             _, msg, flag = self.__download_data()
@@ -255,6 +313,9 @@ class CookieCloud(_IPluginModule):
                     "password": self._password,
                     "notify": self._notify,
                     "onlyonce": self._onlyonce,
+                    "synchronousMode": self._synchronousMode,
+                    "black_list": self._black_list,
+                    "white_list": self._white_list,
                 })
 
             # 周期运行
@@ -326,9 +387,17 @@ class CookieCloud(_IPluginModule):
             return
         # 整理数据,使用domain域名的最后两级作为分组依据
         domain_groups = defaultdict(list)
+        domain_black_list = [".".join(re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url).group("domain").split(".")[-2:]) \
+            for _url in re.split(",|\n|，|\t| ", self._black_list) if _url != "" and re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url)]
+        domain_white_list = [".".join(re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url).group("domain").split(".")[-2:]) \
+            for _url in re.split(",|\n|，|\t| ", self._white_list) if _url != "" and re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url)]
         for site, cookies in contents.items():
             for cookie in cookies:
                 domain_parts = cookie["domain"].split(".")[-2:]
+                if self._synchronousMode and self._synchronousMode == "black_mode" and ".".join(domain_parts) in domain_black_list:
+                    continue
+                elif self._synchronousMode and self._synchronousMode == "white_mode" and ".".join(domain_parts) not in domain_white_list:
+                    continue
                 domain_key = tuple(domain_parts)
                 domain_groups[domain_key].append(cookie)
         # 计数
