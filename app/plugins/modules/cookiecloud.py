@@ -268,9 +268,9 @@ class CookieCloud(_IPluginModule):
             self._password = config.get("password")
             self._notify = config.get("notify")
             self._onlyonce = config.get("onlyonce")
-            self._synchronousMode = config.get("synchronousMode", 'all_mode') or 'all_mode'
-            self._black_list = config.get("black_list", []) or []
-            self._white_list = config.get("white_list", []) or []
+            self._synchronousMode = config.get("synchronousMode", "all_mode") or "all_mode"
+            self._black_list = config.get("black_list", "") or ""
+            self._white_list = config.get("white_list", "") or ""
             self._req = RequestUtils(content_type="application/json")
             if self._server:
                 if not self._server.startswith("http"):
@@ -388,9 +388,9 @@ class CookieCloud(_IPluginModule):
         # 整理数据,使用domain域名的最后两级作为分组依据
         domain_groups = defaultdict(list)
         domain_black_list = [".".join(re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url).group("domain").split(".")[-2:]) \
-            for _url in re.split(",|\n|，|\t| ", self._black_list) if _url != ""]
+            for _url in re.split(",|\n|，|\t| ", self._black_list) if _url != "" and re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url)]
         domain_white_list = [".".join(re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url).group("domain").split(".")[-2:]) \
-            for _url in re.split(",|\n|，|\t| ", self._white_list) if _url != ""]
+            for _url in re.split(",|\n|，|\t| ", self._white_list) if _url != "" and re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url)]
         for site, cookies in contents.items():
             for cookie in cookies:
                 domain_parts = cookie["domain"].split(".")[-2:]
