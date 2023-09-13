@@ -71,7 +71,7 @@ class CookieCloud(_IPluginModule):
     # 需要忽略的Cookie
     _ignore_cookies = ['CookieAutoDeleteBrowsingDataCleanup']
     # 黑白名单
-    _SynchronousMode = 'all_mode'
+    _synchronousMode = 'all_mode'
     _black_list = None
     _white_list = None
 
@@ -116,7 +116,7 @@ class CookieCloud(_IPluginModule):
                             'type': 'select',
                             'content': [
                                 {
-                                    'id': 'SynchronousMode',
+                                    'id': 'synchronousMode',
                                     'options': {
                                         'all_mode':'全部',
                                         'black_mode': '黑名单',
@@ -268,9 +268,9 @@ class CookieCloud(_IPluginModule):
             self._password = config.get("password")
             self._notify = config.get("notify")
             self._onlyonce = config.get("onlyonce")
-            self._SynchronousMode = config.get("SynchronousMode")
-            self._black_list = config.get("black_list")
-            self._white_list = config.get("white_list")
+            self._synchronousMode = config.get("synchronousMode", "all_mode") or "all_mode"
+            self._black_list = config.get("black_list", "") or ""
+            self._white_list = config.get("white_list", "") or ""
             self._req = RequestUtils(content_type="application/json")
             if self._server:
                 if not self._server.startswith("http"):
@@ -313,7 +313,7 @@ class CookieCloud(_IPluginModule):
                     "password": self._password,
                     "notify": self._notify,
                     "onlyonce": self._onlyonce,
-                    "SynchronousMode": self._SynchronousMode,
+                    "synchronousMode": self._synchronousMode,
                     "black_list": self._black_list,
                     "white_list": self._white_list,
                 })
@@ -388,15 +388,15 @@ class CookieCloud(_IPluginModule):
         # 整理数据,使用domain域名的最后两级作为分组依据
         domain_groups = defaultdict(list)
         domain_black_list = [".".join(re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url).group("domain").split(".")[-2:]) \
-            for _url in re.split(",|\n|，|\t| ", self._black_list) if _url != ""]
+            for _url in re.split(",|\n|，|\t| ", self._black_list) if _url != "" and re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url)]
         domain_white_list = [".".join(re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url).group("domain").split(".")[-2:]) \
-            for _url in re.split(",|\n|，|\t| ", self._white_list) if _url != ""]
+            for _url in re.split(",|\n|，|\t| ", self._white_list) if _url != "" and re.search(r"(https?://)?(?P<domain>[a-zA-Z0-9.-]+)", _url)]
         for site, cookies in contents.items():
             for cookie in cookies:
                 domain_parts = cookie["domain"].split(".")[-2:]
-                if self._SynchronousMode == "black_mode" and ".".join(domain_parts) in domain_black_list:
+                if self._synchronousMode and self._synchronousMode == "black_mode" and ".".join(domain_parts) in domain_black_list:
                     continue
-                elif self._SynchronousMode == "white_mode" and ".".join(domain_parts) not in domain_white_list:
+                elif self._synchronousMode and self._synchronousMode == "white_mode" and ".".join(domain_parts) not in domain_white_list:
                     continue
                 domain_key = tuple(domain_parts)
                 domain_groups[domain_key].append(cookie)
