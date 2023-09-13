@@ -309,13 +309,12 @@ class MetaVideoV2(MetaBase):
             self.resource_type = re.sub(r'(?i)ctv', '', self.resource_type)
 
         special_streaming_services_matches = re.findall(r'%s' % self._special_streaming_service, self._original_title)
-        special_streaming_services_text = None
         if len(special_streaming_services_matches) > 1:
             special_streaming_services_text = ' '.join(special_streaming_services_matches)
         else:
             special_streaming_services_text = special_streaming_services_matches[0] if special_streaming_services_matches else ""
         if special_streaming_services_text:
-            self.resource_type += special_streaming_services_text
+            self.resource_type += f" {special_streaming_services_text}"
             self.resource_type = self.resource_type.rstrip()
 
     def __init_resource_effect(self):
@@ -464,13 +463,12 @@ class MetaVideoV2(MetaBase):
                 self.resource_team = None
 
         special_resource_team_matches = re.findall(r'%s' % self._special_resource_team, self._original_title)
-        special_resource_team_text = None
         if len(special_resource_team_matches) > 1:
             special_resource_team_text = ' '.join(special_resource_team_matches)
         else:
             special_resource_team_text = special_resource_team_matches[0] if special_resource_team_matches else ""
         if special_resource_team_text:
-            self.resource_team += special_resource_team_text
+            self.resource_team += f" {special_resource_team_text}"
             self.resource_team = self.resource_team.rstrip()
 
     def guess_media_item(self, title, subtitle):
