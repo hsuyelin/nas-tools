@@ -120,8 +120,10 @@ class MetaVideoV2(MetaBase):
                     or re.findall(r'-D[Ii]Y@', self._original_title):
                 self.resource_type = f"{self.resource_type} DIY"
 
-        # 修正年份被识别为季
+        # 修正季/集/媒体类型
         self.__fix_season()
+        self.__fix_episode()
+        self.__fix_media_type()
 
         # 去掉名字中不需要的干扰字符，过短的纯数字不要
         self.cn_name = self.__fix_name(self.cn_name)
@@ -529,8 +531,8 @@ class MetaVideoV2(MetaBase):
                 season = re.findall(r'%s' % self._numbers_re, season_matched_text, flags=re.IGNORECASE)[0]
                 if season:
                     season = re.sub(r'^0+', '', season)
-                    fix_season = cn2an.cn2an(season, "smart")
                     try:
+                        fix_season = cn2an.cn2an(season, "smart")
                         fix_season = int(fix_season)
                         title = re.sub(r'%s' % seasons_pattern, f".S{fix_season}.", title, flags=re.IGNORECASE)
                     except Exception as e:
@@ -559,8 +561,8 @@ class MetaVideoV2(MetaBase):
                 episode = re.findall(r'%s' % self._numbers_re, episode_matched_text, flags=re.IGNORECASE)[0]
                 if episode:
                     episode = re.sub(r'^0+', '', episode)
-                    fix_episode = cn2an.cn2an(episode, "smart")
                     try:
+                        fix_episode = cn2an.cn2an(episode, "smart")
                         fix_episode = int(fix_episode)
                         title = re.sub(r'%s' % episode_pattern, f".E{fix_episode}.", title, flags=re.IGNORECASE)
                     except Exception as e:
@@ -627,6 +629,9 @@ class MetaVideoV2(MetaBase):
         if not StringUtils.is_string_and_not_empty(self._original_subtitle):
             return
 
+        if self.begin_season and self.end_season and self.begin_season != self.end_season:
+            return
+
         fixed_subtitle = self._original_subtitle.replace("-", ".")
 
         # 匹配出季组
@@ -663,6 +668,18 @@ class MetaVideoV2(MetaBase):
                     except Exception as e:
                         pass
 
+        if self.begin_season and self.end_season and self.begin_season == self.end_season:
+            self.end_season = None
+
+    def __fix_episode(self):
+        if not StringUtils.is_string_and_not_empty(self._original_subtitle):
+            return
+
+        if self.begin_episode and self.end_episode and self.begin_episode != self.end_episode:
+            return
+
+        fixed_subtitle = self._original_subtitle.replace("-", ".")
+
         # 匹配出集组
         episodes_pattern = f"({self._episodes_re}|{self._episodes_re_2})"
         episodes_match = re.search(r'%s' % episodes_pattern, fixed_subtitle, flags=re.IGNORECASE)
@@ -688,8 +705,8 @@ class MetaVideoV2(MetaBase):
                 episode = re.findall(r'%s' % self._numbers_re, episode_matched_text, flags=re.IGNORECASE)[0]
                 if episode:
                     episode = re.sub(r'^0+', '', episode)
-                    fix_episode = cn2an.cn2an(episode, "smart")
                     try:
+                        fix_episode = cn2an.cn2an(episode, "smart")
                         fix_episode = int(fix_episode)
                         self.begin_episode = fix_episode
                         self.end_episode = None
@@ -707,8 +724,8 @@ class MetaVideoV2(MetaBase):
                 episode_all = re.search(r'(?:全|共)\s*([0-9一二三四五六七八九十百零]+)\s*集|話|話', episode_all_match.group(2)).group(1)
             if episode_all:
                 episode_all = re.sub(r'^0+', '', episode_all)
-                fix_episode_all = cn2an.cn2an(episode_all, "smart")
                 try:
+                    fix_episode_all = cn2an.cn2an(episode_all, "smart")
                     fix_episode_all = int(fix_episode_all)
                     self.begin_episode = 1
                     self.end_episode = fix_episode_all
@@ -729,8 +746,8 @@ class MetaVideoV2(MetaBase):
                                                     episode_all_by_title_match.group(2)).group(1)
             if episode_all:
                 episode_all = re.sub(r'^0+', '', episode_all)
-                fix_episode_all = cn2an.cn2an(episode_all, "smart")
                 try:
+                    fix_episode_all = cn2an.cn2an(episode_all, "smart")
                     fix_episode_all = int(fix_episode_all)
                     self.begin_episode = 1
                     self.end_episode = fix_episode_all
@@ -738,6 +755,15 @@ class MetaVideoV2(MetaBase):
                 except Exception as e:
                     pass
 
+        if self.begin_episode and self.end_episode and self.begin_episode == self.end_episode:
+            self.end_episode = None
+            
+        if self.begin_season and self.end_season and self.begin_season != self.end_season:
+            self.begin_episode = None
+            self.end_episode = None
+            self.total_episodes = None
+
+    def __fix_media_type(self):
         if self.begin_season or self.begin_episode:
             self.media_type = MediaType.TV
             self.type = MediaType.TV
