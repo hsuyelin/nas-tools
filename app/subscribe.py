@@ -166,7 +166,7 @@ class Subscribe:
             # 根据TMDBID查询，从推荐加订阅的情况
             if mediaid:
                 # 根据ID查询
-                media_info = WebUtils.get_mediainfo_from_id(mtype=mtype, mediaid=mediaid)
+                media_info = WebUtils.get_mediainfo_from_id(mtype=mtype, mediaid=mediaid, wait=True)
                 if not season:
                     season = media_info.begin_season
             else:
