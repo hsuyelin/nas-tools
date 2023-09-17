@@ -438,7 +438,7 @@ class DoubanRank(_IPluginModule):
                         self.warn(f"未查询到媒体信息：{title} （豆瓣id：{douban_id}）")
                         continue
                     media_release_date = int(media_info.year) if StringUtils.is_int_or_float(media_info.year) else None
-                    media_vote_average = int(media_info.vote_average) if StringUtils.is_int_or_float(media_info.year) else None
+                    media_vote_average = float(media_info.vote_average) if StringUtils.is_int_or_float(media_info.year) else None
                     if self._release_date and media_release_date and media_release_date < self._release_date:
                         self.info(
                             f"{media_info.get_title_string()} 上映日期 {media_release_date} 低于限制 {self._release_date}，跳过 ．．．")
