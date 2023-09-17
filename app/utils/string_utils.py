@@ -119,6 +119,8 @@ class StringUtils:
         """
         判断是否是整型或浮点型的格式
         """
+        if not word:
+            return None
         pattern = r'^[-+]?\d+(\.\d+)?$'
         return re.match(pattern, word) is not None
 
