@@ -1382,8 +1382,11 @@ function openFileBrowser(el, root, only_folders, on_folders, on_files, close_on_
         }
       }).on("filetreeinitiated filetreeexpanded", function(e, data) {
         if (on_folders) {
-          p.val(data.rel);
-          p.trigger('change');
+          // filetreeinitiated初始化事件时data是空的
+          if (e.type != 'filetreeinitiated'){
+            p.val(data.rel);
+            p.trigger('change');
+          }
           if (close_on_select) {
             $(ft).slideUp('fast', function () {
               $(ft).remove();
@@ -1391,8 +1394,10 @@ function openFileBrowser(el, root, only_folders, on_folders, on_files, close_on_
           }
         }
       });
+  // 新版因为下载器的目录设置包含在折叠区域内，设置top会导致位置偏移，去掉反而正常
+  ft.css({'left': p.position().left, 'width': (p.parent().width())});
   // Format fileTree according to parent position, height and width
-  ft.css({'left': p.position().left, 'top': (p.position().top + p.outerHeight()), 'width': (p.parent().width())});
+  // ft.css({'left': p.position().left, 'top': (p.position().top + p.outerHeight()), 'width': (p.parent().width())});
   // close if click elsewhere
   $(document).mouseup(function (e) {
     if (!ft.is(e.target) && ft.has(e.target).length === 0) {
