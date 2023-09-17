@@ -1070,14 +1070,13 @@ def dirlist():
         sync_class = ""
         link_path = ""
         link_direction = ""
-        # 检查目录是否是同步目录或在同步目录内 
-        if x and (x == folder or folder.startswith(f"{x}/")):
-            sync_class = f"sync-{'src' if direction == '→' else 'dest'}{' auto-locate' if locating else ''}"
-            if folder == x:
-                target = SystemUtils.shorten_path(y) if y else "未设置"
-                link_path = f'<span class="link-folder" data-bs-toggle="tooltip" title="{y}" data-jump="{y}">{target}</span>'
-                link_direction = f'<span class="link-direction" data-direction="{direction}">{direction}</span>'
-                result = True
+        # 匹配同步目录
+        sync_class = f"sync-{'src' if direction == '→' else 'dest'}{' auto-locate' if locating else ''}"
+        if folder == x:
+            target = SystemUtils.shorten_path(y) if y else "未设置"
+            link_path = f'<span class="link-folder" data-bs-toggle="tooltip" title="{y}" data-jump="{y}">{target}</span>'
+            link_direction = f'<span class="link-direction" data-direction="{direction}">{direction}</span>'
+            result = True
         return result, sync_class, link_path, link_direction
         
     def get_hardlink_info(folder):
@@ -1089,12 +1088,14 @@ def dirlist():
         link_direction = ""
         # 获取所有硬链接的同步目录设置
         sync_dirs = Sync().get_filehardlinks_sync_dirs()
-        # 按设置遍历匹配同步目录 
+        # 按设置遍历检查目录是否是同步目录或在同步目录内  
         for dir in sync_dirs:
-            result, sync_class, link_path, link_direction = match_sync_dir(folder, dir[0], dir[1], dir[2], '→')
-            if result: break
-            result, sync_class, link_path, link_direction = match_sync_dir(folder, dir[1], dir[0], dir[2], '←')
-            if result: break
+            if dir[0] and (dir[0] == folder or folder.startswith(f"{dir[0]}/")):
+                result, sync_class, link_path, link_direction = match_sync_dir(folder, dir[0], dir[1], dir[2], '→')
+                if result: break
+            elif dir[1] and (dir[1] == folder or folder.startswith(f"{dir[1]}/")):
+                result, sync_class, link_path, link_direction = match_sync_dir(folder, dir[1], dir[0], dir[2], '←')
+                if result: break
         return sync_class, link_path, link_direction
     
     def get_media_dirs():
