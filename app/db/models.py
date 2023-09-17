@@ -67,6 +67,7 @@ class CONFIGSYNCPATHS(Base):
     RENAME = Column(Integer)
     ENABLED = Column(Integer)
     NOTE = Column(Text)
+    LOCATING = Column(Integer)
 
 
 class CONFIGUSERS(Base):

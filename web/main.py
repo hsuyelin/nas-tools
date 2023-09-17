@@ -13,7 +13,7 @@ from math import floor
 from pathlib import Path
 from threading import Lock
 from urllib import parse
-from urllib.parse import unquote
+from urllib.parse import quote, unquote
 
 from dotenv import load_dotenv
 from flask import Flask, request, json, render_template, make_response, session, send_from_directory, send_file, \
@@ -1062,11 +1062,65 @@ def do():
 @App.route('/dirlist', methods=['POST'])
 @login_required
 def dirlist():
+    def match_sync_dir(folder, x, y, locating, direction):
+        """
+        匹配同步目录对硬链接信息生成HTML
+        """
+        result = False
+        sync_class = ""
+        link_path = ""
+        link_direction = ""
+        # 检查目录是否是同步目录或在同步目录内 
+        if x and (x == folder or folder.startswith(f"{x}/")):
+            sync_class = f"sync-{'src' if direction == '→' else 'dest'}{' auto-locate' if locating else ''}"
+            if folder == x:
+                target = SystemUtils.shorten_path(y) if y else "未设置"
+                link_path = f'<span class="link-folder" data-bs-toggle="tooltip" title="{y}" data-jump="{y}">{target}</span>'
+                link_direction = f'<span class="link-direction" data-direction="{direction}">{direction}</span>'
+                result = True
+        return result, sync_class, link_path, link_direction
+        
+    def get_hardlink_info(folder):
+        """
+        获取硬链接信息
+        """
+        sync_class = ""
+        link_path = ""
+        link_direction = ""
+        # 获取所有硬链接的同步目录设置
+        sync_dirs = Sync().get_filehardlinks_sync_dirs()
+        # 按设置遍历匹配同步目录 
+        for dir in sync_dirs:
+            result, sync_class, link_path, link_direction = match_sync_dir(folder, dir[0], dir[1], dir[2], '→')
+            if result: break
+            result, sync_class, link_path, link_direction = match_sync_dir(folder, dir[1], dir[0], dir[2], '←')
+            if result: break
+        return sync_class, link_path, link_direction
+    
+    def get_media_dirs():
+        """
+        获取媒体库目录
+        """
+        media_dirs = []
+        movie_path = Config().get_config('media').get('movie_path')
+        tv_path = Config().get_config('media').get('tv_path')
+        anime_path = Config().get_config('media').get('anime_path')
+        unknown_path = Config().get_config('media').get('unknown_path')
+        if movie_path is not None: media_dirs.extend([path.rstrip('/') for path in movie_path])
+        if tv_path is not None: media_dirs.extend([path.rstrip('/') for path in tv_path])
+        if anime_path is not None: media_dirs.extend([path.rstrip('/') for path in anime_path])
+        if unknown_path is not None: media_dirs.extend([path.rstrip('/') for path in unknown_path])   
+        return list(set(media_dirs))
+    
+    def get_download_dirs():
+        # 获取下载目录
+        return [path.rstrip('/') for path in Downloader().get_download_visit_dirs()]
+    
     r = ['<ul class="jqueryFileTree" style="display: none;">']
     try:
         r = ['<ul class="jqueryFileTree" style="display: none;">']
         in_dir = unquote(request.form.get('dir'))
-        ft = request.form.get("filter")
+        only_folders = request.form.get("onlyFolders")
         if not in_dir or in_dir == "/":
             if SystemUtils.get_system() == OsType.WINDOWS:
                 partitions = SystemUtils.get_windows_drives()
@@ -1076,20 +1130,36 @@ def dirlist():
                     dirs = [os.path.join("C:/", f) for f in os.listdir("C:/")]
             else:
                 dirs = [os.path.join("/", f) for f in os.listdir("/")]
+        elif in_dir == quote("[SYNC-FOLDERS]"):
+            sync_dirs = []
+            for id, conf in Sync().get_sync_path_conf().items():
+                sync_dirs.append(conf["from"])
+                sync_dirs.append(conf["to"])
+            dirs = list(set(sync_dirs))
+        elif in_dir == quote("[DOWNLOAD-FOLDERS]"):
+            dirs = get_download_dirs()
+        elif in_dir == quote("[MEDIA-FOLDERS]"):
+            dirs = get_media_dirs()
         else:
             d = os.path.normpath(urllib.parse.unquote(in_dir))
             if not os.path.isdir(d):
                 d = os.path.dirname(d)
             dirs = [os.path.join(d, f) for f in os.listdir(d)]
+        dirs.sort()
         for ff in dirs:
             f = os.path.basename(ff)
             if not f:
                 f = ff
             if os.path.isdir(ff):
-                r.append('<li class="directory collapsed"><a rel="%s/">%s</a></li>' % (
-                    ff.replace("\\", "/"), f.replace("\\", "/")))
+                # 对硬链接同步目录进行标识处理
+                sync_class, link_path, link_direction = get_hardlink_info(ff)
+                # 获取文件夹路径的MD5存为id，用于前端选择后更新文件夹硬链接同步标识
+                folder_class = "media-folder" if ff in get_media_dirs() else "download-folder" if ff in get_download_dirs() else ""
+                path = ff.replace("\\", "/") + "/"
+                r.append('<li class="directory %s %s collapsed"><a rel="%s">%s%s%s</a></li>' % (
+                    folder_class, sync_class, path, f.replace("\\", "/"), link_direction, link_path))
             else:
-                if ft != "HIDE_FILES_FILTER":
+                if not only_folders:
                     e = os.path.splitext(f)[1][1:]
                     r.append('<li class="file ext_%s"><a rel="%s">%s</a></li>' % (
                         e, ff.replace("\\", "/"), f.replace("\\", "/")))
