@@ -263,13 +263,15 @@
     files.forEach(filepath => {
       ajax_post("get_filehardlinks", { filepath: filepath }, function (ret) {
         if (ret.data) {
+          let node = $(`#mediafile_file_container input[value="${ret.data.filepath}"]`).parent().find('.mediafile-hardlink-pair ul');
+          node.empty();
           for (let j = 0; j < ret.data.hardlinks.length; j++) {
             let $linkFile = $(`<li data-bs-toggle="tooltip" title="${ret.data.hardlinks[j][1]}"><span data-direction="${ret.data.direction}">${ret.data.hardlinks[j][0]}</span></li>`);
             // 绑定事件，点击时跳转到硬链接文件所在的目录
             if (ret.data.hardlinks[j][2]){
               bind_jump_folder($linkFile, ret.data.hardlinks[j][2]);
             }
-            $(`#mediafile_file_container input[value="${ret.data.filepath}"]`).parent().find('.mediafile-hardlink-pair').append($('<ul></ul>').append($linkFile));
+            node.append($linkFile);
           }
           // 刷新tooltip
           fresh_tooltip();
@@ -611,7 +613,7 @@
           <div class="row">
             <div class="col">
               <h3 class="mb-0"><a href='javascript:mediafile_transfer("{FILENAME}", "{FILEPOS}")'>{FILENAME}</a></h3>
-              <h4 class="mb-0 mediafile-hardlink-pair"></h4>
+              <h4 class="mb-0 mediafile-hardlink-pair"><ul></ul></h4>
               <custom-chips class="mt-1" id="testresults_{FILEPOS}"></custom-chips>
               <input type="hidden" value="{FILEPATH}" id="mediafilepath_{FILEPOS}">
             </div>
