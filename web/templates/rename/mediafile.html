@@ -266,12 +266,12 @@
           let node = $(`#mediafile_file_container input[value="${ret.data.filepath}"]`).parent().find('.mediafile-hardlink-pair ul');
           node.empty();
           for (let j = 0; j < ret.data.hardlinks.length; j++) {
-            let $linkFile = $(`<li data-bs-toggle="tooltip" title="${ret.data.hardlinks[j][1]}"><span data-direction="${ret.data.direction}">${ret.data.hardlinks[j][0]}</span></li>`);
+            let linkFile = $(`<li data-bs-toggle="tooltip" title="${ret.data.hardlinks[j][1]}" data-jump="${ret.data.hardlinks[j][2]}"><span data-direction="${ret.data.direction}">${ret.data.hardlinks[j][0]}</span></li>`);
             // 绑定事件，点击时跳转到硬链接文件所在的目录
             if (ret.data.hardlinks[j][2]){
-              bind_jump_folder($linkFile, ret.data.hardlinks[j][2]);
+              init_jump_dirs([linkFile]);
             }
-            node.append($linkFile);
+            node.append(linkFile);
           }
           // 刷新tooltip
           fresh_tooltip();
@@ -282,17 +282,22 @@
     });
   }
 
-  // 绑定跳转目录
-  function bind_jump_folder(src, target) {
-    src.on("click", function (event){
-      if (target !== ""){
+  // 初始化跳转目录
+  function init_jump_dirs(dirs) {
+    for (let i=0; i < dirs.length; i++) {
+      // 忽略空路径
+      if ($(dirs[i]).attr("data-jump") === "") continue
+      // 绑定事件，点击时跳转到硬链接目录
+      $(dirs[i]).on("click", function (event){
         // 父元素移除时，自动产生的tooltip不会自动移除，须强行销毁
         $(this).tooltip("dispose");
-        $("#mediafile_path").val(target).show();
-        $("#special_folder").hide().find("span").text("");      
+        $("#mediafile_path").val($(this).attr("data-jump")).show();
+        $("#special_folder").hide().find("span").text("");          
         init_mediafile_tree();
-      }
-    });
+      });        
+    }
+    // 刷新tooltip
+    fresh_tooltip();
   }
 
   // 初始化文件树
@@ -307,26 +312,23 @@
         onlyFolders: true,
         multiFolder: false
       },
+      // 回调方法,只对文件有效,目录必须通过事件进行处理
       function (file) {
       }
-    ).on("filetreeinitiated filetreeexpanded", function(e, data) {
-      // 处理展开目录下的绑定跳转
+    ).on("filetreeinitiated filetreeexpanded filetreecollapsed", function(e, data){
+      // 初始化结束、展开折叠结束时刷新文件区
+      if (data.rel){
+        refresh_files(data.rel);
+      }else{
+        refresh_files($("#mediafile_path").val());
+      }
+    }).on("filetreeinitiated filetreeexpanded", function(e, data) {
+      // 初始化结束和展开结束时获得目录(jQueryFileTree原代码处理filetreeinitiated事件处理有误，须删除showTree中的根目录判断才能正确触发)
+      // 处理跳转目录
       if (ft.attr("data-event-time") != e.timeStamp){
         ft.attr("data-event-time", e.timeStamp);
-        let $linkFolder = [];
-        if (e.type === "filetreeinitiated"){
-          refresh_files($("#mediafile_path").val());
-          $linkFolder = ft.find("ul .link-folder");
-        }else{
-          refresh_files(data.rel);
-          $linkFolder = $(data.li[0]).find("ul .link-folder");
-        }
-        for (let i=0; i < $linkFolder.length; i++) {
-          // 绑定事件，点击时跳转到硬链接目录
-          if ($($linkFolder[i]).attr("data-jump")){
-            bind_jump_folder($($linkFolder[i]), $($linkFolder[i]).attr("data-jump"));
-          }
-        }
+        let target = e.type === "filetreeinitiated" ? ft: $(data.li[0]);   
+        init_jump_dirs(target.find("ul .link-folder"));
         // 刷新tooltip
         fresh_tooltip();
       }          
@@ -563,21 +565,21 @@
 
   // 跳转同步目录
   function jump_sync_folders() {
-    $("#mediafile_path").val("[SYNC-FOLDERS]").hide();
+    $("#mediafile_path").val("*SYNC-FOLDERS*").hide();
     $("#special_folder").show().find("span").text("同步目录");
     init_mediafile_tree();
   }
 
   // 跳转媒体目录
   function jump_media_folders() {
-    $("#mediafile_path").val("[MEDIA-FOLDERS]").hide();
+    $("#mediafile_path").val("*MEDIA-FOLDERS*").hide();
     $("#special_folder").show().find("span").text("媒体目录");
     init_mediafile_tree();
   }
 
   // 跳转下载目录
   function jump_download_folders() {
-    $("#mediafile_path").val("[DOWNLOAD-FOLDERS]").hide();
+    $("#mediafile_path").val("*DOWNLOAD-FOLDERS*").hide();
     $("#special_folder").show().find("span").text("下载目录");
     init_mediafile_tree();
   }

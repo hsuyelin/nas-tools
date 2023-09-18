@@ -1131,15 +1131,15 @@ def dirlist():
                     dirs = [os.path.join("C:/", f) for f in os.listdir("C:/")]
             else:
                 dirs = [os.path.join("/", f) for f in os.listdir("/")]
-        elif in_dir == quote("[SYNC-FOLDERS]"):
+        elif in_dir == "*SYNC-FOLDERS*":
             sync_dirs = []
             for id, conf in Sync().get_sync_path_conf().items():
                 sync_dirs.append(conf["from"])
                 sync_dirs.append(conf["to"])
             dirs = list(set(sync_dirs))
-        elif in_dir == quote("[DOWNLOAD-FOLDERS]"):
+        elif in_dir == "*DOWNLOAD-FOLDERS*":
             dirs = get_download_dirs()
-        elif in_dir == quote("[MEDIA-FOLDERS]"):
+        elif in_dir == "*MEDIA-FOLDERS*":
             dirs = get_media_dirs()
         else:
             d = os.path.normpath(urllib.parse.unquote(in_dir))

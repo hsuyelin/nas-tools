@@ -1357,63 +1357,169 @@ function openFileBrowser(el, root, only_folders, on_folders, on_files, close_on_
   if (!only_folders && !on_files) only_folders = true;
   if (!root.trim()) root = "";
   let p = $(el);
-  // Skip is fileTree is already open
+  // 目录树已打开则跳过
   if (p.next().hasClass('fileTree')) return null;
-  // create a random id
+  // 创建随机数附加在id上
   const r = Math.floor((Math.random() * 1000) + 1);
-  // Add a new span and load fileTree
-  p.after("<div id='fileTree" + r + "' class='fileTree card shadow-sm' style='z-index: 99999;'></div>");
+  // 在“父对象”之后添加目录树和工具盒并初始化
+  p.after(`<div id='fileTree${r}' class='fileTree card shadow-sm' style='z-index: 99999;'></div>
+           <div id='treeToolbox${r}' class='filetree-toolbox'> 
+            <a id='treeToolbox_system' href='javascript:blur()'>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24"
+                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                    stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <polyline points="5 12 3 12 12 3 21 12 19 12"></polyline>
+                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"></path>
+                <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"></path>
+              </svg>
+              系统
+            </a>
+            <a id='treeToolbox_media' href='javascript:blur()'>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play"
+                    width="24" height="24" viewBox="0 0 24 24"
+                    stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M7 4v16l13 -8z"></path>
+              </svg>
+              媒体
+            </a>
+            <a id='treeToolbox_sync' href='javascript:blur()'>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-refresh"
+                    width="24" height="24" viewBox="0 0 24 24"
+                    stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
+                <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
+              </svg>
+              同步
+            </a>            
+            <a id='treeToolbox_download' href='javascript:blur()'>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-download" width="24" height="24"
+                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                    stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                <polyline points="7 11 12 16 17 11"></polyline>
+                <line x1="12" y1="4" x2="12" y2="16"></line>
+              </svg>
+              下载
+            </a></div>`);
   const ft = $('#fileTree' + r);
-  ft.fileTree({
-        script: 'dirlist',
-        root: root,
-        onlyFolders: only_folders,
-        multiFolder: false
-      },
-      function (file) {
-        if (on_files) {
-          p.val(file);
-          p.trigger('change');
-          if (close_on_select) {
-            ft.slideUp('fast', function () {
-              ft.remove();
-            });
-          }
-        }
-      }).on("filetreeinitiated filetreeexpanded", function(e, data) {
-        if (on_folders) {
-          // filetreeinitiated初始化事件时data是空的
-          if (e.type != 'filetreeinitiated'){
-            p.val(data.rel);
-            p.trigger('change');
-          }
-          if (close_on_select) {
-            $(ft).slideUp('fast', function () {
-              $(ft).remove();
-            });
-          }
-        }
-      });
-  // 新版因为下载器的目录设置包含在折叠区域内，设置top会导致位置偏移，去掉反而正常
+  const toolbox = $('#treeToolbox' + r);
+  init_browser(root);
+  init_toolbox();
+  // 目录树、工具盒与“父对象”的位置、宽度保持一致（无需设置top，在某些场景下设置top会导致错位，例如下载器的目录设置）
   ft.css({'left': p.position().left, 'width': (p.parent().width())});
-  // Format fileTree according to parent position, height and width
-  // ft.css({'left': p.position().left, 'top': (p.position().top + p.outerHeight()), 'width': (p.parent().width())});
-  // close if click elsewhere
+  toolbox.css({'left': p.position().left+p.parent().width()});  
+  // 操作区外点击时关闭路径选择框
   $(document).mouseup(function (e) {
-    if (!ft.is(e.target) && ft.has(e.target).length === 0) {
-      ft.slideUp('fast', function () {
-        $(ft).remove();
-      });
+    if (!ft.is(e.target) && ft.has(e.target).length === 0 && !toolbox.is(e.target) && toolbox.has(e.target).length === 0) {
+      close_browser();
     }
   });
-  // close if parent changed
+  // “父对象”改变时关闭关闭路径选择框
   p.bind("keydown", function () {
-    ft.slideUp('fast', function () {
-      $(ft).remove();
-    });
+    close_browser();
   });
-  // Open fileTree
+  // 打开目录树、工具盒
   ft.slideDown('fast');
+  toolbox.fadeIn('slow');
+
+  // 初始化路径选择框
+  function init_browser(root){
+    ft.removeData("fileTree");      
+    ft.fileTree({
+      script: 'dirlist',
+      root: encodeURIComponent(root),
+      onlyFolders: only_folders,
+      multiFolder: false
+    },
+    // 回调方法,只对文件有效,目录必须通过事件进行处理
+    function (file) {
+      if (on_files) {
+        // 回写路径
+        write_back_path(p, file);
+        // 如果选择时关闭则关闭路径选择框
+        if (close_on_select) {
+          close_browser();      
+        }
+      }
+    }).on("filetreeexpanded filetreecollapsed", function(e, data){
+      // 展开折叠时回写路径
+      if (data.rel){
+        write_back_path(p, data.rel);
+      }
+      // 如果选择时关闭则关闭路径选择框
+      if (close_on_select) {
+        close_browser();
+      }
+    }).on("filetreeinitiated filetreeexpanded", function(e, data) {
+      // 初始化结束和展开结束时获得目录(jQueryFileTree原代码处理filetreeinitiated事件处理有误，须删除showTree中的根目录判断才能正确触发)
+      if (on_folders) {
+        // 处理跳转目录
+        if (ft.attr("data-event-time") != e.timeStamp){
+          ft.attr("data-event-time", e.timeStamp);
+          let target = e.type === "filetreeinitiated" ? ft: $(data.li[0]);     
+          init_jump_dirs(target.find("ul .link-folder"));
+          // 刷新tooltip
+          fresh_tooltip(); 
+        }
+      }
+    });
+  }
+  
+  // 初始化工具盒
+  function init_toolbox(){
+    toolbox.find('#treeToolbox_system').off().on('click',function(){
+      init_browser(root);
+    });
+    toolbox.find('#treeToolbox_sync').off().on('click',function(){
+      init_browser("*SYNC-FOLDERS*");
+    });
+    toolbox.find('#treeToolbox_media').off().on('click',function(){
+      init_browser("*MEDIA-FOLDERS*");
+    });
+    toolbox.find('#treeToolbox_download').off().on('click',function(){
+      init_browser("*DOWNLOAD-FOLDERS*");
+    });
+  }
+
+  // 初始化跳转目录
+  function init_jump_dirs(dirs) {
+    for (let i=0; i < dirs.length; i++) {
+      // 忽略空路径
+      if ($(dirs[i]).attr("data-jump") === "") continue
+      // 绑定事件，点击时跳转到硬链接目录
+      $(dirs[i]).on("click", function (event){
+        root = $(this).attr("data-jump");
+        // 父元素移除时，自动产生的tooltip不会自动移除，须强行销毁
+        $(this).tooltip("dispose");
+        // 回写路径
+        write_back_path(p, root);
+        // 初始化路径选择框
+        init_browser(root);
+      });        
+    }
+    // 刷新tooltip
+    fresh_tooltip();
+  }
+
+  // 回写路径
+  function write_back_path(target, path){
+    target.val(path);
+    target.trigger('change');
+  }
+
+  // 关闭路径选择框
+  function close_browser(){
+    ft.slideUp('fast', function () {
+      $(this).remove();
+    });
+    toolbox.fadeOut('fast', function () {
+      $(this).remove();
+    });     
+  }  
 }
 
 //初始化目录选择控件
