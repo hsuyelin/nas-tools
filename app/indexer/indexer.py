@@ -141,6 +141,16 @@ class Indexer(object):
             return []
 
         indexers = self.get_indexers(check=True)
+        """
+        const filters = {
+            "site": search_site,
+            "restype": search_restype,
+            "pix": search_pix,
+            "sp_state": sp_state,
+            "rule": search_rule
+        };
+        """
+        # FIXME: 需要根据filters里site是否None，如果不为None，需要找出指定的indexer进行搜索匹配 @hsuyelin@163.com
         if not indexers:
             log.error("没有配置索引器，无法搜索！")
             return []

@@ -11,8 +11,15 @@ from app.utils import StringUtils
 from config import Config, RMT_MEDIAEXT
 from app.helper import FfmpegHelper
 
-
-def MetaInfo(title, subtitle=None, mtype=None, filePath=None):
+def MetaInfo(title,
+             subtitle=None,
+             mtype=None,
+             filePath=None,
+             media_type=None,
+             cn_name=None,
+             en_name=None,
+             tmdb_id=None,
+             imdb_id=None):
     """
     媒体整理入口，根据名称和副标题，判断是哪种类型的识别，返回对应对象
     :param title: 标题、种子名、文件名
@@ -51,13 +58,12 @@ def MetaInfo(title, subtitle=None, mtype=None, filePath=None):
         recognize_enhance_enable = laboratory.get('recognize_enhance_enable', False) or False
 
     if recognize_enhance_enable:
-         meta_info = MetaVideoV2(rev_title, subtitle, fileflag, filePath)
+         meta_info = MetaVideoV2(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
     else:
         if mtype == MediaType.ANIME or is_anime(rev_title):
-            meta_info = MetaAnime(rev_title, subtitle, fileflag, filePath)
+            meta_info = MetaAnime(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
         else:
-            meta_info = MetaVideo(rev_title, subtitle, fileflag, filePath)
-
+            meta_info = MetaVideo(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
     # 设置原始名称
     meta_info.org_string = org_title
     # 设置识别词处理后名称

@@ -2,7 +2,7 @@
 
 # <<< START ADDED PART
 from PyInstaller.building.build_main import Analysis, PYZ, EXE, COLLECT, BUNDLE, TOC
-
+import babelfish
 
 def collect_pkg_data(package, include_py_files=False, subdir=None):
     import os
@@ -58,12 +58,17 @@ def collect_local_submodules(package):
                 submodules.append(package + '.' + f[:-3])
     return submodules
 
-
 hiddenimports = ['Crypto.Math',
                  'Crypto.Cipher',
                  'Crypto.Util',
                  'Crypto.Hash',
                  'Crypto.Protocol',
+                 'babelfish.converters.alpha2',
+                 'babelfish.converters.alpha3b',
+                 'babelfish.converters.alpha3t',
+                 'babelfish.converters.name',
+                 'babelfish.converters.opensubtitles',
+                 'babelfish.converters.countryname',
                  'logging.config',
                  'app.sites.siteuserinfo',
                  'app.mediaserver.client',
@@ -81,13 +86,26 @@ hiddenimports += collect_local_submodules('app.plugins.modules')
 hiddenimports += collect_local_submodules('app.plugins.modules._autosignin')
 # <<< END HIDDENIMPORTS PART
 
-block_cipher = None
+# <<< START DATAS
+def collect_datas():
+    import os
+    import guessit
+    datas = []
+    return [
+        (babelfish.__path__[0] + '/data', 'babelfish/data'),
+        (guessit.__path__[0] + '/config', 'guessit/config'),
+        (guessit.__path__[0] + '/data', 'guessit/data'),
+    ]
 
+datas = collect_datas()
+# <<< END DATAS
+
+block_cipher = None
 a = Analysis(
     ['./../run.py'],
     pathex=pathex_tp,
     binaries=[],
-    datas=[],
+    datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},

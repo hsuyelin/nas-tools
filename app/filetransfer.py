@@ -217,9 +217,11 @@ class FileTransfer:
                        r"|简[体中]?)[.\])])" \
                        r"|([\u4e00-\u9fa5]{0,3}[中双][\u4e00-\u9fa5]{0,2}[字文语][\u4e00-\u9fa5]{0,3})" \
                        r"|简体|简中" \
+                       r"|[Gg][Bb]" \
                        r"|(?<![a-z0-9])gb(?![a-z0-9])"
         _zhtw_sub_re = r"([.\[(](((zh[-_])?(hk|tw|cht|tc|TC|jptc|JPTC|cht&jpn|CHT|Cht&Jap|CHT&JAP))" \
                        r"|繁[体中]?)[.\])])" \
+                       r"|[bB][iI][gG]5" \
                        r"|繁体中[文字]|中[文字]繁体|繁体" \
                        r"|(?<![a-z0-9])big5(?![a-z0-9])"
         _eng_sub_re = r"[.\[(]eng[.\])]"
@@ -698,7 +700,9 @@ class FileTransfer:
                         log.error("【Rmt】%s 无法识别媒体信息！" % file_name)
                     continue
                 # 当前文件大小
-                media.size = os.path.getsize(file_item)
+                media.size = 0
+                if os.path.exists(file_item):
+                    media.size = os.path.getsize(file_item)
                 # 目的目录，有输入target_dir时，往这个目录放
                 if target_dir:
                     dist_path = target_dir

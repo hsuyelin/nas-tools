@@ -7,6 +7,7 @@ from app.helper import ProgressHelper
 from app.media import Media
 from app.media.meta import MetaInfo
 from app.utils.types import MediaType, SearchType, ProgressKey
+from config import Config
 
 
 class _IIndexClient(metaclass=ABCMeta):
@@ -20,11 +21,15 @@ class _IIndexClient(metaclass=ABCMeta):
     media = None
     progress = None
     filter = None
+    recognize_enhance_enable = False
 
     def __init__(self):
         self.media = Media()
         self.filter = Filter()
         self.progress = ProgressHelper()
+        laboratory = Config().get_config("laboratory")
+        if laboratory:
+            self.recognize_enhance_enable = laboratory.get("simplify_library_notification", False) or False
 
     @abstractmethod
     def match(self, ctype):
@@ -106,7 +111,30 @@ class _IIndexClient(metaclass=ABCMeta):
                     index_rule_fail += 1
                     continue
                 # 识别种子名称
-                meta_info = MetaInfo(title=torrent_name, subtitle=f"{labels} {description}")
+                imdbid_match = False
+                name_match = False
+                if match_media:
+                    imdbid_match = imdbid and match_media.imdb_id and str(imdbid) == str(match_media.imdb_id)
+                    name_match = match_media.org_string in torrent_name or \
+                                match_media.original_title in torrent_name or \
+                                match_media.org_string in description or \
+                                match_media.original_title in description
+                    year_match = match_media.year in torrent_name or \
+                                 match_media.year in description
+                if (imdbid_match or name_match) and year_match and self.recognize_enhance_enable:
+                    meta_info = MetaInfo(title=torrent_name,
+                                         subtitle=f"{labels} {description}",
+                                         mtype=match_media.media_type,
+                                         cn_name=   match_media.org_string,
+                                         en_name=match_media.original_title,
+                                         tmdb_id=match_media.tmdb_id,
+                                         imdb_id=match_media.imdb_id)
+                    meta_info.set_tmdb_info(self.media.get_tmdb_info(mtype=match_media.media_type,
+                                                             tmdbid=match_media.tmdb_id,
+                                                             append_to_response="all"))
+                else:
+                    meta_info = MetaInfo(title=torrent_name, subtitle=f"{labels} {description}")
+
                 if not meta_info.get_name():
                     log.info(f"【{self.client_name}】{torrent_name} 无法识别到名称")
                     index_match_fail += 1

@@ -31,7 +31,7 @@ class DouBan:
         self.doubanapi = DoubanApi()
         self.doubanweb = DoubanWeb()
         try:
-            res = RequestUtils(timeout=5).get_res("https://www.douban.com/")
+            res = RequestUtils(referer="https://www.douban.com", timeout=5).get_res("https://www.douban.com/")
             if res:
                 self.cookie = StringUtils.str_from_cookiejar(res.cookies)
         except Exception as err:
@@ -45,7 +45,7 @@ class DouBan:
         log.info("【Douban】正在通过API查询豆瓣详情：%s" % doubanid)
         # 随机休眠
         if wait:
-            time = round(random.uniform(1, 5), 1)
+            time = round(random.uniform(10, 60), 1)
             log.info("【Douban】随机休眠：%s 秒" % time)
             sleep(time)
         if mtype == MediaType.MOVIE:

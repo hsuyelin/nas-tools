@@ -17,6 +17,7 @@ from app.utils import Torrent
 from app.utils.commons import singleton
 from app.utils.types import MediaType, SearchType, EventType, SystemConfigKey, RssType
 from web.backend.web_utils import WebUtils
+from config import Config
 
 lock = Lock()
 
@@ -165,7 +166,7 @@ class Subscribe:
             # 根据TMDBID查询，从推荐加订阅的情况
             if mediaid:
                 # 根据ID查询
-                media_info = WebUtils.get_mediainfo_from_id(mtype=mtype, mediaid=mediaid)
+                media_info = WebUtils.get_mediainfo_from_id(mtype=mtype, mediaid=mediaid, wait=True)
                 if not season:
                     season = media_info.begin_season
             else:
@@ -578,6 +579,10 @@ class Subscribe:
         """
         # 更新电影
         log.info("【Subscribe】开始刷新订阅TMDB信息...")
+        name_follow_tmdb_changed = True
+        media = Config().get_config('media')
+        if media:
+            name_follow_tmdb_changed = media.get("name_follow_tmdb_changed", True) or True
         rss_movies = self.get_subscribe_movies(state='R')
         for rid, rss_info in rss_movies.items():
             # 跳过模糊匹配的
@@ -593,7 +598,7 @@ class Subscribe:
                                                year=year,
                                                mtype=MediaType.MOVIE,
                                                cache=False)
-            if media_info and media_info.tmdb_id and media_info.title != name:
+            if media_info and media_info.tmdb_id and media_info.title != name and name_follow_tmdb_changed:
                 log.info(f"【Subscribe】检测到TMDB信息变化，更新电影订阅 {name} 为 {media_info.title}")
                 # 更新订阅信息
                 self.dbhelper.update_rss_movie_tmdb(rid=rssid,
@@ -633,7 +638,7 @@ class Subscribe:
                 # 设置总集数的，不更新集数
                 if total_ep:
                     total_episode = total_ep
-                if total_episode and (name != media_info.title or total != total_episode):
+                if total_episode and (name != media_info.title or total != total_episode) and name_follow_tmdb_changed:
                     # 新的缺失集数
                     lack_episode = total_episode - (total - lack)
                     log.info(

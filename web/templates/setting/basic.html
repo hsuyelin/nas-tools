@@ -444,9 +444,15 @@
                 </div>
             </div>
             <div class="col-lg">
-              <div class="mb-3" style="display:none;">
-                <h1>占位元素 </h1>
-              </div>
+                <div class="mb-3">
+                  <label class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="media.name_follow_tmdb_changed"
+                           {% if Config.media.name_follow_tmdb_changed %}checked{% endif %}>
+                    <span class="form-check-label">已整理媒体名称跟随TMDB变化 <span class="form-help"
+                                                                          title="开启则会一直与TMDB同步但是会创建多个文件夹；关闭后将会保持与TMDB信息改变之前的名称一致，不会再创建新文件夹"
+                                                                          data-bs-toggle="tooltip">?</span></span>
+                  </label>
+                </div>
             </div>
           </div>
         </div>
@@ -780,18 +786,6 @@
                     <span class="form-check-label">默认搜索豆瓣资源 <span class="form-help"
                                                                           title="开启将使用豆瓣进行电影电视剧的名称搜索，允许中文名不完整时自动联想，但如豆瓣数据与TMDB不一致时可能会无法搜索；关闭后使用TMDB的数据，对中文支持不友好，但不会有无法搜索的问题"
                                                                           data-bs-toggle="tooltip">?</span></span>
-                  </label>
-                </div>
-              </div>
-              <div class="col-12 col-xl-3">
-                <div class="mb-3">
-                  <label class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="laboratory.search_en_title" {% if
-                      Config.laboratory and Config.laboratory.search_en_title %}checked{% endif %}>
-                    <span class="form-check-label">搜索优先使用英文名 <span class="form-help"
-                                                                            title="开启后对于精确搜索场景将会优先使用英文名搜索，否则优先使用中文名搜索"
-                                                                            data-bs-toggle="tooltip">?</span>
-                    </span>
                   </label>
                 </div>
               </div>

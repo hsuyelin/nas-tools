@@ -1,4 +1,5 @@
 from app.media.tmdbv3api.tmdb import TMDb
+from app.utils import StringUtils
 
 try:
     from urllib import urlencode
@@ -23,6 +24,7 @@ class Search(TMDb):
         :param params:
         :return:
         """
+        self.__update_language(params)
         return self._get_obj(self._call(self._urls["companies"], urlencode(params)))
 
     def collections(self, params):
@@ -31,6 +33,7 @@ class Search(TMDb):
         :param params:
         :return:
         """
+        self.__update_language(params)
         return self._get_obj(self._call(self._urls["collections"], urlencode(params)))
 
     def keywords(self, params):
@@ -39,6 +42,7 @@ class Search(TMDb):
         :param params:
         :return:
         """
+        self.__update_language(params)
         return self._get_obj(self._call(self._urls["keywords"], urlencode(params)))
 
     def movies(self, params):
@@ -47,6 +51,7 @@ class Search(TMDb):
         :param params:
         :return:
         """
+        self.__update_language(params)
         return self._get_obj(self._call(self._urls["movies"], urlencode(params)))
 
     def multi(self, params):
@@ -55,6 +60,7 @@ class Search(TMDb):
         :param params:
         :return:
         """
+        self.__update_language(params)
         return self._get_obj(self._call(self._urls["multi"], urlencode(params)))
 
     def people(self, params):
@@ -63,6 +69,7 @@ class Search(TMDb):
         :param params:
         :return:
         """
+        self.__update_language(params)
         return self._get_obj(self._call(self._urls["people"], urlencode(params)))
 
     def tv_shows(self, params):
@@ -71,4 +78,14 @@ class Search(TMDb):
         :param params:
         :return:
         """
+        self.__update_language(params)
         return self._get_obj(self._call(self._urls["tv_shows"], urlencode(params)))
+
+    def __update_language(self, params):
+        if not isinstance(params, dict):
+            return
+        query = params.get("query", "") or ""
+        if not StringUtils.is_string_and_not_empty(query):
+            return
+        is_chinese = StringUtils.is_chinese(query)
+        self.language = "zh" if is_chinese else "en"

@@ -109,12 +109,18 @@ class StringUtils:
             else:
                 return False
         return True
+    @staticmethod
+    def is_eng_media_name_format(word):
+        pattern = r'^[a-zA-Z]+[a-zA-Z0-9\s._:@!@]*$'
+        return bool(re.match(pattern, word))
 
     @staticmethod
     def is_int_or_float(word):
         """
         判断是否是整型或浮点型的格式
         """
+        if not word:
+            return None
         pattern = r'^[-+]?\d+(\.\d+)?$'
         return re.match(pattern, word) is not None
 

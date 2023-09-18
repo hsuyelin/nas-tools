@@ -152,10 +152,15 @@ body, .page {
     padding: 0px 5px;
 }
 
-.link-folder:hover{
+.link-folder:not([data-jump=""]):hover{
     color: var(--tblr-blue);
     border: 1px solid var(--tblr-blue);
     cursor: pointer;
+}
+
+LI.directory a.selected {
+    color: inherit;
+    text-decoration: none;
 }
 
 .jqueryFileTree LI a:hover {
@@ -163,46 +168,74 @@ body, .page {
     color: var(--tblr-link-color) !important;
 }
 
-#mediafile_folder_sync::before,
-.mediafile-link span::before {
+#mediafile_hardlink_mark {
+    border-radius: var(--tblr-border-radius);
+    border: 1px solid rgb(0,0,0,0);    
+    color: var(--tblr-gray-400);
+    padding: 5px 10px;   
+}
+
+#mediafile_hardlink_mark[data-direction]:not(.auto-locate):not(.invalid-mark) {
+    cursor: pointer;  
+}
+
+#mediafile_hardlink_mark[data-direction]:not(.auto-locate):not(.invalid-mark):hover {
+    border-color: var(--tblr-link-color);    
+    color: var(--tblr-link-color);
+}
+
+#mediafile_hardlink_mark[data-direction].auto-locate::after {
+    content: "自动定位";
+    display: inline-block;
+    border-radius: var(--tblr-border-radius);
+    border: 1px solid var(--tblr-gray-400);
+    color: var(--tblr-gray-400);
+    transform: scale(0.6);
+    padding: 0px 5px;
+}
+
+#mediafile_hardlink_mark::before,
+.mediafile-hardlink-pair span::before {
     content: "";
     display: inline-flex;
-    margin: 0px 5px 0px 10px;
+    margin-right: 5px;
     width: 10px;
     transform: scale(0.6);
 }
 
-#mediafile_folder_sync[data-direction="→"]::before {
+#mediafile_hardlink_mark[data-direction]::before {
     content: "●";
+}
+
+#mediafile_hardlink_mark[data-direction="→"]::before {
     color: var(--tblr-red);
 }
 
-#mediafile_folder_sync[data-direction="←"]::before {
-    content: "●";
+#mediafile_hardlink_mark[data-direction="←"]::before {
     color: var(--tblr-green);
 }
 
-.mediafile-link span[data-direction="→"]::before {
+.mediafile-hardlink-pair span[data-direction="→"]::before {
     content: "→";
     color: var(--tblr-red);
 }
 
-.mediafile-link span[data-direction="←"]::before {
+.mediafile-hardlink-pair span[data-direction="←"]::before {
     content: "←";
     color: var(--tblr-green);
 }
 
-.mediafile-link ul {
+.mediafile-hardlink-pair ul {
     padding-left: 0px;
 }
 
-.mediafile-link li {
+.mediafile-hardlink-pair li {
     list-style: none;
     color: var(--tblr-gray-400);
     font-size: 8px;
 }
 
-.mediafile-link li span:hover {
+.mediafile-hardlink-pair li span:hover {
     text-decoration: underline;
     color: var(--tblr-blue);
     cursor: pointer;

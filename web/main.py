@@ -15,6 +15,7 @@ from threading import Lock
 from urllib import parse
 from urllib.parse import quote, unquote
 
+from dotenv import load_dotenv
 from flask import Flask, request, json, render_template, make_response, session, send_from_directory, send_file, \
     redirect, Response
 from flask_compress import Compress
@@ -50,6 +51,14 @@ from web.backend.pro_user import ProUser
 from web.backend.wallpaper import get_login_wallpaper
 from web.backend.web_utils import WebUtils
 from web.security import require_auth
+
+flask_dir = Path(__file__).resolve().parent.parent
+flask_env_path = flask_dir / ".flaskenv"
+if flask_env_path.is_file():
+    print(f"正在加载flask环境变量: {str(flask_env_path)}")
+    load_dotenv(dotenv_path=flask_env_path)
+else:
+    print("flask.env 文件不存在")
 
 # 配置文件锁
 ConfigLock = Lock()
@@ -663,7 +672,7 @@ def brushtask():
     # 下载器列表
     Downloaders = Downloader().get_downloader_conf_simple()
     # 任务列表
-    Tasks = BrushTask().get_brushtask_info()
+    Tasks = BrushTask().get_brushtask_info().values()
     return render_template("site/brushtask.html",
                            Count=len(Tasks),
                            Sites=CfgSites,
@@ -1053,44 +1062,74 @@ def do():
 @App.route('/dirlist', methods=['POST'])
 @login_required
 def dirlist():
+    def match_sync_dir(folder, x, y, locating, direction):
+        """
+        匹配同步目录对硬链接信息生成HTML
+        """
+        result = False
+        sync_class = ""
+        link_path = ""
+        link_direction = ""
+        # 匹配同步目录
+        sync_class = f"sync-{'src' if direction == '→' else 'dest'}{' auto-locate' if locating else ''}"
+        if folder == x:
+            target = SystemUtils.shorten_path(y) if y else "未设置"
+            link_path = f'<span class="link-folder" data-bs-toggle="tooltip" title="{y}" data-jump="{y}">{target}</span>'
+            link_direction = f'<span class="link-direction" data-direction="{direction}">{direction}</span>'
+            result = True
+        return result, sync_class, link_path, link_direction
+        
     def get_hardlink_info(folder):
         """
         获取硬链接信息
         """
         sync_class = ""
         link_path = ""
-        link_direction = ""        
-        sync_dirs = Sync().get_hardlinks_sync_dirs()     
+        link_direction = ""
+        # 获取所有硬链接的同步目录设置
+        sync_dirs = Sync().get_filehardlinks_sync_dirs()
+        # 按设置遍历检查目录是否是同步目录或在同步目录内  
         for dir in sync_dirs:
-            if folder.startswith(dir[0]):
-                if folder == dir[0]:
-                    link_path = f'<span class="link-folder" data-bs-toggle="tooltip" title="{dir[1]}" data-jump="{dir[1]}">{SystemUtils.shorten_path(dir[1])}</span>'
-                    link_direction = '<span class="link-direction" data-direction="→">→</span>'
-                sync_class = "sync-src"
-                break
-            elif folder.startswith(dir[1]):
-                if folder == dir[1]:
-                    link_path = f'<span class="link-folder" data-bs-toggle="tooltip" title="{dir[0]}" data-jump="{dir[0]}">{SystemUtils.shorten_path(dir[0])}</span>'
-                    link_direction = '<span class="link-direction" data-direction="←">←</span>'
-                sync_class = "sync-dest"
-                break        
+            if dir[0] and (dir[0] == folder or folder.startswith(f"{dir[0]}/")):
+                result, sync_class, link_path, link_direction = match_sync_dir(folder, dir[0], dir[1], dir[2], '→')
+                if result: break
+            elif dir[1] and (dir[1] == folder or folder.startswith(f"{dir[1]}/")):
+                result, sync_class, link_path, link_direction = match_sync_dir(folder, dir[1], dir[0], dir[2], '←')
+                if result: break
         return sync_class, link_path, link_direction
-    
+
+    def add_paths_to_media_dirs(paths, media_dirs):
+        """
+        添加路径到媒体目录列表。
+
+        :param paths: 待添加的路径列表
+        :param media_dirs: 媒体目录列表
+        """
+        if not paths:
+            return
+
+        valid_paths = [pathElement.rstrip('/') for pathElement in paths if StringUtils.is_string_and_not_empty(pathElement)]
+        media_dirs.extend(valid_paths)
+
     def get_media_dirs():
+        """
+        获取媒体库目录
+        """
         media_dirs = []
         movie_path = Config().get_config('media').get('movie_path')
         tv_path = Config().get_config('media').get('tv_path')
         anime_path = Config().get_config('media').get('anime_path')
         unknown_path = Config().get_config('media').get('unknown_path')
-        if movie_path is not None: media_dirs.extend([path.rstrip('/') for path in movie_path])
-        if tv_path is not None: media_dirs.extend([path.rstrip('/') for path in tv_path])
-        if anime_path is not None: media_dirs.extend([path.rstrip('/') for path in anime_path])
-        if unknown_path is not None: media_dirs.extend([path.rstrip('/') for path in unknown_path])   
+        add_paths_to_media_dirs(movie_path, media_dirs)
+        add_paths_to_media_dirs(tv_path, media_dirs)
+        add_paths_to_media_dirs(anime_path, media_dirs)
+        add_paths_to_media_dirs(unknown_path, media_dirs)  
         return list(set(media_dirs))
     
     def get_download_dirs():
+        # 获取下载目录
         return [path.rstrip('/') for path in Downloader().get_download_visit_dirs()]
-        
+    
     r = ['<ul class="jqueryFileTree" style="display: none;">']
     try:
         r = ['<ul class="jqueryFileTree" style="display: none;">']
@@ -1120,7 +1159,6 @@ def dirlist():
             if not os.path.isdir(d):
                 d = os.path.dirname(d)
             dirs = [os.path.join(d, f) for f in os.listdir(d)]
-        
         dirs.sort()
         for ff in dirs:
             f = os.path.basename(ff)

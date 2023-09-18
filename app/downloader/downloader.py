@@ -388,11 +388,17 @@ class Downloader:
                     else:
                         tags.append(tag)
             else:
+                # 字符串是空串或者None
+                tags = []
                 if tag:
                     if isinstance(tag, list):
                         tags = tag
                     else:
                         tags = [tag]
+            # 添加站点tag
+            site_tags = self.sites.get_site_download_tags(media_info.site)
+            if site_tags:
+                tags.extend(str(site_tags).split(";"))
 
             # 暂停
             if is_paused is None:
@@ -1340,7 +1346,8 @@ class Downloader:
         if not config or not dtype:
             return False
         # 测试状态
-        state = self.__build_class(ctype=dtype, conf=config).get_status()
+        download_client = self.__build_class(ctype=dtype, conf=config)
+        state = download_client.get_status() if download_client else False
         if not state:
             log.error(f"【Downloader】下载器连接测试失败")
         return state

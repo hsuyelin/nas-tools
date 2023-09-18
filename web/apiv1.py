@@ -962,17 +962,6 @@ class SystemPath(ClientResource):
         """
         return WebAction().api_action(cmd='get_sub_path', data=self.parser.parse_args())
 
-@system.route('/hardlink')
-class SystemHardlink(ClientResource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('filepath', type=str, help='路径', location='form', required=True)
-
-    @system.doc(parser=parser)
-    def post(self):
-        """
-        查询文件的硬链接
-        """
-        return WebAction().api_action(cmd='get_hardlinks', data=self.parser.parse_args())
 
 @system.route('/restart')
 class SystemRestart(ClientResource):
@@ -2142,6 +2131,30 @@ class SyncRun(ApiResource):
         return WebAction().api_action(cmd='sch', data={"item": "sync"})
 
 
+@sync.route('/file/hardlinks')
+class SystemFileHardlinks(ClientResource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('filepath', type=str, help='路径', location='form', required=True)
+    @system.doc(parser=parser)
+    def post(self):
+        """
+        查询文件的硬链接
+        """
+        return WebAction().api_action(cmd='get_filehardlinks', data=self.parser.parse_args())
+
+
+@sync.route('/directory/hardlink')
+class SystemDirectoryHardlink(ClientResource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('dirpath', type=str, help='路径', location='form', required=True)
+    @system.doc(parser=parser)
+    def post(self):
+        """
+        查询目录的硬链接
+        """
+        return WebAction().api_action(cmd='get_dirhardlink', data=self.parser.parse_args())
+    
+    
 @message.route('/client/update')
 class MessageClientUpdate(ClientResource):
     parser = reqparse.RequestParser()

@@ -71,6 +71,15 @@ export class PageMediainfo extends CustomElement {
     `);
   }
 
+  _fix_card_image_url(url) {
+    if (!url || url.toLowerCase() === "none") {
+      return "";
+    }
+    var regex = /qnmob3/i;
+    var fixedUrl = url.replace(regex, 'img1');
+    return fixedUrl;
+  }
+
   render() {
     return html`
       <div class="container-xl placeholder-glow page-wrapper-top-off lit-media-info-page-bg">
@@ -242,7 +251,7 @@ export class PageMediainfo extends CustomElement {
                 card-tmdbid=${item.id}
                 card-mediatype=${item.type}
                 card-showsub=1
-                card-image=${'/img?url='+item.image}
+                card-image=${'/img?url='+this._fix_card_image_url(item.image)}
                 card-fav=${item.fav}
                 card-vote=${item.vote}
                 card-year=${item.year}
@@ -271,7 +280,7 @@ export class PageMediainfo extends CustomElement {
                 card-tmdbid=${item.id}
                 card-mediatype=${item.type}
                 card-showsub=1
-                card-image=${'/img?url='+item.image}
+                card-image=${'/img?url='+this._fix_card_image_url(item.image)}
                 card-fav=${item.fav}
                 card-vote=${item.vote}
                 card-year=${item.year}

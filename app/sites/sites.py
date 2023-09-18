@@ -92,6 +92,7 @@ class Sites:
                 "chrome": True if site_note.get("chrome") == "Y" else False,
                 "proxy": True if site_note.get("proxy") == "Y" else False,
                 "subtitle": True if site_note.get("subtitle") == "Y" else False,
+                "tags": site_note.get("tags"),
                 "limit_interval": site_note.get("limit_interval"),
                 "limit_count": site_note.get("limit_count"),
                 "limit_seconds": site_note.get("limit_seconds"),
@@ -245,6 +246,16 @@ class Sites:
             for site in self._siteByIds.values():
                 if site.get("name") == site_name:
                     return site.get("download_setting")
+        return None
+
+    def get_site_download_tags(self, site_name=None):
+        """
+        获取站点标签
+        """
+        if site_name:
+            for site in self._siteByIds.values():
+                if site.get("name") == site_name:
+                    return site.get("tags")
         return None
 
     def test_connection(self, site_id):

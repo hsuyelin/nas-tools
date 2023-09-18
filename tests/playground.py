@@ -66,7 +66,7 @@ def main():
     # video4_item = MediaItem(datas=video4_dict)
     # print(video4_item.to_dict_str())
 
-    # video5 = "这个杀手不太冷.导演剪辑版.1024x576.CD-1.WEB-DL.H264.AAC-HHWEB"
+    # video5 = "夺宝奇兵5.Indiana Jones and the Dial of Destiny.2023.2160p.HDR.H265.内嵌中英字幕.mp4"
     # video5_dict = TestUtils.guess_movie_info(video5)
     # video5_item = MediaItem(datas=video5_dict)
     # print(video5_item.to_dict_str())

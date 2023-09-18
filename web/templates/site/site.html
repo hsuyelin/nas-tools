@@ -196,6 +196,22 @@
           </div>
         </div>
         <div class="row">
+          <div class="col-lg-12">
+            <div class="mb-3">
+              <label class="form-label">User-Agent <span class="form-help"
+                                                         title="站点签到/数据获取/搜索请求时使用的User-Agent，为空则使用基础配置中User-Agent设置" data-bs-toggle="tooltip">?</span></label>
+              <div class="input-group input-group-flat">
+                <input type="text" class="form-control" id="site_ua" value="" placeholder="站点访问User-Agent">
+                <span class="input-group-text">
+                  <a href="javascript:set_user_agent('site_ua')" class="link-secondary" title="从浏览器中获取 User-Agent" data-bs-toggle="tooltip">
+                    {{ SVG.arrow_bar_to_left() }}
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
           <div class="col-lg-4">
             <div class="mb-3">
               <label class="form-label required">RSS解析种子详情 <span class="form-help"
@@ -275,15 +291,10 @@
           </div>
           <div class="col-lg-8">
             <div class="mb-3">
-            <label class="form-label">User-Agent <span class="form-help"
-                  title="站点签到/数据获取/搜索请求时使用的User-Agent，为空则使用基础配置中User-Agent设置" data-bs-toggle="tooltip">?</span></label>
+            <label class="form-label">站点标签 <span class="form-help"
+                  title="下载站点资源时使用的标签，多个使用英文分号即;分割，下载时会和下载设置中标签合并，可留空。" data-bs-toggle="tooltip">?</span></label>
               <div class="input-group input-group-flat">
-                <input type="text" class="form-control" id="site_ua" value="" placeholder="站点访问User-Agent">
-                <span class="input-group-text">
-                  <a href="javascript:set_user_agent('site_ua')" class="link-secondary" title="从浏览器中获取 User-Agent" data-bs-toggle="tooltip">
-                    {{ SVG.arrow_bar_to_left() }}
-                  </a>
-                </span>
+                <input type="text" class="form-control" id="site_tags" value="" placeholder="站点标签">
               </div>
             </div>
           </div>
@@ -473,6 +484,7 @@
     $("#site_proxy").val('N');
     $("#site_parse").val('Y');
     $("#site_subtitle").val('N');
+    $("#site_tags").val('');
     $("#site_unread_msg_notify").val('Y');
     $("#sitelimit_interval").val('');
     $("#sitelimit_count").val('');
@@ -517,6 +529,7 @@
         } else {
           $("#site_subtitle").val("N");
         }
+        $("#site_tags").val(ret.site.tags);
         if (ret.site.unread_msg_notify) {
           $("#site_unread_msg_notify").val("Y");
         } else {
@@ -596,6 +609,7 @@
     let chrome = $("#site_chrome").val();
     let proxy = $("#site_proxy").val();
     let subtitle = $("#site_subtitle").val();
+    let tags = $("#site_tags").val();
     // 流控规则
     let limit_interval = $("#sitelimit_interval").val();
     if (limit_interval && isNaN(limit_interval)) {
@@ -635,6 +649,7 @@
         "proxy": proxy,
         "message": site_unread_msg_notify,
         "subtitle": subtitle,
+        "tags": tags,
         "limit_interval": limit_interval,
         "limit_count": limit_count,
         "limit_seconds": limit_seconds
@@ -646,6 +661,19 @@
     ajax_post("update_site", data, function (ret) {
       $("#add_or_edit_site_btn").attr("disabled", false).text("新增");
       $("#modal-site").modal("hide");
+      if (ret === undefined) {
+        show_fail_modal("！", function () {
+          GlobalModalAbort = true;
+          window_history_refresh();
+        });
+      }
+
+      if (ret.code !== "200") {
+        show_fail_modal(ret.msg, function () {
+          GlobalModalAbort = true;
+          navmenu('site');
+        });
+      }
       //刷新页面
       window_history_refresh();
     });

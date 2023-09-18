@@ -9,7 +9,6 @@ import shutil
 import signal
 import sqlite3
 import time
-import hashlib
 from math import floor
 from pathlib import Path
 from urllib.parse import unquote
@@ -178,7 +177,8 @@ class WebAction:
             "get_downloading": self.get_downloading,
             "test_site": self.__test_site,
             "get_sub_path": self.__get_sub_path,
-            "get_hardlinks": self.__get_hardlinks,
+            "get_filehardlinks": self.__get_filehardlinks,
+            "get_dirhardlink": self.__get_dirhardlink,
             "rename_file": self.__rename_file,
             "delete_files": self.__delete_files,
             "download_subtitle": self.__download_subtitle,
@@ -1121,8 +1121,10 @@ class WebAction:
                                   cookie=cookie,
                                   note=note,
                                   rss_uses=rss_uses)
-
-        return {"code": ret}
+        if ret:
+            return {"code": "200"}
+        else:
+            return {"code": "400", "msg": "更新数据库失败，请重试"}
 
     @staticmethod
     def __get_site(data):
@@ -1280,6 +1282,7 @@ class WebAction:
         compatibility = data.get("compatibility")
         rename = data.get("rename")
         enabled = data.get("enabled")
+        locating = data.get("locating")
 
         _sync = Sync()
 
@@ -1317,7 +1320,8 @@ class WebAction:
                                mode=mode,
                                compatibility=compatibility,
                                rename=rename,
-                               enabled=enabled)
+                               enabled=enabled,
+                               locating=locating)
         return {"code": 0, "msg": ""}
 
     @staticmethod
@@ -1363,6 +1367,9 @@ class WebAction:
                 _sync.check_source(sid=sid)
             _sync.check_sync_paths(sid=sid, enabled=1 if checked else 0)
             return {"code": 0}
+        elif flag == "locating":
+            _sync.check_sync_paths(sid=sid, locating=1 if checked else 0)
+            return {"code": 0}        
         else:
             return {"code": 1}
 
@@ -4128,8 +4135,7 @@ class WebAction:
                             "type": "file",
                             "rel": os.path.dirname(ff).replace("\\", "/"),
                             "ext": ext,
-                            "size": StringUtils.str_filesize(os.path.getsize(ff)),
-                            "linkid": hashlib.md5(ff.encode()).hexdigest()
+                            "size": StringUtils.str_filesize(os.path.getsize(ff))
                         })
 
         except Exception as e:
@@ -4145,38 +4151,37 @@ class WebAction:
         }
 
     @staticmethod
-    def __get_hardlinks(data):
+    def __get_filehardlinks(data):
         """
-        获取硬链接
+        获取文件硬链接
         """            
         def parse_hardlinks(hardlinks):
             paths = []
             for link in hardlinks:
                 paths.append([SystemUtils.shorten_path(link["file"], 'left', 2), link["file"], link["filepath"]])      
             return paths
-                
         r = {}
         try:
             file = data.get("filepath")
             direction = ""
             hardlinks = []
-            sync_dirs = Sync().get_hardlinks_sync_dirs()                 
+            # 获取所有硬链接的同步目录设置
+            sync_dirs = Sync().get_filehardlinks_sync_dirs()  
+            # 按设置遍历检查文件是否在同步目录内，只查找第一个匹配项，多余的忽略
             for dir in sync_dirs:
-                if file.startswith(dir[0]):
+                if dir[0] and file.startswith(f"{dir[0]}/"):
                     direction = '→'
                     hardlinks = parse_hardlinks(SystemUtils().find_hardlinks(file=file, fdir=dir[1]))
                     break
-                elif file.startswith(dir[1]):
+                elif dir[1] and file.startswith(f"{dir[1]}/"):
                     direction = '←'
                     hardlinks = parse_hardlinks(SystemUtils().find_hardlinks(file=file, fdir=dir[0]))
                     break     
-                                    
             r={
-                "linkid": hashlib.md5(file.encode()).hexdigest(),
-                "direction": direction,
-                "hardlinks": hardlinks
+                "filepath": file,  # 文件路径
+                "direction": direction,  # 同步方向
+                "hardlinks": hardlinks  # 同步链接，内容分别为缩略路径、文件路径、目录路径
             }
-
         except Exception as e:
             ExceptionUtils.exception_traceback(e)
             return {
@@ -4188,7 +4193,50 @@ class WebAction:
             "count": len(r),
             "data": r
         }
-
+        
+    @staticmethod
+    def __get_dirhardlink(data):
+        """
+        获取同步目录硬链接
+        """            
+        r = {}
+        try:
+            path = data.get("dirpath")
+            direction = ""
+            hardlink = []
+            locating = False
+            # 获取所有硬链接的同步目录设置
+            sync_dirs = Sync().get_filehardlinks_sync_dirs()    
+            # 按设置遍历检查目录是否是同步目录或在同步目录内             
+            for dir in sync_dirs:
+                if dir[0] and (dir[0] == path or path.startswith(f"{dir[0]}/")):
+                    direction = '→'
+                    hardlink = dir[0].replace(dir[0], dir[1])
+                    locating = dir[2]
+                    break
+                elif dir[1] and (dir[1] == path or path.startswith(f"{dir[1]}/")):
+                    direction = '←'
+                    hardlink = dir[1].replace(dir[1], dir[0])
+                    locating = dir[2]
+                    break
+            r={
+                "dirpath": path,  # 同步目录路径
+                "direction": direction,  # 同步方向
+                "hardlink": hardlink,  # 同步链接，内容为配置中对应的目录或子目录
+                "locating": locating  # 自动定位
+            }
+        except Exception as e:
+            ExceptionUtils.exception_traceback(e)
+            return {
+                "code": -1,
+                "message": '加载路径失败: %s' % str(e)
+            }
+        return {
+            "code": 0,
+            "count": len(r),
+            "data": r
+        }
+        
     @staticmethod
     def __rename_file(data):
         """
