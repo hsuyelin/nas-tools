@@ -487,6 +487,8 @@ class MetaVideoV2(MetaBase):
         return media_item_title, media_item_subtitle
 
     def __fix_release_group(self, title):
+        if not StringUtils.is_string_and_not_empty(title):
+            return None
         # 定义正则表达式模式，匹配以英文 [任意内容] 或中文 【任意内容】 开头的部分
         pattern = r'^(\[[^\]]+\]|【[^】]+】)'
         # 定义关键词列表，包含需要检查的关键词
@@ -495,9 +497,9 @@ class MetaVideoV2(MetaBase):
                     "LoliHouse", "ANi", "喵萌", "c.c動漫", "c.c动漫", "压制", "MagicStar",
                     "芝士动物朋友", "招募", "丸子家族", "LoveEcho!", "VCB-Studio", "虹咲学园烤肉同好会",
                     "練習組", "练习组", "夜莺家族", "APTX4869", "事务所", "新番", "合集", "连载",
-                    "日剧", "美剧", "电视剧", "动画片", "动漫", "欧美", "西德", "日韩", "超高清", "高清",
-                    "蓝光", "翡翠台", "梦幻天堂", "毀片黨", "毁片党", "论坛", "ViuTV", "PTS", "JADE",
-                    "AOD", "CHC", "周年", "纪念版", "白金", "特效", "首发", "原盘"]
+                    "日剧", "美剧", "电视剧", "动画片", "动漫", "欧美", "西德", "日韩", "超高清", "高清", "蓝光",
+                    "翡翠台", "梦幻天堂", "毀片黨", "毁片党", "论坛", "ViuTV", "PTS", "JADE", "AOD", "CHC",
+                    "周年", "纪念版", "白金", "特效", "首发", "原盘"]
 
         match = re.search(pattern, title, re.IGNORECASE)
         if not match:
