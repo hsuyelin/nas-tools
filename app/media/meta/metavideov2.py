@@ -34,15 +34,18 @@ class MetaVideoV2(MetaBase):
                     r"|[248]K|\d{3,4}[PIX]+" \
                     r"|CD[\s.]*[1-9]|DVD[\s.]*[1-9]|DISK[\s.]*[1-9]|DISC[\s.]*[1-9]"
     _release_group_re = r"\[.*(?:字幕组|字幕社|发布组|手抄部|手抄组|压制|动漫|新番|合集|连载|日剧|美剧|电视剧|动画片|动漫|欧美|西德|日韩|超高清|高清|蓝光|翡翠台|梦幻天堂·龙网|喵萌奶茶屋|Sub|LoliHouse|毀片黨|毁片党|论坛|Raws)\]"
-    _seasons_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季?\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季"
+    _seasons_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(季)?\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(季)"
     _seasons_re_2 = r"(?:[Ss]0*|Season|season)([0-9]+)\s*\.\s*(?:[Ss]0*|Season|season)([0-9]+)"
-    _season_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*季"
+    _season_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(季)"
     _season_re_2 = r"(?<![a-zA-Z0-9_])(?i)[sS](eason)?\s*0*\d+"
-    _episodes_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)?\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
+    _season_all_re = r"(?<![^\s.\\-])\s*(?<!第)(?:\d+|[一二三四五六七八九十]+)\s*(季)\s*(全)(?![^\s.\\-]*[\d一二三四五六七八九十])"
+    _season_all_re_2 = r"(全|共)\s*(?:\d+|[一二三四五六七八九十]+)\s*(季)"
+    _episodes_re = r"(?:第)?\s*(?<![sS])(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)?\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
     _episodes_re_2 = r"(?:[Ee]0*|episode|ep)([0-9]+)\s*\.\s*(?:[Ee]0*|episode|ep)([0-9]+)"
     _episode_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
     _episode_re_2 = r"(?<![a-zA-Z0-9_])(?i)(?:e|ep|episode)\s*0*\d+"
-    _episode_all_re = r"((?:[0-9一二三四五六七八九十百零]+\s*集|話|话)\s*全)|((?:全|共)\s*(?:[0-9一二三四五六七八九十百零]+\s*集|話|話))"
+    _episode_all_re = r"(?<![^\s.\\-])\s*(?<!第)(?:\d+|[一二三四五六七八九十]+)\s*(寄|集|话|話)\s*(全)(?![^\s.\\-]*[\d一二三四五六七八九十])"
+    _episode_all_re_2 = r"(全|共)\s*(?:\d+|[一二三四五六七八九十]+)\s*(寄|集|话|話)"
     _numbers_re = r"\d+|[一二三四五六七八九十]+"
     _years_re = r"(\d{4}(?!p|P))\s*\.\s*(\d{4})(?![pP])"
     _release_date_re = r"\d{2,4}年\d+(?:月)?(?:新番|合集|)"
@@ -82,7 +85,8 @@ class MetaVideoV2(MetaBase):
             return
 
         _fixed_title = self.__fix_title(title)
-        media_item_title, media_item_subtitle = self.guess_media_item(_fixed_title, subtitle)
+        _fixed_subtitle = self.__fix_release_group(subtitle)
+        media_item_title, media_item_subtitle = self.guess_media_item(_fixed_title, _fixed_subtitle)
         self._media_item_title = media_item_title
         self._media_item_subtitle = media_item_subtitle
 
@@ -482,6 +486,38 @@ class MetaVideoV2(MetaBase):
 
         return media_item_title, media_item_subtitle
 
+    def __fix_release_group(self, title):
+        if not StringUtils.is_string_and_not_empty(title):
+            return None
+        # 定义正则表达式模式，匹配以英文 [任意内容] 或中文 【任意内容】 开头的部分
+        pattern = r'^(\[[^\]]+\]|【[^】]+】)'
+        # 定义关键词列表，包含需要检查的关键词
+        keywords = ["raws", "raw", "sub", "studio", "搬运组", "搬運組", "字幕组", "字幕組", "漢化組", "汉化组",
+                    "发布组", "發佈組", "字幕团", "字幕社", "工作室", "制作组", "制作組", "Team",
+                    "LoliHouse", "ANi", "喵萌", "c.c動漫", "c.c动漫", "压制", "MagicStar",
+                    "芝士动物朋友", "招募", "丸子家族", "LoveEcho!", "VCB-Studio", "虹咲学园烤肉同好会",
+                    "練習組", "练习组", "夜莺家族", "APTX4869", "事务所", "新番", "合集", "连载",
+                    "日剧", "美剧", "电视剧", "动画片", "动漫", "欧美", "西德", "日韩", "超高清", "高清", "蓝光",
+                    "翡翠台", "梦幻天堂", "毀片黨", "毁片党", "论坛", "ViuTV", "PTS", "JADE", "AOD", "CHC",
+                    "周年", "纪念版", "白金", "特效", "首发", "原盘"]
+
+        match = re.search(pattern, title, re.IGNORECASE)
+        if not match:
+            return title
+
+        matched_part = match.group(0)
+        if not matched_part:
+            return title
+
+        contains_keyword = any(keyword.lower() in matched_part.lower() for keyword in keywords)
+        if not contains_keyword:
+            return title
+
+        title = title.replace(matched_part, '', 1)
+        title += matched_part
+
+        return title
+
     def __fix_title(self, title):
         if not StringUtils.is_string_and_not_empty(title):
             return
@@ -492,16 +528,11 @@ class MetaVideoV2(MetaBase):
             .replace("】", "]") \
 
         # 将开头字幕组信息移动至字符串末尾
-        release_group_match = re.search(r'%s' % self._release_group_re, title, flags=re.IGNORECASE)
+        title = self.__fix_release_group(title)
         # 去除其他不重要的信息
         title = re.sub(r'%s' % self._other_re, '', title, flags=re.IGNORECASE)
         # 中括号里单独的数字大概率是集数
         title = re.sub(r'\[(\d+)\]', r'[E\1]', title, flags=re.IGNORECASE)
-        if release_group_match:
-            tag = release_group_match.group()
-            modified_string = title.replace(tag, '').strip()
-            modified_string += '.' + tag
-            title = modified_string
 
         if title.startswith("["):
             title = title.replace("[", "", 1)
@@ -627,11 +658,7 @@ class MetaVideoV2(MetaBase):
             self.begin_season = None
 
         if not StringUtils.is_string_and_not_empty(self._original_subtitle):
-            return
-
-        if self.begin_season and self.end_season and self.begin_season != self.end_season:
-            return
-
+            self._original_subtitle = ""
         fixed_subtitle = self._original_subtitle.replace("-", ".")
 
         # 匹配出季组
@@ -668,16 +695,51 @@ class MetaVideoV2(MetaBase):
                     except Exception as e:
                         pass
 
+        # 匹配出总季数
+        season_all_match_pattern = f"({self._season_all_re}|{self._season_all_re_2})"
+        season_all_match = re.search(r'%s' % season_all_match_pattern, fixed_subtitle, flags=re.IGNORECASE)
+        if season_all_match:
+            season_all = None
+            season_all_number_match = re.search(r'%s' % self._numbers_re, season_all_match.group(1))
+            if season_all_number_match:
+                season_all = season_all_number_match.group(0)
+            if season_all:
+                season_all = re.sub(r'^0+', '', season_all)
+                try:
+                    fix_season_all = cn2an.cn2an(season_all, "smart")
+                    fix_season_all = int(fix_season_all)
+                    self.begin_season = 1
+                    self.end_season = None if fix_season_all == 1 else fix_season_all
+                    self.total_seasons = fix_season_all
+                except Exception as e:
+                    pass
+
+        # 如果副标题没有总季数，从主标题在匹配一遍看是否有总季数，以免遗漏
+        fixed_title = self._original_title.replace("-", ".")
+        season_all_match_pattern = f"({self._season_all_re}|{self._season_all_re_2})"
+        season_all_by_title_match = re.search(r'%s' % season_all_match_pattern, fixed_title, flags=re.IGNORECASE)
+        if season_all_by_title_match:
+            season_all = None
+            season_all_number_match = re.search(r'%s' % self._numbers_re, season_all_by_title_match.group(1))
+            if season_all_number_match:
+                season_all = season_all_number_match.group(0)
+            if season_all:
+                season_all = re.sub(r'^0+', '', season_all)
+                try:
+                    fix_season_all = cn2an.cn2an(season_all, "smart")
+                    fix_season_all = int(fix_season_all)
+                    self.begin_season = 1
+                    self.end_season = None if fix_season_all == 1 else fix_season_all
+                    self.total_seasons = fix_season_all
+                except Exception as e:
+                    pass
+
         if self.begin_season and self.end_season and self.begin_season == self.end_season:
             self.end_season = None
 
     def __fix_episode(self):
         if not StringUtils.is_string_and_not_empty(self._original_subtitle):
-            return
-
-        if self.begin_episode and self.end_episode and self.begin_episode != self.end_episode:
-            return
-
+            self._original_subtitle = ""
         fixed_subtitle = self._original_subtitle.replace("-", ".")
 
         # 匹配出集组
@@ -715,42 +777,40 @@ class MetaVideoV2(MetaBase):
                         pass
 
         # 匹配出总集数
-        episode_all_match = re.search(r'%s' % self._episode_all_re, fixed_subtitle, flags=re.IGNORECASE)
+        episode_all_match_pattern = f"({self._episode_all_re}|{self._episode_all_re_2})"
+        episode_all_match = re.search(r'%s' % episode_all_match_pattern, fixed_subtitle, flags=re.IGNORECASE)
         if episode_all_match:
             episode_all = None
-            if episode_all_match.group(1):
-                episode_all = re.search(r'([0-9一二三四五六七八九十百零]+)\s*集|話|话\s*全', episode_all_match.group(1)).group(1)
-            else:
-                episode_all = re.search(r'(?:全|共)\s*([0-9一二三四五六七八九十百零]+)\s*集|話|話', episode_all_match.group(2)).group(1)
+            episode_all_number_match = re.search(r'%s' % self._numbers_re, episode_all_match.group(1))
+            if episode_all_number_match:
+                episode_all = episode_all_number_match.group(0)
             if episode_all:
                 episode_all = re.sub(r'^0+', '', episode_all)
                 try:
                     fix_episode_all = cn2an.cn2an(episode_all, "smart")
                     fix_episode_all = int(fix_episode_all)
                     self.begin_episode = 1
-                    self.end_episode = fix_episode_all
+                    self.end_episode = None if fix_episode_all == 1 else fix_episode_all
                     self.total_episodes = fix_episode_all
                 except Exception as e:
                     pass
 
         # 如果副标题没有总集数，从主标题在匹配一遍看是否有总集数，以免遗漏
         fixed_title = self._original_title.replace("-", ".")
-        episode_all_by_title_match = re.search(r'%s' % self._episode_all_re, fixed_title, flags=re.IGNORECASE)
+        episode_all_match_pattern = f"({self._episode_all_re}|{self._episode_all_re_2})"
+        episode_all_by_title_match = re.search(r'%s' % episode_all_match_pattern, fixed_title, flags=re.IGNORECASE)
         if episode_all_by_title_match:
             episode_all = None
-            if episode_all_by_title_match.group(1):
-                episode_all = re.search(r'([0-9一二三四五六七八九十百零]+)\s*集|話|话\s*全',
-                                            episode_all_by_title_match.group(1)).group(1)
-            else:
-                episode_all = re.search(r'(?:全|共)\s*([0-9一二三四五六七八九十百零]+)\s*集|話|話',
-                                                    episode_all_by_title_match.group(2)).group(1)
+            episode_all_number_match = re.search(r'%s' % self._numbers_re, episode_all_by_title_match.group(1))
+            if episode_all_number_match:
+                episode_all = episode_all_number_match.group(0)
             if episode_all:
                 episode_all = re.sub(r'^0+', '', episode_all)
                 try:
                     fix_episode_all = cn2an.cn2an(episode_all, "smart")
                     fix_episode_all = int(fix_episode_all)
                     self.begin_episode = 1
-                    self.end_episode = fix_episode_all
+                    self.end_episode = None if fix_episode_all == 1 else fix_episode_all
                     self.total_episodes = fix_episode_all
                 except Exception as e:
                     pass
