@@ -1097,6 +1097,7 @@ def dirlist():
                 result, sync_class, link_path, link_direction = match_sync_dir(folder, dir[1], dir[0], dir[2], '←')
                 if result: break
         return sync_class, link_path, link_direction
+    
 
     def add_paths_to_media_dirs(paths, media_dirs):
         """
@@ -1120,6 +1121,10 @@ def dirlist():
         tv_path = Config().get_config('media').get('tv_path')
         anime_path = Config().get_config('media').get('anime_path')
         unknown_path = Config().get_config('media').get('unknown_path')
+        if movie_path is not None: media_dirs.extend([path.rstrip('/') for path in movie_path])
+        if tv_path is not None: media_dirs.extend([path.rstrip('/') for path in tv_path])
+        if anime_path is not None: media_dirs.extend([path.rstrip('/') for path in anime_path])
+        if unknown_path is not None: media_dirs.extend([path.rstrip('/') for path in unknown_path])   
         add_paths_to_media_dirs(movie_path, media_dirs)
         add_paths_to_media_dirs(tv_path, media_dirs)
         add_paths_to_media_dirs(anime_path, media_dirs)
@@ -1144,15 +1149,15 @@ def dirlist():
                     dirs = [os.path.join("C:/", f) for f in os.listdir("C:/")]
             else:
                 dirs = [os.path.join("/", f) for f in os.listdir("/")]
-        elif in_dir == quote("[SYNC-FOLDERS]"):
+        elif in_dir == "*SYNC-FOLDERS*":
             sync_dirs = []
             for id, conf in Sync().get_sync_path_conf().items():
                 sync_dirs.append(conf["from"])
                 sync_dirs.append(conf["to"])
             dirs = list(set(sync_dirs))
-        elif in_dir == quote("[DOWNLOAD-FOLDERS]"):
+        elif in_dir == "*DOWNLOAD-FOLDERS*":
             dirs = get_download_dirs()
-        elif in_dir == quote("[MEDIA-FOLDERS]"):
+        elif in_dir == "*MEDIA-FOLDERS*":
             dirs = get_media_dirs()
         else:
             d = os.path.normpath(urllib.parse.unquote(in_dir))

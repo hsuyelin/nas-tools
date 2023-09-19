@@ -22,6 +22,7 @@ body, .page {
 .fileTree {
     width: 240px;
     max-height: 200px;
+    min-height: 80px;
     overflow-y: scroll;
     overflow-x: hidden;
     position: absolute;
@@ -301,6 +302,14 @@ LI.directory a.selected {
 #special_folder svg:hover{
     color: var(--tblr-white);
     width: 12px;
+}
+
+.filetree-toolbox {
+    display: none;
+    position: absolute;
+    width: 70px;
+    transform: translateX(-70px) scale(0.8);
+    z-index: 100000;
 }
 
 .dropzone {

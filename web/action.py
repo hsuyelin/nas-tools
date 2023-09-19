@@ -4083,15 +4083,15 @@ class WebAction:
                                 for f in os.listdir("C:/")]
                 else:
                     dirs = [os.path.join("/", f) for f in os.listdir("/")]
-            elif d == "[SYNC-FOLDERS]":
+            elif d == "*SYNC-FOLDERS*":
                 sync_dirs = []
                 for id, conf in Sync().get_sync_path_conf().items():
                     sync_dirs.append(conf["from"])
                     sync_dirs.append(conf["to"])
                 dirs = list(set(sync_dirs))
-            elif d == "[DOWNLOAD-FOLDERS]":
+            elif d == "*DOWNLOAD-FOLDERS*":
                 dirs = [path.rstrip('/') for path in Downloader().get_download_visit_dirs()]
-            elif d == "[MEDIA-FOLDERS]":
+            elif d == "*MEDIA-FOLDERS*":
                 media_dirs = []
                 movie_path = Config().get_config('media').get('movie_path')
                 tv_path = Config().get_config('media').get('tv_path')
