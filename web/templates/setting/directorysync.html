@@ -115,6 +115,16 @@
                     {% endif %}
                   </div>
                 </div>
+                <div class="datagrid-item">
+                  <div class="datagrid-title">自动定位</div>
+                  <div class="datagrid-content">
+                    {% if Attr.locating %}
+                      <span class="badge bg-cyan">开</span>
+                    {% else %}
+                      <span class="badge bg-orange">关</span>
+                    {% endif %}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -195,6 +205,14 @@
               <span class="form-check-label">开启同步</span>
             </label>
           </div>
+          <div class="col-lg-4 mb-1">
+            <label class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="sync_path_locating" checked>
+              <span class="form-check-label">自动定位 <span class="form-help"
+                title="开启自动定位后，媒体整理的文件管理中，查看硬链接同步目录下的媒体文件时，自动显示链接目标或链接来源的文件，但同一文件夹下链接文件较多时，页面加载性能会降低"
+                data-bs-toggle="tooltip">?</span></span>
+            </label>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -215,7 +233,9 @@
     $("#sync_path_compatibility").prop("checked", false);
     $("#sync_path_rename").prop("checked", true);
     $("#sync_path_enabled").prop("checked", true);
+    $("#sync_path_locating").prop("checked", false);
     $("#modal-directory").modal('show');
+    refresh_locating_state();
   }
 
   // 打开编辑窗口
@@ -232,7 +252,9 @@
         $("#sync_path_compatibility").prop("checked", sync_item.compatibility);
         $("#sync_path_rename").prop("checked", sync_item.rename);
         $("#sync_path_enabled").prop("checked", sync_item.enabled);
+        $("#sync_path_locating").prop("checked", sync_item.locating);
         $("#modal-directory").modal('show');
+        refresh_locating_state();
       }
     });
   }
@@ -284,5 +306,15 @@
     });
   }
 
+  // 刷新自动定位状态
+  function refresh_locating_state(){
+    if ($("#sync_path_syncmod").val() == "link"){
+      // 硬链接时定位状态才有效
+      $("#sync_path_locating").prop('disabled', false);
+    }else{
+      $("#sync_path_locating").prop('disabled', true).prop('checked', false);
+    }
+  }
 
+  $("#sync_path_syncmod").change(refresh_locating_state);
 </script>

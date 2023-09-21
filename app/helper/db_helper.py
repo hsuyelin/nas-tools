@@ -2315,7 +2315,7 @@ class DbHelper:
             return False
 
     @DbPersist(_db)
-    def insert_config_sync_path(self, source, dest, unknown, mode, compatibility, rename, enabled, note=None):
+    def insert_config_sync_path(self, source, dest, unknown, mode, compatibility, rename, enabled, locating, note=None):
         """
         增加目录同步
         """
@@ -2327,6 +2327,7 @@ class DbHelper:
             COMPATIBILITY=int(compatibility),
             RENAME=int(rename),
             ENABLED=int(enabled),
+            LOCATING=int(locating),
             NOTE=note
         ))
 
@@ -2348,7 +2349,7 @@ class DbHelper:
         return self._db.query(CONFIGSYNCPATHS).order_by(CONFIGSYNCPATHS.SOURCE).all()
 
     @DbPersist(_db)
-    def check_config_sync_paths(self, sid=None, compatibility=None, rename=None, enabled=None):
+    def check_config_sync_paths(self, sid=None, compatibility=None, rename=None, enabled=None, locating=None):
         """
         设置目录同步状态
         """
@@ -2370,7 +2371,13 @@ class DbHelper:
                     "COMPATIBILITY": int(compatibility)
                 }
             )
-
+        elif sid and locating is not None:
+            self._db.query(CONFIGSYNCPATHS).filter(CONFIGSYNCPATHS.ID == int(sid)).update(
+                {
+                    "LOCATING": int(locating)
+                }
+            )
+            
     @DbPersist(_db)
     def delete_download_setting(self, sid):
         """

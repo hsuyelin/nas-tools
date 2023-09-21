@@ -15,13 +15,31 @@
               <span class="input-icon-addon">
                 {{ SVG.folders() }}
               </span>
-              <input type="text" id="mediafile_path" value="{{ Dir }}" class="form-control" placeholder="/"
-                     aria-label="目录路径">
-            </div>
-            <a href="javascript:return_to_parentdir()">
-              {{ SVG.arrow_back_up() }}
-              上级目录
-            </a>
+              <div>
+                <input type="text" id="mediafile_path" value="{{ Dir }}" class="form-control" placeholder="/" aria-label="目录路径">
+                <div id="special_folder" style="display:none"><div><span></span><a href="javascript:return_to_parentdir()">{{ SVG.x() }}</a></div></div>
+              </div>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <a href="javascript:return_to_parentdir()">
+                  {{ SVG.arrow_back_up() }}
+                  上级目录
+                </a>
+                <div style="display: inline-flex; gap: 5px;">
+                  <a href="javascript:jump_sync_folders()">
+                    {{ SVG.refresh() }}
+                    同步
+                  </a>
+                  <a href="javascript:jump_media_folders()">
+                    {{ SVG.player_play() }}
+                    媒体
+                  </a>
+                  <a href="javascript:jump_download_folders()">
+                    {{ SVG.download() }}
+                    下载
+                  </a>
+                </div>
+              </div>
             <div id="mediafile_tree" style="overflow-y: auto; overflow-x: hidden"></div>
           </div>
         </div>
@@ -29,7 +47,7 @@
           <div class="card-body py-0 border-0">
             <div class="d-flex flex-column flex-md-row justify-content-md-between">
               <div class="text-muted align-self-center">
-                共 <span id="mediafile_num">0</span> 个文件
+                共 <span id="mediafile_num">0</span> 个文件 <span id="mediafile_hardlink_mark"></span>
               </div>
               <div class="align-self-center">
                 <a href="javascript:mediafile_transfer_all()" class="btn btn-primary" title="转移当前目录">
@@ -41,7 +59,7 @@
                   硬链接
                 </a>
                 <a href="javascript:mediafile_scraper_all()" class="btn" title="刮削当前目录">
-                  {{ SVG.link() }}
+                  {{ SVG.download() }}
                   刮削
                 </a>
               </div>
@@ -50,8 +68,8 @@
           <div class="card-body border-0">
             <input type="hidden" id="mediafile_current_dir">
             <input type="hidden" id="mediafile_current_files">
-            <div class="row row-cards" style="overflow-y: auto; overflow-x: hidden">
-              <div class="col" id="mediafile_file_container"></div>
+            <div class="row row-cards">
+              <div class="col" id="mediafile_file_container" style="overflow-y: auto; overflow-x: hidden"></div>
             </div>
           </div>
         </div>
@@ -145,6 +163,9 @@
 
   //刷新文件列表
   function refresh_files(folder) {
+    // 刷新硬链接标记
+    refresh_hardlink_mark(folder);
+    
     if (folder) {
       $("#mediafile_current_dir").val(folder);
     } else {
@@ -170,31 +191,171 @@
                   .replaceAll("{FILEPOS}", i)
                   .replaceAll("{FILEPATH}", filepath.replace("'", "&apos;"))
           );
-        $("#mediafile_current_files").val(JSON.stringify(files))
+          $("#mediafile_current_files").val(JSON.stringify(files))
+
+          // 同步目录启用了自动定位才定位媒体文件的所有硬链接
+          if ($("#mediafile_hardlink_mark").hasClass("auto-locate")){
+            locate_hardlink([filepath]);
+          }
+        }
+        if (ret.count == 0){
+          // 没有文件的情况下标记无效，解绑所有事件
+          $("#mediafile_hardlink_mark").addClass("invalid-mark");
+          $("#mediafile_hardlink_mark").off();
+        }else{
+          // 有文件时移除无效标记
+          $("#mediafile_hardlink_mark").removeClass("invalid-mark");
         }
       }
     });
   }
 
-  // 初始化文件树
-  function init_mediafile_tree() {
-    let ft = $('#mediafile_tree');
-    ft.empty();
-    ft.fileTree(
-        {
-          script: 'dirlist',
-          root: encodeURIComponent($("#mediafile_path").val()),
-          filter: 'HIDE_FILES_FILTER',
-          allowBrowsing: true
-        },
-        function (file) {
-        },
-        function (folder) {
-          refresh_files(folder);
+  // 文件区刷新硬链接标记
+  function refresh_hardlink_mark(folder){
+    // 获取文件夹路径的MD5找到目录树节点
+    let node = $(`#mediafile_tree a[rel='${folder}']`);
+    let locating = false;
+    let mark = $("#mediafile_hardlink_mark");
+    // 解绑所有事件
+    mark.off();
+    if (node.length > 0){
+      // 目录树中找到了目录，则继续找到其父对象
+      node = node.parent();
+    } else if ($("#mediafile_path").val() === folder){
+      // 目录与目录框中的目录一致，则使用目录框
+      node = $("#mediafile_path");
+    }
+    if (node.length > 0) {
+      // 处理硬链接标记内容
+      if (node.hasClass("sync-src")) {
+        mark.attr("data-direction", "→").text("硬链接同步来源目录");
+      } else if (node.hasClass("sync-dest")) {
+        mark.attr("data-direction", "←").text("硬链接同步目标目录");
+      } else {
+        // 非同步目录清理标记内容和属性
+        mark.removeAttr("data-direction").text("");
+      }
+      // 处理自动定位
+      if (node.hasClass("auto-locate")){
+        // 自动定位添加样式并清理属性
+        mark.addClass("auto-locate").removeAttr("title");
+      } else {
+        // 非自动定位清理样式并添加属性
+        mark.removeClass("auto-locate").attr("title", "定位所有文件硬链接");
+        // 非自动定位绑定鼠标事件
+        mark.on("mouseenter mouseleave", function (event){
+          // 切换标记内容
+          let value = $(this).attr("title");
+          $(this).attr("title",$(this).text()).text(value);
+        }).on("click", function (event){
+          // 所有文件逐一定位硬链接
+          locate_hardlink(JSON.parse($("#mediafile_current_files").val()));
         });
-    refresh_files($("#mediafile_path").val());
+      }
+    } else {
+      // 清理所有标记样式、内容和属性
+      mark.removeAttr("data-direction").removeClass("auto-locate").removeAttr("title").text("");
+    }
   }
 
+  // 定位媒体文件的所有硬链接
+  function locate_hardlink(files) {
+    files.forEach(filepath => {
+      ajax_post("get_filehardlinks", { filepath: filepath }, function (ret) {
+        if (ret.data) {
+          let node = $(`#mediafile_file_container input[value="${ret.data.filepath}"]`).parent().find('.mediafile-hardlink-pair ul');
+          node.empty();
+          for (let j = 0; j < ret.data.hardlinks.length; j++) {
+            let linkFile = $(`<li data-bs-toggle="tooltip" title="${ret.data.hardlinks[j][1]}" data-jump="${ret.data.hardlinks[j][2]}"><span data-direction="${ret.data.direction}">${ret.data.hardlinks[j][0]}</span></li>`);
+            // 绑定事件，点击时跳转到硬链接文件所在的目录
+            if (ret.data.hardlinks[j][2]){
+              init_jump_dirs([linkFile]);
+            }
+            node.append(linkFile);
+          }
+          // 刷新tooltip
+          fresh_tooltip();
+          // 未知原因快速切换文件跳转时，会随机出现tooltip未及时移除的情况，在刷新tooltip后再强行移除可消除继续显示的内容
+          $('.bs-tooltip-auto').remove();
+        }
+      }); 
+    });
+  }
+
+  // 初始化跳转目录
+  function init_jump_dirs(dirs) {
+    for (let i=0; i < dirs.length; i++) {
+      // 忽略空路径
+      if ($(dirs[i]).attr("data-jump") === "") continue
+      // 绑定事件，点击时跳转到硬链接目录
+      $(dirs[i]).on("click", function (event){
+        // 父元素移除时，自动产生的tooltip不会自动移除，须强行销毁
+        $(this).tooltip("dispose");
+        $("#mediafile_path").val($(this).attr("data-jump")).show();
+        $("#special_folder").hide().find("span").text("");          
+        init_mediafile_tree();
+      });        
+    }
+    // 刷新tooltip
+    fresh_tooltip();
+  }
+
+  // 初始化文件树
+  function init_mediafile_tree() {
+    let ft = $('#mediafile_tree'); 
+    // 销毁之前的实例 
+    ft.removeData("fileTree");
+    ft.fileTree(
+      {
+        script: 'dirlist',
+        root: encodeURIComponent($("#mediafile_path").val()),
+        onlyFolders: true,
+        multiFolder: false
+      },
+      // 回调方法,只对文件有效,目录必须通过事件进行处理
+      function (file) {
+      }
+    ).on("filetreeinitiated filetreeexpanded filetreecollapsed", function(e, data){
+      // 初始化结束、展开折叠结束时刷新文件区
+      if (data.rel){
+        refresh_files(data.rel);
+      }else{
+        refresh_files($("#mediafile_path").val());
+      }
+    }).on("filetreeinitiated filetreeexpanded", function(e, data) {
+      // 初始化结束和展开结束时获得目录(jQueryFileTree原代码处理filetreeinitiated事件处理有误，须删除showTree中的根目录判断才能正确触发)
+      // 处理跳转目录
+      if (ft.attr("data-event-time") != e.timeStamp){
+        ft.attr("data-event-time", e.timeStamp);
+        let target = e.type === "filetreeinitiated" ? ft: $(data.li[0]);   
+        init_jump_dirs(target.find("ul .link-folder"));
+        // 刷新tooltip
+        fresh_tooltip();
+      }          
+    });
+    init_mediafile_path_dirhardlink();
+  }
+
+  // 目录框的目录获取同步目录硬链接
+  function init_mediafile_path_dirhardlink(){
+    let dir = $("#mediafile_path");
+    ajax_post("get_dirhardlink", { dirpath: dir.val() }, function (ret) {
+      if (ret.data) {
+        dir.removeClass("sync-src").removeClass("sync-dest").removeClass("auto-locate");
+        if (ret.data.hardlink !== ""){
+          if (ret.data.direction === "→"){
+            dir.addClass("sync-src");
+          } else if (ret.data.direction === "←"){
+            dir.addClass("sync-dest");
+          }
+          if (ret.data.locating){
+            dir.addClass("auto-locate");
+          }
+        }
+      }
+    });     
+  }
+  
   // 回车响应
   $('#mediafile_path').bind('keypress', function (event) {
     if (event.keyCode == "13") {
@@ -397,7 +558,29 @@
     if (!parentdir) {
       parentdir = "/";
     }
-    $("#mediafile_path").val(parentdir);
+    $("#mediafile_path").val(parentdir).show();
+    $("#special_folder").hide().find("span").text("");
+    init_mediafile_tree();
+  }
+
+  // 跳转同步目录
+  function jump_sync_folders() {
+    $("#mediafile_path").val("*SYNC-FOLDERS*").hide();
+    $("#special_folder").show().find("span").text("同步目录");
+    init_mediafile_tree();
+  }
+
+  // 跳转媒体目录
+  function jump_media_folders() {
+    $("#mediafile_path").val("*MEDIA-FOLDERS*").hide();
+    $("#special_folder").show().find("span").text("媒体目录");
+    init_mediafile_tree();
+  }
+
+  // 跳转下载目录
+  function jump_download_folders() {
+    $("#mediafile_path").val("*DOWNLOAD-FOLDERS*").hide();
+    $("#special_folder").show().find("span").text("下载目录");
     init_mediafile_tree();
   }
 
@@ -421,7 +604,7 @@
 </script>
 <script id="mediafile_item_template" type="text/html">
   <div class="card mb-2">
-    <div class="row">
+    <div class="row" style="padding: 5px 5px 0 5px">
       <div class="col-auto pe-0">
         <div class="m-2">
           <div class="avatar avatar-md">{FILEEXT}</div>
@@ -432,6 +615,7 @@
           <div class="row">
             <div class="col">
               <h3 class="mb-0"><a href='javascript:mediafile_transfer("{FILENAME}", "{FILEPOS}")'>{FILENAME}</a></h3>
+              <h4 class="mb-0 mediafile-hardlink-pair"><ul></ul></h4>
               <custom-chips class="mt-1" id="testresults_{FILEPOS}"></custom-chips>
               <input type="hidden" value="{FILEPATH}" id="mediafilepath_{FILEPOS}">
             </div>
@@ -451,6 +635,7 @@
                 <button onclick='mediafile_transfer("{FILENAME}", "{FILEPOS}")' class="btn btn-sm btn-pill">转移</button>
                 <button onclick='mediafile_scraper("{FILENAME}", "{FILEPOS}")' class="btn btn-sm btn-pill">刮削</button>
                 <button onclick='mediafile_subtitle("{FILENAME}", "{FILEPOS}")' class="btn btn-sm btn-pill">下载字幕</button>
+                <button onclick='locate_hardlink(["{FILEPATH}"])' class="btn btn-sm btn-pill">定位硬链接</button>
                 <button onclick='mediafile_findlinks("{FILENAME}", "{FILEPOS}")' class="btn btn-sm btn-pill">硬链接查询</button>
                 <button onclick='show_mediafile_rename_modal("{FILENAME}", "{FILEPOS}")' class="btn btn-sm btn-pill">重命名</button>
                 <button onclick='mediafile_delete("{FILENAME}", "{FILEPOS}")' class="btn btn-sm btn-pill">删除</button>

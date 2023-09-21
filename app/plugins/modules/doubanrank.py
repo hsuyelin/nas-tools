@@ -13,7 +13,7 @@ from app.media import Media
 from app.mediaserver import MediaServer
 from app.plugins.modules._base import _IPluginModule
 from app.subscribe import Subscribe
-from app.utils import RequestUtils, DomUtils
+from app.utils import RequestUtils, DomUtils, StringUtils
 from app.utils.types import MediaType, SearchType, RssType
 from config import Config
 from web.backend.web_utils import WebUtils
@@ -63,6 +63,7 @@ class DoubanRank(_IPluginModule):
     _rss_addrs = []
     _ranks = []
     _vote = 0
+    _release_date = 0
     _scheduler = None
 
     def init_config(self, config: dict = None):
@@ -74,6 +75,7 @@ class DoubanRank(_IPluginModule):
             self._enable = config.get("enable")
             self._onlyonce = config.get("onlyonce")
             self._cron = config.get("cron")
+            self._release_date = int(config.get("release_date")) if config.get("release_date") else 0
             self._vote = float(config.get("vote")) if config.get("vote") else 0
             rss_addrs = config.get("rss_addrs")
             if rss_addrs:
@@ -107,6 +109,7 @@ class DoubanRank(_IPluginModule):
                     "enable": self._enable,
                     "cron": self._cron,
                     "ranks": self._ranks,
+                    "release_date": self._release_date,
                     "vote": self._vote,
                     "rss_addrs": "\n".join(self._rss_addrs)
                 })
@@ -154,6 +157,18 @@ class DoubanRank(_IPluginModule):
                                 {
                                     'id': 'cron',
                                     'placeholder': '0 0 0 ? *',
+                                }
+                            ]
+                        },
+                        {
+                            'title': '上映日期',
+                            'required': "",
+                            'tooltip': '大于或者等于该评分的才会被订阅（以TMDB上映日期为准），不填则不限制',
+                            'type': 'text',
+                            'content': [
+                                {
+                                    'id': 'release_date',
+                                    'placeholder': '0',
                                 }
                             ]
                         },
@@ -422,10 +437,15 @@ class DoubanRank(_IPluginModule):
                     if not media_info:
                         self.warn(f"未查询到媒体信息：{title} （豆瓣id：{douban_id}）")
                         continue
-                    if self._vote and media_info.vote_average \
-                            and media_info.vote_average < self._vote:
+                    media_release_date = int(media_info.year) if StringUtils.is_int_or_float(media_info.year) else None
+                    media_vote_average = float(media_info.vote_average) if StringUtils.is_int_or_float(media_info.year) else None
+                    if self._release_date and media_release_date and media_release_date < self._release_date:
                         self.info(
-                            f"{media_info.get_title_string()} 评分 {media_info.vote_average} 低于限制 {self._vote}，跳过 ．．．")
+                            f"{media_info.get_title_string()} 上映日期 {media_release_date} 低于限制 {self._release_date}，跳过 ．．．")
+                        continue
+                    if self._vote and media_vote_average and media_vote_average < self._vote:
+                        self.info(
+                            f"{media_info.get_title_string()} 评分 {media_vote_average} 低于限制 {self._vote}，跳过 ．．．")
                         continue
                     # 检查媒体服务器是否存在
                     item_id = self.mediaserver.check_item_exists(mtype=media_info.type,
