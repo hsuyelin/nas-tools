@@ -7,6 +7,7 @@ from threading import Event
 
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.date import DateTrigger
 from lxml import etree
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as es
@@ -22,6 +23,8 @@ from app.sites.sites import Sites
 from app.utils import RequestUtils, ExceptionUtils, StringUtils, SchedulerUtils
 from app.utils.types import EventType
 from config import Config
+from jinja2 import Template
+import random
 
 
 class AutoSignIn(_IPluginModule):
@@ -46,6 +49,9 @@ class AutoSignIn(_IPluginModule):
     # 可使用的用户级别
     auth_level = 2
 
+    # 上次运行结果属性
+    _last_run_results_list = []
+
     # 私有属性
     eventmanager = None
     siteconf = None
@@ -64,6 +70,8 @@ class AutoSignIn(_IPluginModule):
     _notify = False
     _clean = False
     _auto_cf = None
+    _missed_detection = False
+    _missed_schedule = None
     # 退出事件
     _event = Event()
 
@@ -82,6 +90,13 @@ class AutoSignIn(_IPluginModule):
                             'tooltip': '开启后会根据周期定时签到指定站点。',
                             'type': 'switch',
                             'id': 'enabled',
+                        },
+                        {
+                            'title': '漏签检测',
+                            'required': "",
+                            'tooltip': '开启后会在指定时段内对未签到站点进行补签（每小时一次，时间随机）。',
+                            'type': 'switch',
+                            'id': 'missed_detection',
                         },
                         {
                             'title': '运行时通知',
@@ -125,6 +140,19 @@ class AutoSignIn(_IPluginModule):
                             ]
                         },
                         {
+                            'title': '漏签检测时段',
+                            'required': "",
+                            'tooltip': '配置时间范围，如08:00-23:59（每小时执行一次，执行时间随机）',
+                            'type': 'text',
+                            'content': [
+                                {
+                                    'id': 'missed_schedule',
+                                    'placeholder': '08:00-23:59',
+                                    'default': '08:00-23:59'
+                                }
+                            ]
+                        },
+                        {
                             'title': '签到队列',
                             'required': "",
                             'tooltip': '同时并行签到的站点数量，默认10（根据机器性能，缩小队列数量会延长签到时间，但可以提升成功率）',
@@ -151,12 +179,12 @@ class AutoSignIn(_IPluginModule):
                         {
                             'title': '自动优选',
                             'required': "",
-                            'tooltip': '命中重试词数量达到设置数量后，自动优化IP（需要正确配置自定义Hosts插件和优选IP插件）',
+                            'tooltip': '命中重试词数量达到设置数量后，自动优化IP（0为不开启，需要正确配置自定义Hosts插件和优选IP插件）',
                             'type': 'text',
                             'content': [
                                 {
                                     'id': 'auto_cf',
-                                    'placeholder': '10',
+                                    'placeholder': '0',
                                 }
                             ]
                         },
@@ -195,6 +223,42 @@ class AutoSignIn(_IPluginModule):
             },
         ]
 
+    def get_page(self):
+        """
+        插件的额外页面，返回页面标题和页面内容
+        :return: 标题，页面内容，确定按钮响应函数
+        """
+
+        template = """
+          <div class="table-responsive table-modal-body">
+            <table class="table table-vcenter card-table table-hover table-striped">
+              <thead>
+              {% if ResultsCount > 0 %}
+              <tr>
+                <th>签到时间</th>
+                <th>签到站点</th>
+                <th>站点地址</th>
+                <th>签到结果</th>
+              </tr>
+              {% endif %}
+              </thead>
+              <tbody>
+              {% if ResultsCount > 0 %}
+                {% for Item in Results %}
+                  <tr id="indexer_{{ Item["id"] }}">
+                    <td>{{ Item["date"] }}</td>
+                    <td>{{ Item["name"] }}</td>
+                    <td>{{ Item["signurl"] }}</td>
+                    <td>{{ Item["result"] }}</td>
+                  </tr>
+                {% endfor %}
+              {% endif %}
+              </tbody>
+            </table>
+          </div>
+        """
+        return "签到记录", Template(template).render(ResultsCount=len(self._last_run_results_list), Results=self._last_run_results_list), None
+
     def init_config(self, config=None):
         self.siteconf = SiteConf()
         self.eventmanager = EventManager()
@@ -211,6 +275,25 @@ class AutoSignIn(_IPluginModule):
             self._onlyonce = config.get("onlyonce")
             self._clean = config.get("clean")
             self._auto_cf = config.get("auto_cf")
+            self._missed_detection = config.get("missed_detection")
+            self._missed_schedule = config.get("missed_schedule")
+
+        if self.is_valid_time_range(self._missed_schedule):
+            self._missed_schedule = re.sub(r'\s', '', str(self._missed_schedule)).replace('24:00', '23:59')
+        else:
+            self._missed_detection = False
+            self._missed_schedule = None
+
+        # 遍历列表并删除日期超过7天的字典项
+        today = datetime.now()
+        seven_days_ago = today - timedelta(days=7)
+
+        for item in self._last_run_results_list[:]:
+            date_str = item.get("date")
+            if date_str:
+                date_obj = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                if date_obj < seven_days_ago:
+                    self._last_run_results_list.remove(item)
 
         # 停止现有任务
         self.stop_service()
@@ -240,6 +323,7 @@ class AutoSignIn(_IPluginModule):
                 # 关闭一次性开关|清理缓存开关
                 self._clean = False
                 self._onlyonce = False
+                    
                 self.update_config({
                     "enabled": self._enabled,
                     "cron": self._cron,
@@ -250,7 +334,9 @@ class AutoSignIn(_IPluginModule):
                     "onlyonce": self._onlyonce,
                     "queue_cnt": self._queue_cnt,
                     "clean": self._clean,
-                    "auto_cf": self._auto_cf
+                    "auto_cf": self._auto_cf,
+                    "missed_detection": self._missed_detection,
+                    "missed_schedule": self._missed_schedule,
                 })
 
             # 周期运行
@@ -260,6 +346,11 @@ class AutoSignIn(_IPluginModule):
                                          func=self.sign_in,
                                          func_desc="自动签到",
                                          cron=str(self._cron))
+            
+            # 漏签检测服务
+            if self._missed_detection and self.is_valid_time_range(self._missed_schedule):
+                self.info(f"漏签检测服务启动，检测时段：{self._missed_schedule}")
+                self.check_missed_signs()
 
             # 启动任务
             if self._scheduler.get_jobs():
@@ -278,6 +369,106 @@ class AutoSignIn(_IPluginModule):
             "desc": "站点签到",
             "data": {}
         }
+
+    @staticmethod
+    def is_valid_time_range(input_str):
+        input_str = re.sub(r'\s', '', input_str).replace('24:00', '23:59')
+
+        pattern = r'^\d{2}:\d{2}-\d{2}:\d{2}$'
+
+        # 验证时间范围是否合理
+        if re.match(pattern, input_str):
+            start_time, end_time = input_str.split('-')
+            start_hour, start_minute = map(int, start_time.split(':'))
+            end_hour, end_minute = map(int, end_time.split(':'))
+            
+            if (0 <= start_hour <= 23 and 0 <= start_minute <= 59 and
+                0 <= end_hour <= 23 and 0 <= end_minute <= 59 and
+                (start_hour < end_hour or (start_hour == end_hour and start_minute < end_minute))):
+                return True
+        return False
+
+    @staticmethod
+    def calculate_time_range(time_range, current_time):
+        # 解析时间范围字符串
+        start_str, end_str = time_range.split('-')
+        start_str = start_str.strip()
+        end_str = end_str.strip()
+        
+        # 解析开始时间和结束时间
+        start_hour, start_minute = map(int, start_str.split(':'))
+        end_hour, end_minute = map(int, end_str.split(':'))
+
+        start_time = datetime(current_time.year, current_time.month, current_time.day, start_hour, start_minute, 0)
+        end_time = datetime(current_time.year, current_time.month, current_time.day, end_hour, end_minute, 59)
+
+        if not isinstance(current_time, datetime):
+            current_time = datetime.now()
+
+        # 计算时间
+        if  start_time <= current_time < end_time: # 时间段内
+            start_time = current_time.replace(minute=0, second=0) + timedelta(hours=1)
+            if start_time > end_time:
+                start_time = datetime(current_time.year, current_time.month, current_time.day + 1, start_hour, start_minute, 0)
+                end_time = datetime(current_time.year, current_time.month, current_time.day + 1, start_hour, 59, 59)
+                return '时段内', start_time, end_time
+            if start_time + timedelta(minutes=59, seconds=59) < end_time:
+                end_time = start_time + timedelta(minutes=59, seconds=59)
+            return '时段内', start_time, end_time
+        elif current_time >= end_time:  # 时间段后
+            start_time = datetime(current_time.year, current_time.month, current_time.day + 1, start_hour, start_minute, 0)
+            end_time = datetime(current_time.year, current_time.month, current_time.day + 1, start_hour, 59, 59)
+            return '时段后', start_time, end_time
+        elif current_time < start_time:  # 时间段前
+            start_time = datetime(current_time.year, current_time.month, current_time.day, start_hour, start_minute, 0)
+            end_time = datetime(current_time.year, current_time.month, current_time.day, start_hour, 59, 59)
+            return '时段前', start_time, end_time
+        else:
+            return None, None, None
+
+    @EventHandler.register(EventType.SiteSignin)
+    # 漏签检测服务
+    def check_missed_signs(self):
+        # 日期
+        today = datetime.today()
+        # 查看今天有没有签到历史
+        today = today.strftime('%Y-%m-%d')
+        today_history = self.get_history(key=today)
+        # 今日没数据
+        if not today_history:
+            sign_sites = self._sign_sites
+        else:
+            # 今天已签到需要重签站点
+            retry_sites = today_history['retry']
+            # 今天已签到站点
+            already_sign_sites = today_history['sign']
+            # 今日未签站点
+            no_sign_sites = [site_id for site_id in self._sign_sites if site_id not in already_sign_sites]
+            # 签到站点 = 需要重签+今日未签
+            sign_sites = list(set(retry_sites + no_sign_sites))
+        
+        if len(sign_sites) > 0:
+            status, start_time, end_time = self.calculate_time_range(self._missed_schedule, datetime.now())
+            if status == '时段内':
+                self.info(f"漏签检测服务启动，即将进行补签！")
+                self._scheduler.add_job(self.sign_in, 'date',
+                                        run_date=datetime.now(tz=pytz.timezone(Config().get_timezone())) + timedelta(
+                                            seconds=3))
+            random_minute = random.randint(start_time.minute, end_time.minute)
+            random_second = random.randint(0, 59)
+            run_time = start_time.replace(minute=random_minute, second=random_second)
+            self.info(f"下一次检测时间：{run_time.strftime('%H:%M:%S')}")
+            self._scheduler.add_job(self.check_missed_signs, DateTrigger(run_date = run_time))
+        else:
+            status, start_time, end_time = self.calculate_time_range(self._missed_schedule, 
+                                                                     datetime.now().replace(hour=0, minute=0, second=0) 
+                                                                     + timedelta(days=1))
+            random_minute = random.randint(start_time.minute, end_time.minute)
+            random_second = random.randint(0, 59)
+            run_time = start_time.replace(minute=random_minute, second=random_second)
+            self.info(f"下一次检测时间：{run_time.strftime('%H:%M:%S')}")
+            self._scheduler.add_job(self.check_missed_signs, DateTrigger(run_date = run_time))
+
 
     @EventHandler.register(EventType.SiteSignin)
     def sign_in(self, event=None):
@@ -346,29 +537,33 @@ class AutoSignIn(_IPluginModule):
             for s in status:
                 # 记录本次命中重试关键词的站点
                 if self._retry_keyword:
-                    site_names = re.findall(r'【(.*?)】', s)
+                    site_names = re.findall(r'【(.*?)】', s[0])
                     if site_names:
                         site_id = sites.get(site_names[0])
-                        match = re.search(self._retry_keyword, s)
+                        match = re.search(self._retry_keyword, s[0])
                         if match:
                             if site_id:
                                 self.debug(f"站点 {site_names[0]} 命中重试关键词 {self._retry_keyword}")
                                 retry_sites.append(str(site_id))
                                 # 命中的站点
-                                retry_msg.append(s)
+                                retry_msg.append(s[0])
                                 continue
 
-                if "登录成功" in s:
-                    login_success_msg.append(s)
-                elif "仿真签到成功" in s:
-                    fz_sign_msg.append(s)
-                    continue
-                elif "签到成功" in s:
-                    sign_success_msg.append(s)
-                elif '已签到' in s:
-                    already_sign_msg.append(s)
+                if "登录成功" in s[0]:
+                    login_success_msg.append(s[0])
+                elif "仿真签到成功" in s[0]:
+                    fz_sign_msg.append(s[0])
+                elif "签到成功" in s[0]:
+                    sign_success_msg.append(s[0])
+                elif "已签到" in s[0]:
+                    already_sign_msg.append(s[0])
                 else:
-                    failed_msg.append(s)
+                    failed_msg.append(s[0])
+                    retry_sites.append(str(site_id))
+
+                status = re.search(r'【.*】(.*)', s[0]).group(1) or None
+                _result = {'id': site_id, 'date': s[1], 'name': site_names[0], 'signurl': s[2], 'result': status }
+                self._last_run_results_list.insert(0, _result)
 
             if not self._retry_keyword:
                 # 没设置重试关键词则重试已选站点
@@ -390,7 +585,7 @@ class AutoSignIn(_IPluginModule):
                                     })
 
             # 触发CF优选
-            if self._auto_cf and len(retry_sites) >= int(self._auto_cf):
+            if self._auto_cf and len(retry_sites) >= (int(self._auto_cf) or 0) > 0:
                 # 获取自定义Hosts插件、CF优选插件，判断是否触发优选
                 customHosts = self.get_config("CustomHosts")
                 cloudflarespeedtest = self.get_config("CloudflareSpeedTest")
@@ -437,16 +632,19 @@ class AutoSignIn(_IPluginModule):
         """
         签到一个站点
         """
-        site_module = self.__build_class(site_info.get("signurl"))
+        signurl = site_info.get("signurl")
+        site_module = self.__build_class(signurl)
+        home_url = StringUtils.get_base_url(signurl)
+        signinTime = datetime.now(tz=pytz.timezone(Config().get_timezone())).strftime('%Y-%m-%d %H:%M:%S')
         if site_module and hasattr(site_module, "signin"):
             try:
                 status, msg = site_module().signin(site_info)
                 # 特殊站点直接返回签到信息，防止仿真签到、模拟登陆有歧义
-                return msg
+                return msg, signinTime, home_url
             except Exception as e:
-                return f"【{site_info.get('name')}】签到失败：{str(e)}"
+                return f"【{site_info.get('name')}】签到失败：{str(e)}", signinTime, home_url
         else:
-            return self.__signin_base(site_info)
+            return self.__signin_base(site_info), signinTime, home_url
 
     def __signin_base(self, site_info):
         """
@@ -491,14 +689,13 @@ class AutoSignIn(_IPluginModule):
                     if html.xpath(xpath):
                         xpath_str = xpath
                         break
-                if re.search(r'已签|签到已得', html_text, re.IGNORECASE) \
-                        and not xpath_str:
+                if re.search(r'已签|签到已得', html_text, re.IGNORECASE):
                     self.info("%s 今日已签到" % site)
                     return f"【{site}】今日已签到"
                 if not xpath_str:
                     if SiteHelper.is_logged_in(html_text):
                         self.warn("%s 未找到签到按钮，模拟登录成功" % site)
-                        return f"【{site}】模拟登录成功"
+                        return f"【{site}】模拟登录成功，已签到或无需签到"
                     else:
                         self.info("%s 未找到签到按钮，且模拟登录失败" % site)
                         return f"【{site}】模拟登录失败！"
