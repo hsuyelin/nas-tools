@@ -9,7 +9,7 @@ from app.downloader import Downloader
 from app.media import Media
 from app.helper import ProgressHelper
 from app.utils.types import SearchType, EventType, ProgressKey
-from app.utils import StringUtils
+
 
 @singleton
 class Searcher:
@@ -129,8 +129,17 @@ class Searcher:
                     if en_title:
                         search_en_name = en_title
             # 两次搜索名称
-            first_search_name = search_cn_name
-            second_search_name = search_en_name if StringUtils.is_string_and_not_empty(search_en_name) else None
+            second_search_name = None
+            if Config().get_config("laboratory").get("search_en_title"):
+                if search_en_name:
+                    first_search_name = search_en_name
+                    second_search_name = search_cn_name
+                else:
+                    first_search_name = search_cn_name
+            else:
+                first_search_name = search_cn_name
+                if search_en_name:
+                    second_search_name = search_en_name
         # 开始搜索
         log.info("【Searcher】开始搜索 %s ..." % first_search_name)
         media_list = self.search_medias(key_word=first_search_name,
