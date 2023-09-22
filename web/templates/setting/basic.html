@@ -213,15 +213,10 @@
               <div class="col-lg">
                 <div class="mb-3">
                   <label class="form-label required">TMDB API Url <span class="form-help"
-                                                                    title="选择访问TMDB API时使用的地址，api.themoviedb.org、api.tmdb.org为官方地址，其余为使用代理中转，如无法连接TMDB匹配媒体信息时可偿试更换"
+                                                                    title="填写TMDB API时使用的地址域名即可，api.themoviedb.org、api.tmdb.org为官方地址，也可自行替换代理的TMDB地址"
                                                                     data-bs-toggle="tooltip">?</span></label>
-                  <select class="form-select" id="app.tmdb_domain">
-                    {% for domain in TmdbDomains %}
-                    <option value="{{ domain }}" {% if Config.app.tmdb_domain==domain %}selected{% endif %}>
-                      {{ domain }}
-                    </option>
-                    {% endfor %}
-                  </select>
+                  <input type="text" value="{% if Config.app %}{{ Config.app.tmdb_domain or '' }}{% endif %}" class="form-control"
+                         id="app.tmdb_domain" placeholder="api.tmdb.org" autocomplete="off">
                 </div>
               </div>
               <div class="col-lg">
