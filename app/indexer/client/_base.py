@@ -113,7 +113,10 @@ class _IIndexClient(metaclass=ABCMeta):
                 # 识别种子名称
                 imdbid_match = False
                 name_match = False
+                year_match = False
                 if match_media:
+                    description = description if description else ""
+                    torrent_name = torrent_name if torrent_name else ""
                     imdbid_match = imdbid and match_media.imdb_id and str(imdbid) == str(match_media.imdb_id)
                     name_match = match_media.org_string in torrent_name or \
                                 match_media.original_title in torrent_name or \
@@ -125,7 +128,7 @@ class _IIndexClient(metaclass=ABCMeta):
                     meta_info = MetaInfo(title=torrent_name,
                                          subtitle=f"{labels} {description}",
                                          mtype=match_media.media_type,
-                                         cn_name=   match_media.org_string,
+                                         cn_name=match_media.org_string,
                                          en_name=match_media.original_title,
                                          tmdb_id=match_media.tmdb_id,
                                          imdb_id=match_media.imdb_id)

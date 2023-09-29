@@ -145,6 +145,8 @@ class Category:
         for key, item in categorys.items():
             if not item:
                 return key
+            if not isinstance(item, dict):
+                continue
             match_flag = True
             for attr, value in item.items():
                 if not value:

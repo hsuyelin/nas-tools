@@ -3,6 +3,7 @@ import shutil
 import sys
 from threading import Lock
 import ruamel.yaml
+import re
 
 # 种子名/文件名要素分隔字符
 SPLIT_CHARS = r"\.|\s+|\(|\)|\[|]|-|\+|【|】|/|～|;|&|\||#|_|「|」|~"
@@ -211,7 +212,14 @@ class Config(object):
             RMT_FAVTYPE = favtype
 
     def get_tmdbapi_url(self):
-        return f"https://{self.get_config('app').get('tmdb_domain') or TMDB_API_DOMAINS[0]}/3"
+        tmdb_domain = self.get_config('app').get('tmdb_domain')
+        if tmdb_domain and isinstance(tmdb_domain, str):
+            tmdb_domain = re.sub(r'^https?://', '', tmdb_domain)
+            tmdb_domain = re.sub(r'/$', '', tmdb_domain)
+        else:
+            tmdb_domain = TMDB_API_DOMAINS[0]
+
+        return f"https://{tmdb_domain}/3"
 
     def get_tmdbimage_url(self, path, prefix="w500"):
         if not path:

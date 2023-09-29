@@ -213,15 +213,10 @@
               <div class="col-lg">
                 <div class="mb-3">
                   <label class="form-label required">TMDB API Url <span class="form-help"
-                                                                    title="选择访问TMDB API时使用的地址，api.themoviedb.org、api.tmdb.org为官方地址，其余为使用代理中转，如无法连接TMDB匹配媒体信息时可偿试更换"
+                                                                    title="填写TMDB API时使用的地址域名即可，api.themoviedb.org、api.tmdb.org为官方地址，也可自行替换代理的TMDB地址"
                                                                     data-bs-toggle="tooltip">?</span></label>
-                  <select class="form-select" id="app.tmdb_domain">
-                    {% for domain in TmdbDomains %}
-                    <option value="{{ domain }}" {% if Config.app.tmdb_domain==domain %}selected{% endif %}>
-                      {{ domain }}
-                    </option>
-                    {% endfor %}
-                  </select>
+                  <input type="text" value="{% if Config.app %}{{ Config.app.tmdb_domain or '' }}{% endif %}" class="form-control"
+                         id="app.tmdb_domain" placeholder="api.tmdb.org" autocomplete="off">
                 </div>
               </div>
               <div class="col-lg">
@@ -786,6 +781,18 @@
                     <span class="form-check-label">默认搜索豆瓣资源 <span class="form-help"
                                                                           title="开启将使用豆瓣进行电影电视剧的名称搜索，允许中文名不完整时自动联想，但如豆瓣数据与TMDB不一致时可能会无法搜索；关闭后使用TMDB的数据，对中文支持不友好，但不会有无法搜索的问题"
                                                                           data-bs-toggle="tooltip">?</span></span>
+                  </label>
+                </div>
+              </div>
+              <div class="col-12 col-xl-3">
+                <div class="mb-3">
+                  <label class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="laboratory.search_en_title" {% if
+                      Config.laboratory and Config.laboratory.search_en_title %}checked{% endif %}>
+                    <span class="form-check-label">搜索优先使用英文名 <span class="form-help"
+                                                                            title="开启后对于精确搜索场景将会优先使用英文名搜索，否则优先使用中文名搜索"
+                                                                            data-bs-toggle="tooltip">?</span>
+                    </span>
                   </label>
                 </div>
               </div>
