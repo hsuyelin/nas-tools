@@ -535,6 +535,7 @@ class AutoSignIn(_IPluginModule):
 
             sites = {site.get('name'): site.get("id") for site in Sites().get_site_dict()}
             for s in status:
+                site_id = None
                 # 记录本次命中重试关键词的站点
                 if self._retry_keyword:
                     site_names = re.findall(r'【(.*?)】', s[0])
@@ -561,9 +562,10 @@ class AutoSignIn(_IPluginModule):
                     failed_msg.append(s[0])
                     retry_sites.append(str(site_id))
 
-                status = re.search(r'【.*】(.*)', s[0]).group(1) or None
-                _result = {'id': site_id, 'date': s[1], 'name': site_names[0], 'signurl': s[2], 'result': status }
-                self._last_run_results_list.insert(0, _result)
+                if site_id:
+                    status = re.search(r'【.*】(.*)', s[0]).group(1) or None
+                    _result = {'id': site_id, 'date': s[1], 'name': site_names[0], 'signurl': s[2], 'result': status }
+                    self._last_run_results_list.insert(0, _result)
 
             if not self._retry_keyword:
                 # 没设置重试关键词则重试已选站点
