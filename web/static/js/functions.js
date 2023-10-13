@@ -1619,6 +1619,8 @@ function show_manual_transfer_modal(manual_type, inpath, syncmod, media_type, un
     $("#rename_season").val("");
   }
 
+  $("#ignore_download_his_div").show();
+
   // 清空输入框
   $("#rename_min_filesize").val("");
   $("#rename_specify_episode").val("");
@@ -1668,6 +1670,7 @@ function manual_media_transfer() {
   const path = $("#rename_path").val();
   const inpath = $("#rename_inpath").val();
   const outpath = $("#rename_outpath").val();
+  const ignore_download_history = $("#ignore_download_his").val();
   if (manual_type == '3') {
     syncmod = $("#rename_syncmod_customize").val();
   } else {
@@ -1758,7 +1761,8 @@ function manual_media_transfer() {
     "min_filesize": min_filesize,
     "unknown_id": unknown_id,
     "path": path,
-    "logid": logid
+    "logid": logid,
+    "ignore_download_history": ignore_download_history,
   };
   $('#modal-media-identification').modal('hide');
   show_refresh_progress("手动转移 " + inpath, "filetransfer");
