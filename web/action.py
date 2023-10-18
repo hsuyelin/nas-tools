@@ -764,6 +764,7 @@ class WebAction:
         episode_part = data.get("episode_part")
         episode_offset = data.get("episode_offset")
         min_filesize = data.get("min_filesize")
+        ignore_download_history = data.get("ignore_download_history")
         if mtype in MovieTypes:
             media_type = MediaType.MOVIE
         elif mtype in TvTypes:
@@ -787,7 +788,8 @@ class WebAction:
                                                     need_fix_all=need_fix_all,
                                                     min_filesize=min_filesize,
                                                     tmdbid=tmdbid,
-                                                    season=season)
+                                                    season=season,
+                                                    ignore_download_history=ignore_download_history)
         if succ_flag:
             if not need_fix_all and not logid:
                 # 更新记录状态
@@ -813,6 +815,7 @@ class WebAction:
         episode_part = data.get("episode_part")
         episode_offset = data.get("episode_offset")
         min_filesize = data.get("min_filesize")
+        ignore_download_history = data.get("ignore_download_history")
         if mtype in MovieTypes:
             media_type = MediaType.MOVIE
         elif mtype in TvTypes:
@@ -830,7 +833,8 @@ class WebAction:
                                                     episode_offset=episode_offset,
                                                     min_filesize=min_filesize,
                                                     tmdbid=tmdbid,
-                                                    season=season)
+                                                    season=season,
+                                                    ignore_download_history=ignore_download_history)
         if succ_flag:
             return {"retcode": 0, "retmsg": "转移成功"}
         else:
@@ -848,7 +852,8 @@ class WebAction:
                           min_filesize=None,
                           tmdbid=None,
                           season=None,
-                          need_fix_all=False
+                          need_fix_all=False,
+                          ignore_download_history=False
                           ):
         """
         开始手工转移文件
@@ -878,7 +883,8 @@ class WebAction:
                                                                                  episode_offset),
                                                                    need_fix_all),
                                                                min_filesize=min_filesize,
-                                                               udf_flag=True)
+                                                               udf_flag=True,
+                                                               ignore_download_history=ignore_download_history)
         else:
             # 按识别的信息转移
             succ_flag, ret_msg = FileTransfer().transfer_media(in_from=SyncType.MAN,
@@ -893,7 +899,8 @@ class WebAction:
                                                                                  episode_offset),
                                                                    need_fix_all),
                                                                min_filesize=min_filesize,
-                                                               udf_flag=True)
+                                                               udf_flag=True,
+                                                               ignore_download_history=ignore_download_history)
         return succ_flag, ret_msg
 
     def delete_history(self, data):

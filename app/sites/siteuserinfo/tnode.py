@@ -11,6 +11,8 @@ class TNodeSiteUserInfo(_ISiteUserInfo):
     schema = SiteSchema.TNode
     order = SITE_BASE_ORDER + 60
 
+    tnNodeLimitPageSize = 100
+
     @classmethod
     def match(cls, html_text):
         return 'Powered By TNode' in html_text
@@ -23,7 +25,7 @@ class TNodeSiteUserInfo(_ISiteUserInfo):
         if csrf_token:
             self._addition_headers = {'X-CSRF-TOKEN': csrf_token.group(1)}
             self._user_detail_page = "api/user/getMainInfo"
-            self._torrent_seeding_page = "api/user/listTorrentActivity?id=&type=seeding&page=1&size=20000"
+            self._torrent_seeding_page = f"api/user/listTorrentActivity?id=&type=seeding&size={self.tnNodeLimitPageSize}&page=1"
 
     def _parse_logged_in(self, html_text):
         """
@@ -69,6 +71,7 @@ class TNodeSiteUserInfo(_ISiteUserInfo):
         if seeding_info.get("status") != 200:
             return
 
+        total = seeding_info.get("data", {}).get("total", [])
         torrents = seeding_info.get("data", {}).get("torrents", [])
 
         page_seeding_size = 0
@@ -84,8 +87,11 @@ class TNodeSiteUserInfo(_ISiteUserInfo):
         self.seeding_size += page_seeding_size
         self.seeding_info.extend(page_seeding_info)
 
-        # 是否存在下页数据
-        next_page = None
+        if self.seeding >= total:
+            # 是否存在下页数据
+            next_page = None
+        else:
+            next_page = f"/api/user/listTorrentActivity?id=&type=seeding&size={self.tnNodeLimitPageSize}&page={(self.seeding + self.tnNodeLimitPageSize - 1) // self.tnNodeLimitPageSize + 1}"
 
         return next_page
 

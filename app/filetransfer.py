@@ -499,7 +499,8 @@ class FileTransfer:
                        episode: (EpisodeFormat, bool) = None,
                        min_filesize=None,
                        udf_flag=False,
-                       root_path=False):
+                       root_path=False,
+                       ignore_download_history=False):
         """
         识别并转移一个文件、多个文件或者目录
         :param in_from: 来源，即调用该功能的渠道
@@ -515,6 +516,7 @@ class FileTransfer:
         :param min_filesize: 过滤小文件大小的上限值
         :param udf_flag: 自定义转移标志，为True时代表是自定义转移，此时很多处理不一样
         :param root_path: 是否根目录下的文件
+        :param ignore_download_history: 是否忽略下载历史识别
         :return: 处理状态，错误信息
         """
 
@@ -550,7 +552,7 @@ class FileTransfer:
             rmt_mode = self._default_rmt_mode
 
         # 检查下载记录，是否有已识别的信息
-        if not tmdb_info:
+        if not tmdb_info and not ignore_download_history:
             download_info = self.dbhelper.get_download_history_by_path(in_path)
             if not download_info and os.path.isfile(in_path):
                 download_info = self.dbhelper.get_download_history_by_path(os.path.dirname(in_path))
