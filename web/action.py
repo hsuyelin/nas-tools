@@ -3584,6 +3584,9 @@ class WebAction:
                 "value": f"{item.UPLOAD_VOLUME_FACTOR} {item.DOWNLOAD_VOLUME_FACTOR}",
                 "name": MetaBase.get_free_string(item.UPLOAD_VOLUME_FACTOR, item.DOWNLOAD_VOLUME_FACTOR)
             }
+            #分辨率
+            if respix == "":
+                respix = "未知分辨率"
             # 制作组、字幕组
             if item.OTHERINFO is None:
                 releasegroup = "未知"
@@ -3641,6 +3644,8 @@ class WebAction:
                     torrent_filter["free"].append(free_item)
                 if releasegroup not in torrent_filter.get("releasegroup"):
                     torrent_filter["releasegroup"].append(releasegroup)
+                if respix not in torrent_filter.get("respix"):
+                    torrent_filter["respix"].append(respix)
                 if item.SITE not in torrent_filter.get("site"):
                     torrent_filter["site"].append(item.SITE)
                 if video_encode \
@@ -3691,6 +3696,7 @@ class WebAction:
                         "site": [item.SITE],
                         "free": [free_item],
                         "releasegroup": [releasegroup],
+                        "respix": [respix],
                         "video": [video_encode] if video_encode else [],
                         "season": [filter_season] if filter_season else []
                     }
