@@ -1763,15 +1763,19 @@ def Img():
     if_none_match = request.headers.get('If-None-Match')
     if if_none_match and if_none_match == etag:
         return make_response('', 304)
+    
     # 获取图片数据
-    response = Response(
-        WebUtils.request_cache(url),
-        mimetype='image/jpeg'
-    )
-    response.headers.set('Cache-Control', 'max-age=604800')
-    response.headers.set('Etag', etag)
-    return response
-
+    try:
+      img = WebUtils.request_cache(url)
+      response = Response(
+          img,
+          mimetype='image/jpeg'
+      )
+      response.headers.set('Cache-Control', 'max-age=604800')
+      response.headers.set('Etag', etag)
+      return response
+    except:
+      return make_response("图片加载失败", 400)
 
 @App.route('/stream-logging')
 @login_required
