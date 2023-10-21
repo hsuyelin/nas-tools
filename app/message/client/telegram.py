@@ -233,7 +233,7 @@ class Telegram(_IMessageClient):
                 if json.get("ok"):
                     log.info("【Telegram】Webhook 设置成功，地址为：%s" % self._webhook_url)
                 else:
-                    log.error("【Telegram】Webhook 设置失败：" % json.get("description"))
+                    log.error("【Telegram】Webhook 设置失败：%s" % json.get("description"))
             else:
                 log.error("【Telegram】Webhook 设置失败：网络连接故障！")
 
