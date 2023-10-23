@@ -912,6 +912,17 @@ class LibraryPlayHistory(ClientResource):
         """
         return WebAction().api_action(cmd='get_library_playhistory')
 
+@library.route('/mediaserver/resume')
+class LibraryResume(ClientResource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('num', type=int, help='返回记录数', location='form', required=True)
+
+    @library.doc(parser=parser)
+    def post(self):
+        """
+        查询媒体库继续观看列表
+        """
+        return WebAction().api_action(cmd='get_library_resume', data=self.parser.parse_args())
 
 @library.route('/mediaserver/statistics')
 class LibraryStatistics(ClientResource):
