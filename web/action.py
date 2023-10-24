@@ -240,6 +240,7 @@ class WebAction:
             "get_category_config": self.get_category_config,
             "get_system_processes": self.get_system_processes,
             "run_plugin_method": self.run_plugin_method,
+            "get_library_resume": self.__get_resume,
         }
         # 远程命令响应
         self._commands = {
@@ -2609,6 +2610,15 @@ class WebAction:
                     os.remove(file_path)
 
         return {"code": 1, "msg": "文件不存在"}
+
+    @staticmethod
+    def __get_resume(data):
+        """
+        获得继续观看
+        """
+        num = data.get("num") or 12
+        # 实测，plex 似乎无法按照数目返回，此处手动切片
+        return { "code": 0, "list": MediaServer().get_resume(num)[0:num] }
 
     @staticmethod
     def __start_mediasync(data):
