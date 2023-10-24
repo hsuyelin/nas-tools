@@ -13,7 +13,7 @@ from app.utils.commons import singleton
 from app.utils.types import MediaType
 
 lock = Lock()
-
+prefer_webp = True
 
 @singleton
 class DouBan:
@@ -396,6 +396,7 @@ class DouBan:
 
     @staticmethod
     def __dict_items(infos, media_type=None, poster_filter=False):
+        
         """
         转化为字典
         """
@@ -448,6 +449,10 @@ class DouBan:
                 poster_path = poster_path.replace("s_ratio_poster", "m_ratio_poster")
             elif poster_filter:
                 continue
+            
+            # prefer webp format
+            if prefer_webp:
+                poster_path = poster_path.replace("jpg", "webp")
 
             ret_infos.append({
                 'id': "DB:%s" % rid,
