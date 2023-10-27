@@ -277,6 +277,8 @@ class Sites:
         # 站点特殊处理...
         if '1ptba' in site_url:
             site_url = site_url + '/index.php'
+        elif 'zmpt' in site_url:
+            site_url = site_url + '/index.php'
         chrome = ChromeHelper()
         if site_info.get("chrome") and chrome.get_status():
             # 计时
