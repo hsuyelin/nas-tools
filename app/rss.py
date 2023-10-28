@@ -268,13 +268,14 @@ class Rss:
                             # 洗版模式
                             else:
                                 # 洗版时季集不完整的资源不要
-                                if media_info.type != MediaType.MOVIE \
+                                '''if media_info.type != MediaType.MOVIE \
                                         and media_info.get_episode_list():
                                     log.info(
                                         f"【Rss】{media_info.get_title_string()}{media_info.get_season_string()} "
+                                        #f"正在洗版，过滤掉季集不完整的资源：{title}"
                                         f"正在洗版，过滤掉季集不完整的资源：{title}"
                                     )
-                                    continue
+                                    continue'''
                                 if not self.subscribe.check_subscribe_over_edition(
                                         rtype=media_info.type,
                                         rssid=match_info.get("id"),
