@@ -205,4 +205,6 @@ class WebUtils:
             ret = RequestUtils().get_res(url)
         if ret:
             return ret.content
-        return None
+        
+        # 避免 lru 缓存失败的情况，exception 不会被缓存
+        raise Exception('request failed')
