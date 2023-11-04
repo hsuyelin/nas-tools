@@ -3761,13 +3761,16 @@ class WebAction:
         return {"code": 0, "result": [rec.as_dict() for rec in Rss().get_rss_history(rtype=mtype)]}
 
     @staticmethod
-    def get_downloading():
+    def get_downloading(data = {}):
         """
         查询正在下载的任务
         """
+        dl_id = data.get("id")
+        force_list = data.get("force_list")
         MediaHander = Media()
         DownloaderHandler = Downloader()
-        torrents = DownloaderHandler.get_downloading_progress()
+        torrents = DownloaderHandler.get_downloading_progress(downloader_id=dl_id, force_list=bool(force_list))
+        
         for torrent in torrents:
             # 先查询下载记录，没有再识别
             name = torrent.get("name")
