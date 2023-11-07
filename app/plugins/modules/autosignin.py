@@ -318,6 +318,10 @@ class AutoSignIn(_IPluginModule):
                 self._scheduler.add_job(self.sign_in, 'date',
                                         run_date=datetime.now(tz=pytz.timezone(Config().get_timezone())) + timedelta(
                                             seconds=3))
+            # 漏签检测服务
+            if self._missed_detection and self.is_valid_time_range(self._missed_schedule):
+                self.info(f"漏签检测服务启动，检测时段：{self._missed_schedule}")
+                self.check_missed_signs()
 
             if self._onlyonce or self._clean:
                 # 关闭一次性开关|清理缓存开关
@@ -346,11 +350,6 @@ class AutoSignIn(_IPluginModule):
                                          func=self.sign_in,
                                          func_desc="自动签到",
                                          cron=str(self._cron))
-            
-            # 漏签检测服务
-            if self._missed_detection and self.is_valid_time_range(self._missed_schedule):
-                self.info(f"漏签检测服务启动，检测时段：{self._missed_schedule}")
-                self.check_missed_signs()
 
             # 启动任务
             if self._scheduler.get_jobs():
@@ -449,7 +448,7 @@ class AutoSignIn(_IPluginModule):
         
         if len(sign_sites) > 0:
             status, start_time, end_time = self.calculate_time_range(self._missed_schedule, datetime.now())
-            if status == '时段内':
+            if status == '时段内' and not self._onlyonce:
                 self.info(f"漏签检测服务启动，即将进行补签！")
                 self._scheduler.add_job(self.sign_in, 'date',
                                         run_date=datetime.now(tz=pytz.timezone(Config().get_timezone())) + timedelta(
@@ -535,20 +534,17 @@ class AutoSignIn(_IPluginModule):
 
             sites = {site.get('name'): site.get("id") for site in Sites().get_site_dict()}
             for s in status:
-                site_id = None
+                site_names = re.findall(r'【(.*?)】', s[0])
+                site_id = sites.get(site_names[0], None) if site_names else None
                 # 记录本次命中重试关键词的站点
                 if self._retry_keyword:
-                    site_names = re.findall(r'【(.*?)】', s[0])
-                    if site_names:
-                        site_id = sites.get(site_names[0])
-                        match = re.search(self._retry_keyword, s[0])
-                        if match:
-                            if site_id:
-                                self.debug(f"站点 {site_names[0]} 命中重试关键词 {self._retry_keyword}")
-                                retry_sites.append(str(site_id))
-                                # 命中的站点
-                                retry_msg.append(s[0])
-                                continue
+                    match = re.search(self._retry_keyword, s[0])
+                    if match and site_id:
+                        self.debug(f"站点 {site_names[0]} 命中重试关键词 {self._retry_keyword}")
+                        retry_sites.append(str(site_id))
+                        # 命中的站点
+                        retry_msg.append(s[0])
+                        continue
 
                 if "登录成功" in s[0]:
                     login_success_msg.append(s[0])
