@@ -628,14 +628,14 @@ class Downloader:
             ExceptionUtils.exception_traceback(err)
             return None
 
-    def get_downloading_progress(self, downloader_id=None, ids=None):
+    def get_downloading_progress(self, downloader_id=None, ids=None, force_list = False):
         """
         查询正在下载中的进度信息
         """
         if not downloader_id:
             downloader_id = self.default_downloader_id
         downloader_conf = self.get_downloader_conf(downloader_id)
-        only_nastool = downloader_conf.get("only_nastool")
+        only_nastool = downloader_conf.get("only_nastool") if not force_list else False
         _client = self.__get_client(downloader_id)
         if not _client:
             return []
