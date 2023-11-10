@@ -69,6 +69,7 @@ App.wsgi_app = ProxyFix(App.wsgi_app)
 App.config['JSON_AS_ASCII'] = False
 App.config['JSON_SORT_KEYS'] = False
 App.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 25}
+App.config['SESSION_REFRESH_EACH_REQUEST'] = False
 App.secret_key = os.urandom(24)
 App.permanent_session_lifetime = datetime.timedelta(days=30)
 
@@ -1762,15 +1763,19 @@ def Img():
     if_none_match = request.headers.get('If-None-Match')
     if if_none_match and if_none_match == etag:
         return make_response('', 304)
+    
     # 获取图片数据
-    response = Response(
-        WebUtils.request_cache(url),
-        mimetype='image/jpeg'
-    )
-    response.headers.set('Cache-Control', 'max-age=604800')
-    response.headers.set('Etag', etag)
-    return response
-
+    try:
+      img = WebUtils.request_cache(url)
+      response = Response(
+          img,
+          mimetype='image/jpeg'
+      )
+      response.headers.set('Cache-Control', 'max-age=604800')
+      response.headers.set('Etag', etag)
+      return response
+    except:
+      return make_response("图片加载失败", 400)
 
 @App.route('/stream-logging')
 @login_required

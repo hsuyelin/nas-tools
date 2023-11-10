@@ -881,22 +881,33 @@
               </select>
             </div>
           </div>
+        <div class="col-lg-4" id="ignore_download_his_div">
+           <div class="mb-3">
+              <label class="form-label required">忽略下载历史识别记录 <span class="form-help" data-bs-toggle="tooltip"
+                                                        data-bs-original-title="启用后不使用下载时的识别缓存,进行重新识别">?</span></label>
+              <select class="form-select" id="ignore_download_his">
+                <option value="1">是</option>
+                <option value="0" selected>否</option>
+              </select>
+            </div>
+          </div>
+
           <div class="col-lg-4" id="rename_min_filesize_div">
             <div class="mb-3">
               <label class="form-label">最小文件大小 <span class="form-help" title="留空将使用基础设置中的转移最小文件大小设置，如不限制大小需输入0" data-bs-toggle="tooltip">?</span></label>
               <input type="text" id="rename_min_filesize" class="form-control" placeholder="最小文件大小(MB)">
             </div>
           </div>
-          <div class="col-lg-12" id="rename_specify_episode_div">
+          <div class="col-lg-8" id="rename_specify_episode_div">
             <div class="mb-3">
               <label class="form-label">集数指定 <span class="form-help"
                                                        title="2个都不填，用默认识别 <br>1、指定具体集数 <br>&nbsp;&nbsp;&nbsp;&nbsp;例如 '1' 表示第一集, '1-2'表示第1-2集(1,2合起来当作一集)，此选项优先级最高。<br>2、part: 需符合以下正则写法(PART[0-9ABCI]{0,2}|^CD[0-9]{0,2}|^DVD[0-9]{0,2}|^DISK[0-9]{0,2}|^DISC[0-9]{0,2})：例如Part1, PartC, PartIII, Cd1, Dvd2, Disk10, Disc12"
                                                        data-bs-toggle="tooltip" data-bs-html="true">?</span></label>
               <div class="row">
-                <div class="col-4">
+                <div class="col-6">
                   <input type="text" id="rename_specify_episode" class="form-control" placeholder="指定集数">
                 </div>
-                <div class="col-4">
+                <div class="col-6">
                   <input type="text" id="rename_specify_part" class="form-control"
                          placeholder="指定Part">
                 </div>

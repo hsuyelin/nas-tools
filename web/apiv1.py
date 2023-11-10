@@ -590,12 +590,16 @@ class DownloadHistory(ClientResource):
 
 @download.route('/now')
 class DownloadNow(ClientResource):
-    @staticmethod
-    def post():
+    parser = reqparse.RequestParser()
+    parser.add_argument('id', type=int, help='下载器 id', location='form', required=False)
+    parser.add_argument('force_list', type=bool, help='强制列出所有下载任务', location='form', required=False)
+
+    @download.doc(parser=parser)
+    def post(self):
         """
         查询正在下载的任务
         """
-        return WebAction().api_action(cmd='get_downloading')
+        return WebAction().api_action(cmd='get_downloading', data=self.parser.parse_args())
 
 
 @download.route('/config/info')
@@ -912,6 +916,17 @@ class LibraryPlayHistory(ClientResource):
         """
         return WebAction().api_action(cmd='get_library_playhistory')
 
+@library.route('/mediaserver/resume')
+class LibraryResume(ClientResource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('num', type=int, help='返回记录数', location='form', required=True)
+
+    @library.doc(parser=parser)
+    def post(self):
+        """
+        查询媒体库继续观看列表
+        """
+        return WebAction().api_action(cmd='get_library_resume', data=self.parser.parse_args())
 
 @library.route('/mediaserver/statistics')
 class LibraryStatistics(ClientResource):
