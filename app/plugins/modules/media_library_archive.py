@@ -35,7 +35,7 @@ class MediaLibraryArchive(_IPluginModule):
     # 主题色
     module_color = "#1592a6"
     # 插件版本
-    module_version = "1.0"
+    module_version = "1.1"
     # 插件作者
     module_author = "hotlcc"
     # 作者主页
@@ -243,6 +243,8 @@ class MediaLibraryArchive(_IPluginModule):
             self.info('执行任务开始')
             self.__running_state.set()
             archive_file = self.__do_archive()
+            if (not archive_file):
+                return
             clear_count = self.__do_clear()
             self.__send_notify(archive_file, clear_count)
         finally:
@@ -252,15 +254,16 @@ class MediaLibraryArchive(_IPluginModule):
     def __do_archive(self):
         """
         执行归档
+        :return 归档文件路径
         """
         media_server = MediaServer()
         if (not media_server or not media_server.server):
             self.warn('媒体服务器不存在，请配置')
-            return
+            return None
         media_trees = self.__build_media_trees(media_server)
         if (not media_trees):
             self.warn('媒体服务器中不存在媒体库，无需归档')
-            return
+            return None
         self.info('从媒体服务器获取数据完成')
         archive_file = self.__save_archive_file(media_trees)
         self.info(f'归档文件生成完成: {archive_file}')
@@ -376,6 +379,15 @@ class MediaLibraryArchive(_IPluginModule):
                 return archive_path
             else:
                 return self.__get_default_archive_path()
+    
+    def __get_or_create_archive_path(self):
+        """
+        获取归档目录，不存在时创建
+        """
+        archive_path = self.__get_archive_path()
+        if (not os.path.exists(archive_path)):
+            os.makedirs(archive_path)
+        return archive_path
 
     def __save_archive_file(self, media_trees = None):
         """
@@ -385,9 +397,7 @@ class MediaLibraryArchive(_IPluginModule):
         markdown_content = self.__build_markdown_content(media_trees)
         if (not markdown_content):
             return None
-        archive_path = self.__get_archive_path()
-        if (not os.path.exists(archive_path)):
-            os.makedirs(archive_path)
+        archive_path = self.__get_or_create_archive_path()
         datetime_str = datetime.now().strftime('%Y%m%d%H%M%S')
         file_name = f"归档_{datetime_str}.md"
         file_path = os.path.join(archive_path, file_name)
@@ -501,7 +511,7 @@ class MediaLibraryArchive(_IPluginModule):
         """
         获取归档的文件信息
         """
-        archive_path = self.__get_archive_path()
+        archive_path = self.__get_or_create_archive_path()
         file_names = os.listdir(archive_path)
         if (not file_names):
             return None
@@ -530,7 +540,7 @@ class MediaLibraryArchive(_IPluginModule):
         """
         if (not file_name):
             return False
-        archive_path = self.__get_archive_path()
+        archive_path = self.__get_or_create_archive_path()
         file_path = os.path.join(archive_path, file_name)
         if (os.path.exists(file_path) and os.path.isfile(file_path) and re.fullmatch('归档_\\d{14}\.md', file_name)):
             os.remove(file_path)
@@ -566,7 +576,7 @@ class MediaLibraryArchive(_IPluginModule):
         archive_files = self.__get_archive_files()
         if (not archive_files):
             return 0
-        archive_path = self.__get_archive_path()
+        archive_path = self.__get_or_create_archive_path()
         index = 0
         clear_count = 0
         for archive_file in archive_files:
