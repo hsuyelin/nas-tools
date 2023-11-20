@@ -17,13 +17,13 @@ class DownloaderHelper(_IPluginModule):
     # 插件名称
     module_name = "下载器助手"
     # 插件描述
-    module_desc = "定期将完成但未做种的种子设为做种；定期整理种子赋予站点标签。"
+    module_desc = "定期将完成但未做种的种子设为做种，种子赋予站点标签，自动删除丢失文件的坏种。"
     # 插件图标
     module_icon = "'); background-image: url('data:image/png;base64,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"
     # 主题色
     module_color = "#6c7a91"
     # 插件版本
-    module_version = "1.2"
+    module_version = "1.3"
     # 插件作者
     module_author = "hotlcc"
     # 作者主页
@@ -154,14 +154,24 @@ class DownloaderHelper(_IPluginModule):
                             'type': 'switch',
                             'title': '站点标签',
                             'tooltip': '设置“' + downloader_name + '”下载器是否开启自动添加站点标签，开启后将会定期完善种子的站点标签',
-                        },
+                        }
+                    ],
+                    [
+                        {
+                            'id': 'downloader.' + downloader_id_str + '.enable_delete',
+                            'type': 'switch',
+                            'title': '自动删种',
+                            'tooltip': '设置“' + downloader_name + '”下载器是否开启自动删种，开启后将会定期删除丢失文件的错误种子',
+                        }
                     ]
                 ]
             })
         return fields
     
-    # 解析配置
     def __parse_config(self, config = None):
+        """
+        解析配置
+        """
         config_obj = {}
         if (not config):
             self.debug(f"解析配置: config = {config}, config_obj = {config_obj}")
@@ -192,8 +202,10 @@ class DownloaderHelper(_IPluginModule):
         self.debug(f"解析配置: config = {config}, config_obj = {config_obj}")
         return config_obj
     
-    # 反解析配置
     def __un_parse_config(self, config_obj = None):
+        """
+        反解析配置
+        """
         config = {}
         if (not config_obj):
             self.debug(f"反解析配置: config_obj = {config_obj}, config = {config}")
@@ -214,8 +226,10 @@ class DownloaderHelper(_IPluginModule):
         self.debug(f"反解析配置: config_obj = {config_obj}, config = {config}")
         return config
 
-    # 初始化调度器
     def __init_scheduler(self, timezone = None):
+        """
+        初始化调度器
+        """
         if (self.__scheduler):
             return
         if (not timezone):
@@ -265,15 +279,19 @@ class DownloaderHelper(_IPluginModule):
             self.__scheduler.start()
             self.debug(f"服务调度器初启动成功")
 
-    # 判断单个任务中是否有生效的子任务
     def __check_has_enabled_sub_task(self, downloader_info = None):
+        """
+        判断单个任务中是否有生效的子任务
+        """
         if (not downloader_info):
             return False
         return True if downloader_info.get('enable_seeding') \
                        or downloader_info.get('enable_tagging') else False
 
-    # 判断任务列表中是否有生效的任务
     def __check_has_enabled_task(self, downloader = None):
+        """
+        判断任务列表中是否有生效的任务
+        """
         if (not downloader):
             downloader = self.__config_obj.get('downloader')
         if (not downloader):
@@ -284,8 +302,10 @@ class DownloaderHelper(_IPluginModule):
                 return True
         return False
     
-    # 插件生效状态
     def get_state(self):
+        """
+        插件生效状态
+        """
         state = True if self.__config_obj \
                        and self.__config_obj.get('enable') \
                        and (self.__config_obj.get('cron') or self.__config_obj.get("listen_download_event")) \
@@ -309,18 +329,24 @@ class DownloaderHelper(_IPluginModule):
         except Exception as e:
             self.error(f"插件服务停止异常: {str(e)}")
 
-    # 分割标签tags为数组
     @staticmethod
     def __split_tags(tags = None):
+        """
+        分割标签tags为数组
+        """
         return re.split("\s*,\s*", tags.strip()) if tags else []
     
-    # 获取排除的标签数组
     def __get_exclude_tag_array(self):
+        """
+        获取排除的标签数组
+        """
         exclude_tags = self.__config_obj.get("exclude_tags")
         return self.__split_tags(exclude_tags)
 
-    # 判断多个标签中是否存在被排除的标签
     def __exists_exclude_tag(self, tags = None):
+        """
+        判断多个标签中是否存在被排除的标签
+        """
         if (not tags):
             return False
         tags_type = type(tags)
@@ -337,19 +363,23 @@ class DownloaderHelper(_IPluginModule):
         else:
             return False
 
-    # 检查是否需要做种
     @staticmethod
     def __check_need_seeding(torrent, downloader_type):
+        """
+        检查是否需要做种
+        """
         if (downloader_type == DownloaderType.QB):
             return torrent.state_enum.is_complete and torrent.state_enum.is_paused
         elif (downloader_type == DownloaderType.TR):
-            return torrent.progress == 100 and torrent.stopped
+            return torrent.progress == 100 and torrent.stopped and torrent.error == 0
         else:
             return False
     
-    # 获取种子的hash
     @staticmethod
     def __get_torrent_hash(torrent, downloader_type):
+        """
+        获取种子的hash
+        """
         if (downloader_type == DownloaderType.QB):
             return torrent.get('hash')
         elif (downloader_type == DownloaderType.TR):
@@ -357,9 +387,11 @@ class DownloaderHelper(_IPluginModule):
         else:
             None
     
-    # 获取种子的名称
     @staticmethod
     def __get_torrent_name(torrent, downloader_type):
+        """
+        获取种子的名称
+        """
         if (downloader_type == DownloaderType.QB):
             return torrent.get('name')
         elif (downloader_type == DownloaderType.TR):
@@ -367,8 +399,10 @@ class DownloaderHelper(_IPluginModule):
         else:
             None
 
-    # qb单个做种
     def __seeding_one_for_qb(self, torrent):
+        """
+        qb单个做种
+        """
         # 判断种子中是否存在排除的标签
         torrent_tags = self.__split_tags(torrent.get('tags'))
         if (self.__exists_exclude_tag(torrent_tags)):
@@ -382,8 +416,10 @@ class DownloaderHelper(_IPluginModule):
         self.info(f'[QB]单个做种完成: hash = {hash}, name = {name}')
         return True
     
-    # tr单个做种
     def __seeding_one_for_tr(self, torrent, downloader):
+        """
+        tr单个做种
+        """
         # 判断种子中是否存在排除的标签
         torrent_tags = torrent.get('labels')
         if (self.__exists_exclude_tag(torrent_tags)):
@@ -397,21 +433,25 @@ class DownloaderHelper(_IPluginModule):
         self.info(f'[TR]单个做种完成: hash = {hash}, name = {name}')
         return True
     
-    # qb全量做种
-    def __seeding_all_for_qb(self, torrents):
-        self.info('[QB]全量做种开始...')
+    def __seeding_batch_for_qb(self, torrents):
+        """
+        qb批量做种
+        """
+        self.info('[QB]批量做种开始...')
         count = 0
         for torrent in torrents:
             if (self.__exit_event.is_set()):
                 return count
             if(self.__seeding_one_for_qb(torrent)):
                 count += 1
-        self.info('[QB]全量做种结束')
+        self.info('[QB]批量做种结束')
         return count
 
-    # tr全量做种
-    def __seeding_all_for_tr(self, downloader, torrents = None):
-        self.info('[TR]全量做种开始...')
+    def __seeding_batch_for_tr(self, downloader, torrents = None):
+        """
+        tr批量做种
+        """
+        self.info('[TR]批量做种开始...')
         if (not torrents):
             torrents = self.__get_torrents(downloader)
         count = 0
@@ -420,30 +460,37 @@ class DownloaderHelper(_IPluginModule):
                 return count
             if(self.__seeding_one_for_tr(torrent, downloader)):
                 count += 1
-        self.info('[TR]全量做种结束')
+        self.info('[TR]批量做种结束')
         return count
     
-    # 全量做种
-    def __seeding_all(self, downloader, torrents = None):
+    def __seeding_batch(self, downloader, torrents = None):
+        """
+        批量做种
+        """
         downloader_type = downloader.get_type()
         if (not torrents):
             torrents = self.__get_torrents(downloader)
         if (downloader_type == DownloaderType.QB):
-            return self.__seeding_all_for_qb(torrents)
+            return self.__seeding_batch_for_qb(torrents)
         elif (downloader_type == DownloaderType.TR):
-            return self.__seeding_all_for_tr(downloader, torrents)
+            return self.__seeding_batch_for_tr(downloader, torrents)
         return 0
     
-    # 解析url query为字典
     @staticmethod
     def __parse_url_query(query = None):
+        """
+        解析url
+        :param query 字典
+        """
         if (not query or len(query) <= 0):
             return {}
         return urllib.parse.parse_qs(query)
 
-    # qb解析 tracker
     @classmethod
     def __parse_tracker_for_qb(cls, torrent = None):
+        """
+        qb解析 tracker
+        """
         if (not torrent):
             return None
         tracker = torrent.get('tracker')
@@ -459,9 +506,11 @@ class DownloaderHelper(_IPluginModule):
             return None
         return tr[0]
 
-    # tr解析 tracker
     @staticmethod
     def __parse_tracker_for_tr(torrent = None):
+        """
+        tr解析 tracker
+        """
         if (not torrent):
             return None
         trackers = torrent.trackers
@@ -470,9 +519,11 @@ class DownloaderHelper(_IPluginModule):
         tracker = trackers[0]
         return tracker.get('announce')
 
-    # 解析 tracker
     @classmethod
     def __parse_tracker(cls, torrent, downloader_type):
+        """
+        解析 tracker
+        """
         if (downloader_type == DownloaderType.QB):
             return cls.__parse_tracker_for_qb(torrent)
         elif (downloader_type == DownloaderType.TR):
@@ -480,9 +531,11 @@ class DownloaderHelper(_IPluginModule):
         else:
             return None
     
-    # 从url中解析域名
     @staticmethod
     def __parse_hostname_from_url(url = None):
+        """
+        从url中解析域名
+        """
         if (not url):
             return None
         url_obj = urllib.parse.urlparse(url)
@@ -490,9 +543,11 @@ class DownloaderHelper(_IPluginModule):
             return None
         return url_obj.hostname
 
-    # 从域名中解析关键字
     @staticmethod
     def __parse_keyword_from_hostname(hostname = None):
+        """
+        从域名中解析关键字
+        """
         if (not hostname):
             return None
         hostname_array = hostname.split('.')
@@ -504,20 +559,26 @@ class DownloaderHelper(_IPluginModule):
         else:
             return None
 
-    # 从url中解析域名关键字
     @classmethod
     def __parse_keyword_from_url(cls, url = None):
+        """
+        从url中解析域名关键字
+        """
         return cls.__parse_keyword_from_hostname(cls.__parse_hostname_from_url(url))
 
-    # 根据域名关键字构造站点标签
     @staticmethod
     def __build_site_tag_by_hostname_keyword(keyword = None):
+        """
+        根据域名关键字构造站点标签
+        """
         if (not keyword):
             return None
         return f'站点/{keyword}'
 
-    # qb单个打标签
     def __tagging_one_for_qb(self, torrent, site_dict = {}):
+        """
+        qb单个打标签
+        """
         # 判断种子中是否存在排除的标签
         torrent_tags = self.__split_tags(torrent.get('tags'))
         if (self.__exists_exclude_tag(torrent_tags)):
@@ -553,8 +614,10 @@ class DownloaderHelper(_IPluginModule):
         self.info(f'[QB]单个打标成功: hash = {hash}, name = {name}')
         return True
 
-    # tr单个打标签
     def __tagging_one_for_tr(self, torrent, downloader, site_dict = {}):
+        """
+        tr单个打标签
+        """
         # 判断种子中是否存在排除的标签
         torrent_tags = torrent.get('labels')
         if (self.__exists_exclude_tag(torrent_tags)):
@@ -590,21 +653,25 @@ class DownloaderHelper(_IPluginModule):
         self.info(f'[TR]单个打标成功: hash = {hash}, name = {name}')
         return True
     
-    # qb全量打标签
-    def __tagging_all_for_qb(self, torrents, site_dict = {}):
-        self.info('[QB]全量打标开始...')
+    def __tagging_batch_for_qb(self, torrents, site_dict = {}):
+        """
+        qb批量打标签
+        """
+        self.info('[QB]批量打标开始...')
         count = 0
         for torrent in torrents:
             if (self.__exit_event.is_set()):
                 return count
             if (self.__tagging_one_for_qb(torrent, site_dict)):
                 count += 1
-        self.info('[QB]全量打标结束')
+        self.info('[QB]批量打标结束')
         return count
     
-    # tr全量打标签
-    def __tagging_all_for_tr(self, downloader, torrents = None, site_dict = {}):
-        self.info('[TR]全量打标开始...')
+    def __tagging_batch_for_tr(self, downloader, torrents = None, site_dict = {}):
+        """
+        tr批量打标签
+        """
+        self.info('[TR]批量打标开始...')
         if (not torrents):
             torrents = self.__get_torrents(downloader)
         count = 0
@@ -613,29 +680,135 @@ class DownloaderHelper(_IPluginModule):
                 return count
             if (self.__tagging_one_for_tr(torrent, downloader, site_dict)):
                 count += 1
-        self.info('[TR]全量打标结束')
+        self.info('[TR]批量打标结束')
         return count
 
-    # 全量打标签
-    def __tagging_all(self, downloader, torrents = None, site_dict = {}):
+    def __tagging_batch(self, downloader, torrents = None, site_dict = {}):
+        """
+        批量打标签
+        """
         downloader_type = downloader.get_type()
         if (not torrents):
             torrents = self.__get_torrents(downloader)
         if (downloader_type == DownloaderType.QB):
-            return self.__tagging_all_for_qb(torrents, site_dict)
+            return self.__tagging_batch_for_qb(torrents, site_dict)
         elif (downloader_type == DownloaderType.TR):
-            return self.__tagging_all_for_tr(downloader, torrents, site_dict)
+            return self.__tagging_batch_for_tr(downloader, torrents, site_dict)
+        return 0
+    
+    @staticmethod
+    def __check_is_missing_files(torrent, downloader_type):
+        """
+        检查种子是否丢失文件
+        """
+        if (downloader_type == DownloaderType.QB):
+            return torrent.get('state') == 'missingFiles'
+        elif (downloader_type == DownloaderType.TR):
+            return torrent.error == 3 \
+               and torrent.error_string != None \
+               and 'No data found' in torrent.error_string
+        else:
+            return False
+
+    @classmethod
+    def __check_need_delete(cls, torrent, downloader_type):
+        """
+        检查是否需要删种
+        """
+        return cls.__check_is_missing_files(torrent, downloader_type)
+    
+    def __delete_one_for_qb(self, torrent, downloader):
+        """
+        qb单个删种
+        """
+        # 判断种子中是否存在排除的标签
+        torrent_tags = self.__split_tags(torrent.get('tags'))
+        if (self.__exists_exclude_tag(torrent_tags)):
+            return False
+        downloader_type = DownloaderType.QB
+        if (not self.__check_need_delete(torrent, downloader_type)):
+            return False
+        hash = self.__get_torrent_hash(torrent, downloader_type)
+        name = self.__get_torrent_name(torrent, downloader_type)
+        downloader.delete_torrents(True, hash)
+        self.info(f'[QB]单个删种完成: hash = {hash}, name = {name}')
+        return True
+
+    def __delete_one_for_tr(self, torrent, downloader):
+        """
+        tr单个删种
+        """
+        # 判断种子中是否存在排除的标签
+        torrent_tags = torrent.get('labels')
+        if (self.__exists_exclude_tag(torrent_tags)):
+            return False
+        downloader_type = DownloaderType.TR
+        if (not self.__check_need_delete(torrent, downloader_type)):
+            return False
+        hash = self.__get_torrent_hash(torrent, downloader_type)
+        name = self.__get_torrent_name(torrent, downloader_type)
+        downloader.delete_torrents(True, torrent.id)
+        self.info(f'[TR]单个删种完成: hash = {hash}, name = {name}')
+        return True
+    
+    def __delete_batch_for_qb(self, downloader, torrents):
+        """
+        qb批量删种
+        """
+        self.info('[QB]批量删种开始...')
+        if (not torrents):
+            torrents = self.__get_torrents(downloader)
+        count = 0
+        for torrent in torrents:
+            if (self.__exit_event.is_set()):
+                return count
+            if (self.__delete_one_for_qb(torrent, downloader)):
+                count += 1
+        self.info('[QB]批量删种结束')
+        return count
+    
+    def __delete_batch_for_tr(self, downloader, torrents):
+        """
+        tr批量删种
+        """
+        self.info('[TR]批量删种开始...')
+        if (not torrents):
+            torrents = self.__get_torrents(downloader)
+        count = 0
+        for torrent in torrents:
+            if (self.__exit_event.is_set()):
+                return count
+            if (self.__delete_one_for_tr(torrent, downloader)):
+                count += 1
+        self.info('[TR]批量删种结束')
+        return count
+    
+    def __delete_batch(self, downloader, torrents = None):
+        """
+        批量删种
+        """
+        downloader_type = downloader.get_type()
+        if (not torrents):
+            torrents = self.__get_torrents(downloader)
+        if (downloader_type == DownloaderType.QB):
+            return self.__delete_batch_for_qb(downloader, torrents)
+        elif (downloader_type == DownloaderType.TR):
+            return self.__delete_batch_for_tr(downloader, torrents)
         return 0
 
-    # 从下载器中获取全部种子
     @staticmethod
     def __get_torrents(downloader = None):
+        """
+        从下载器中获取全部种子
+        """
         if (not downloader):
             return None
         return downloader.get_torrents()[0]
 
-    # 执行任务
     def __do_task(self):
+        """
+        执行任务
+        """
         if (self.__running_state.is_set()):
             self.debug('已有进行中的任务，本次不执行')
             return
@@ -645,8 +818,10 @@ class DownloaderHelper(_IPluginModule):
         finally:
             self.__running_state.clear()
 
-    # 针对所有下载器执行任务
     def __do_task_for_all_downloader(self):
+        """
+        针对所有下载器执行任务
+        """
         # 站点词典
         site_dict = self.__get_site_dict()
         # 任务执行统计结果
@@ -660,8 +835,10 @@ class DownloaderHelper(_IPluginModule):
         # 发送通知
         self.__send_notify(results)
 
-    # 针对单个下载器执行任务
     def __do_task_for_single_downloader(self, downloader_id = None, downloader_config = {}, site_dict = {}):
+        """
+        针对单个下载器执行任务
+        """
         if (not downloader_id or not downloader_config):
             return None
         if (self.__exit_event.is_set()):
@@ -671,7 +848,8 @@ class DownloaderHelper(_IPluginModule):
             return None
         enable_seeding = downloader_config.get('enable_seeding')
         enable_tagging = downloader_config.get('enable_tagging')
-        if (not enable_seeding and not enable_tagging):
+        enable_delete = downloader_config.get('enable_delete')
+        if (not enable_seeding and not enable_tagging and not enable_delete):
             return None
         downloader = self.__downloader.get_downloader(downloader_id = downloader_id)
         if (not downloader):
@@ -696,27 +874,35 @@ class DownloaderHelper(_IPluginModule):
             'downloader_name': downloader_name,
             'total': torrents_count
         }
-        # 全量做种
+        # 批量做种
         if (enable_seeding):
-            result['seeding'] = self.__seeding_all(downloader = downloader, torrents = torrents)
+            result['seeding'] = self.__seeding_batch(downloader = downloader, torrents = torrents)
             if (self.__exit_event.is_set()):
                 return result
-        # 全量打标签
+        # 批量打标签
         if (enable_tagging):
-            result['tagging'] = self.__tagging_all(downloader = downloader, torrents = torrents, site_dict = site_dict)
+            result['tagging'] = self.__tagging_batch(downloader = downloader, torrents = torrents, site_dict = site_dict)
+            if (self.__exit_event.is_set()):
+                return result
+        # 批量删种
+        if (enable_delete):
+            result['delete'] = self.__delete_batch(downloader = downloader, torrents = torrents)
             if (self.__exit_event.is_set()):
                 return result
         self.info(f'下载器[{downloader_name}]任务执行结束')
         return result
 
-    # 发送通知
     def __send_notify(self, results = None):
+        """
+        发送通知
+        """
         if (self.__config_obj.get('enable_notify') and results):
             text = ''
             for result in results:
                 seeding = result.get('seeding')
                 tagging = result.get('tagging')
-                if ((seeding and seeding > 0) or (tagging and tagging > 0)):
+                delete = result.get('delete')
+                if ((seeding and seeding > 0) or (tagging and tagging > 0) or (delete and delete > 0)):
                     downloader_name = result.get('downloader_name')
                     total = result.get('total')
                     text += f'【任务：{downloader_name}】\n'
@@ -725,6 +911,8 @@ class DownloaderHelper(_IPluginModule):
                         text += f'做种数：{seeding}\n'
                     if (tagging):
                         text += f'打标数：{tagging}\n'
+                    if (delete):
+                        text += f'删种数：{delete}\n'
                     text += '\n'
                     text += '————————————\n'
             if (text):
@@ -733,16 +921,20 @@ class DownloaderHelper(_IPluginModule):
                     text = text
                 )
 
-    # 获取站点词典
     def __get_site_dict(self):
+        """
+        获取站点词典
+        """
         site_infos = Sites().get_sites()
         if (site_infos):
             return {self.__parse_keyword_from_url(site_info.get("signurl")): site_info.get("name") for site_info in site_infos}
         return {}
 
-    # 监听下载添加事件
     @EventHandler.register(EventType.DownloadAdd)
     def listen_download_add_event(self, event):
+        """
+        监听下载添加事件
+        """
         if (not self.get_state() or not self.__config_obj.get("listen_download_event")):
             return
         if (not self.__scheduler or not self.__scheduler.running):
