@@ -95,10 +95,10 @@ class Sync(object):
                 log.info(f"【Sync】{monpath} 不进行监控和同步：手动关闭")
             if target_path and not os.path.exists(target_path) and syncmode_enum not in ModuleConf.REMOTE_RMT_MODES:
                 log.info(f"【Sync】目的目录不存在，正在创建：{target_path}")
-                os.makedirs(target_path)
+                os.makedirs(target_path, exist_ok=True)
             if unknown_path and not os.path.exists(unknown_path):
                 log.info(f"【Sync】未识别目录不存在，正在创建：{unknown_path}")
-                os.makedirs(unknown_path)
+                os.makedirs(unknown_path, exist_ok=True)
             # 登记关系
             self._sync_path_confs[str(sid)] = {
                 'id': sid,
