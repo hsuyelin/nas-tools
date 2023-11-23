@@ -37,7 +37,7 @@ class Scraper:
         self._rmt_mode = None
         self._temp_path = os.path.join(Config().get_temp_path(), "scraper")
         if not os.path.exists(self._temp_path):
-            os.makedirs(self._temp_path)
+            os.makedirs(self._temp_path, exist_ok=True)
 
     def folder_scraper(self, path, exclude_path=None, mode=None):
         """
@@ -393,7 +393,7 @@ class Scraper:
         temp_file = os.path.join(self._temp_path, out_file[1:])
         temp_file_dir = os.path.dirname(temp_file)
         if not os.path.exists(temp_file_dir):
-            os.makedirs(temp_file_dir)
+            os.makedirs(temp_file_dir, exist_ok=True)
         with open(temp_file, "wb") as f:
             f.write(content)
         if self._rmt_mode in [RmtMode.RCLONE, RmtMode.RCLONECOPY]:

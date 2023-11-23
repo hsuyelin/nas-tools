@@ -386,7 +386,7 @@ class MediaLibraryArchive(_IPluginModule):
         """
         archive_path = self.__get_archive_path()
         if (not os.path.exists(archive_path)):
-            os.makedirs(archive_path)
+            os.makedirs(archive_path, exist_ok=True)
         return archive_path
 
     def __save_archive_file(self, media_trees = None):

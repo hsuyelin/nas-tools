@@ -52,7 +52,7 @@ class OpenSubtitles(_IPluginModule):
         self.sitehelper = SiteHelper()
         self._save_tmp_path = Config().get_temp_path()
         if not os.path.exists(self._save_tmp_path):
-            os.makedirs(self._save_tmp_path)
+            os.makedirs(self._save_tmp_path, exist_ok=True)
         if config:
             self._enable = config.get("enable")
 

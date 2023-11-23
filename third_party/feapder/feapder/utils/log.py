@@ -138,7 +138,7 @@ def get_logger(
     # 定义一个RotatingFileHandler，最多备份5个日志文件，每个日志文件最大10M
     if is_write_to_file:
         if path and not os.path.exists(os.path.dirname(path)):
-            os.makedirs(os.path.dirname(path))
+            os.makedirs(os.path.dirname(path), exist_ok=True)
 
         rf_handler = RotatingFileHandler(
             path,

@@ -401,7 +401,7 @@ class FileTransfer:
                 continue
             new_dir = os.path.dirname(new_file)
             if not os.path.exists(new_dir) and rmt_mode not in ModuleConf.REMOTE_RMT_MODES:
-                os.makedirs(new_dir)
+                os.makedirs(new_dir, exist_ok=True)
             retcode = self.__transfer_command(file_item=file,
                                               target_file=new_file,
                                               rmt_mode=rmt_mode)
@@ -431,7 +431,7 @@ class FileTransfer:
         target_dir = os.path.join(target_dir, parent_name)
         if not os.path.exists(target_dir) and rmt_mode not in ModuleConf.REMOTE_RMT_MODES:
             log.debug("【Rmt】正在创建目录：%s" % target_dir)
-            os.makedirs(target_dir)
+            os.makedirs(target_dir, exist_ok=True)
         # 目录
         if os.path.isdir(file_item):
             log.info("【Rmt】正在%s目录：%s 到 %s" % (rmt_mode.value, file_item, target_dir))
@@ -800,7 +800,7 @@ class FileTransfer:
                     elif rmt_mode not in ModuleConf.REMOTE_RMT_MODES:
                         # 创建目录
                         log.debug("【Rmt】正在创建目录：%s" % ret_dir_path)
-                        os.makedirs(ret_dir_path)
+                        os.makedirs(ret_dir_path, exist_ok=True)
                 # 转移蓝光原盘
                 if bluray_disk_dir:
                     ret = self.__transfer_bluray_dir(file_item, ret_dir_path, rmt_mode)
@@ -1229,7 +1229,7 @@ class FileTransfer:
             new_file = new_file_list[0]
         new_dir = os.path.dirname(new_file)
         if not os.path.exists(new_dir) and sync_transfer_mode not in ModuleConf.REMOTE_RMT_MODES:
-            os.makedirs(new_dir)
+            os.makedirs(new_dir, exist_ok=True)
         return self.__transfer_command(file_item=in_file,
                                        target_file=new_file,
                                        rmt_mode=sync_transfer_mode), ""

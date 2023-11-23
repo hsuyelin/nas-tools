@@ -1703,7 +1703,7 @@ def upload():
         files = request.files['file']
         temp_path = Config().get_temp_path()
         if not os.path.exists(temp_path):
-            os.makedirs(temp_path)
+            os.makedirs(temp_path, exist_ok=True)
         file_path = Path(temp_path) / files.filename
         files.save(str(file_path))
         return {"code": 0, "filepath": str(file_path)}

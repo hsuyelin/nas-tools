@@ -22,7 +22,7 @@ class Torrent:
     def __init__(self):
         self._torrent_temp_path = Config().get_temp_path()
         if not os.path.exists(self._torrent_temp_path):
-            os.makedirs(self._torrent_temp_path)
+            os.makedirs(self._torrent_temp_path, exist_ok=True)
 
     def get_torrent_info(self, url, cookie=None, ua=None, referer=None, proxy=False):
         """

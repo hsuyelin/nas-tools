@@ -1109,7 +1109,7 @@ def get_conf_value(config_file, section, key):
 def mkdir(path):
     try:
         if not os.path.exists(path):
-            os.makedirs(path)
+            os.makedirs(path, exist_ok=True)
     except OSError as exc:  # Python >2.5
         pass
 
