@@ -235,3 +235,11 @@ class Config(object):
         if category:
             return os.path.join(Config().get_config_path(), f"{category}.yaml")
         return None
+
+    def get_telegram_domain(self):
+        telegram_domain = (self.get_config('laboratory') or {}).get("telegram_domain", "https://api.telegram.org")
+        if telegram_domain and telegram_domain.startswith("http"):
+            telegram_domain = "https://api.telegram.org"
+        if telegram_domain and telegram_domain.endswith("/"):
+            telegram_domain = telegram_domain[:-1]
+        return telegram_domain

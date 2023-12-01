@@ -217,3 +217,5 @@ laboratory:
   show_more_sites: true
   # 【入库通知精简】：开启后会简化入库推送通知
   simplify_library_notification: false
+  # 《使用Cloudflare Worker搭建Telegram Bot Api 代理》https://www.yuque.com/u21363723/nt6hcz/whq99ankmn87arcq?singleDoc
+  telegram_domain:
