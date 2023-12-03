@@ -28,12 +28,14 @@ class Telegram(_IMessageClient):
     _interactive = False
     _enabled = True
     _api_key = None
+    _telegram_domain = None
 
     def __init__(self, config):
         self._client_config = config
         self._interactive = config.get("interactive")
         self._domain = Config().get_domain()
         self._api_key = Config().get_config("security").get("api_key")
+        self._telegram_domain = Config().get_telegram_domain()
         self.init_config()
 
     def init_config(self):
@@ -182,7 +184,7 @@ class Telegram(_IMessageClient):
         if image:
             # 发送图文消息
             values = {"chat_id": chat_id, "photo": image, "caption": caption, "parse_mode": "Markdown"}
-            sc_url = "https://api.telegram.org/bot%s/sendPhoto?" % self._telegram_token
+            sc_url = "%s/bot%s/sendPhoto?" % (self._telegram_domain, self._telegram_token)
             res = RequestUtils(proxies=proxies).get_res(sc_url + urlencode(values))
             flag, msg = _res_parse(res)
             if flag:
@@ -190,7 +192,7 @@ class Telegram(_IMessageClient):
             else:
                 photo_req = RequestUtils(proxies=proxies).get_res(image)
                 if photo_req and photo_req.content:
-                    sc_url = "https://api.telegram.org/bot%s/sendPhoto" % self._telegram_token
+                    sc_url = "%s/bot%s/sendPhoto" % (self._telegram_domain, self._telegram_token)
                     data = {"chat_id": chat_id, "caption": caption, "parse_mode": "Markdown"}
                     files = {"photo": photo_req.content}
                     res = requests.post(sc_url, proxies=proxies, data=data, files=files)
@@ -199,7 +201,7 @@ class Telegram(_IMessageClient):
                         return flag, msg
         # 发送文本消息
         values = {"chat_id": chat_id, "text": caption, "parse_mode": "Markdown"}
-        sc_url = "https://api.telegram.org/bot%s/sendMessage?" % self._telegram_token
+        sc_url = "%s/bot%s/sendMessage?" % (self._telegram_domain, self._telegram_token)
         res = RequestUtils(proxies=proxies).get_res(sc_url + urlencode(values))
         flag, msg = _res_parse(res)
         return flag, msg
@@ -226,7 +228,7 @@ class Telegram(_IMessageClient):
             if status == 2:
                 self.__del_bot_webhook()
             values = {"url": self._webhook_url, "allowed_updates": ["message"]}
-            sc_url = "https://api.telegram.org/bot%s/setWebhook?" % self._telegram_token
+            sc_url = "%s/bot%s/setWebhook?" % (self._telegram_domain, self._telegram_token)
             res = RequestUtils(proxies=Config().get_proxies()).get_res(sc_url + urlencode(values))
             if res is not None:
                 json = res.json()
@@ -242,7 +244,7 @@ class Telegram(_IMessageClient):
         获取Telegram已设置的Webhook
         :return: 状态：1-存在且相等，2-存在不相等，3-不存在，0-网络出错
         """
-        sc_url = "https://api.telegram.org/bot%s/getWebhookInfo" % self._telegram_token
+        sc_url = "%s/bot%s/getWebhookInfo" % (self._telegram_domain, self._telegram_token)
         res = RequestUtils(proxies=Config().get_proxies()).get_res(sc_url)
         if res is not None and res.json():
             if res.json().get("ok"):
@@ -269,7 +271,7 @@ class Telegram(_IMessageClient):
         删除Telegram Webhook
         :return: 是否成功
         """
-        sc_url = "https://api.telegram.org/bot%s/deleteWebhook" % self._telegram_token
+        sc_url = "%s/bot%s/deleteWebhook" % (self._telegram_domain, self._telegram_token)
         res = RequestUtils(proxies=Config().get_proxies()).get_res(sc_url)
         if res and res.json() and res.json().get("ok"):
             return True
@@ -301,7 +303,7 @@ class Telegram(_IMessageClient):
         while True:
             _config = Config()
             web_port = _config.get_config("app").get("web_port")
-            sc_url = "https://api.telegram.org/bot%s/getUpdates?" % self._telegram_token
+            sc_url = "%s/bot%s/getUpdates?" % (self._telegram_domain, self._telegram_token)
             ds_url = "http://127.0.0.1:%s/telegram?apikey=%s" % (web_port, self._api_key)
             if not self._enabled:
                 log.info("Telegram消息接收服务已停止")

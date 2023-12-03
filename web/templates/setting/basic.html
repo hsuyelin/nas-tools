@@ -713,6 +713,15 @@
           </div>
           <div class="card-body">
             <div class="row">
+              <div class="col-12 col-xl-12">
+                    <div class="mb-3">
+                      <label class="form-label">Telegram Bot Api 代理<span class="form-help"
+                                                                            title="使用Cloudflare Worker搭建Telegram Bot Api 代理, 配置教程：https://www.yuque.com/u21363723/nt6hcz/whq99ankmn87arcq?singleDoc"
+                                                                            data-bs-toggle="tooltip">?</span></label>
+                      <input type="text" value="{% if Config.laboratory %}{{ Config.laboratory.telegram_domain or '' }}{% endif %}" class="form-control"
+                             id="laboratory.telegram_domain" placeholder="https://api.telegram.org" autocomplete="off">
+                </div>
+              </div>
               <div class="col-12 col-xl-3">
                 <div class="mb-3">
                   <label class="form-check form-switch">
