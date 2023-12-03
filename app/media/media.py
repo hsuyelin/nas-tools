@@ -1048,7 +1048,7 @@ class Media:
         ret_infos = []
         for info in infos:
             tmdbid = info.get("id")
-            vote = round(float(info.get("vote_average")), 1) if info.get("vote_average") else 0,
+            vote = round(float(info.get("vote_average")), 1) if (info.get("vote_average") and info.get('vote_count') > 10) else 0
             image = Config().get_tmdbimage_url(info.get("poster_path"))
             if poster_filter and not image:
                 continue
