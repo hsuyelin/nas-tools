@@ -318,8 +318,6 @@ class StringUtils:
         filename_prefer_barre = media.get("filename_prefer_barre", False) or False
         if filename_prefer_barre:
             cleaned_name = cleaned_name.replace(":", " - ").replace("：", " - ")
-        else:
-            cleaned_name = cleaned_name.replace(":", "：")
         return cleaned_name
 
     @staticmethod
