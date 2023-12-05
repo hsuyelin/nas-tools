@@ -9,7 +9,7 @@ movie:
     genre_ids: '16'
   华语电影:
     # 分类依据，可以是：original_language 语种、production_countries(电影)/origin_country(电视剧) 国家或地区、genre_ids 内容类型等，只要TMDB API返回的字段中有就行
-    # 配置多项条件时，需要同时满足；不需要的匹配项可以删掉或者配置为空
+    # 配置多项条件时，需要同时满足；不需要的匹配项需要删掉，不可留空
     # 匹配值对应用,号分隔，这里是匹配语种
     original_language: 'zh,cn,bo,za'
   # 未配置任何过滤条件时，则按先后顺序不符合上面分类的都会在这个分类下，建议配置在最末尾

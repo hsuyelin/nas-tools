@@ -130,46 +130,63 @@ class Category:
         """
         return self.get_category(self._anime_categorys, tmdb_info)
 
-    @staticmethod
-    def get_category(categorys, tmdb_info):
+    def get_category_path(self, categorys, tmdb_info):
+        """
+        根据 TMDB信息与分类配置文件进行比较，确定所属分类
+        match_flag: 匹配规则，不匹配或者没有值的时候返回False 和空路径
+        path: 目录下没有其他条件的时候直接返回当前目录，有下级条件的时候，
+              匹配上则返回, 匹配不上则开始匹配下一个目录。
+        :param categorys: 分类配置
+        :param tmdb_info: TMDB信息
+        :return: match_flag, path 分类的名称
+        """
+        path = ""
+        match_flag = True
+        if not tmdb_info:
+            return False, ""
+        if not categorys:
+            return False, ""
+
+        for key, value in categorys.items():
+            if not value:
+                return match_flag, key
+
+            # 如果有多级分类，则继续查询下层分类规则
+            if isinstance(value, dict):
+                match_flag, path = self.get_category_path(value, tmdb_info)
+                if match_flag:
+                    return match_flag, os.path.join(key, path)
+                # 当前分类下已不匹配，查询下一个分类
+                continue
+
+            info_value = tmdb_info.get(key)
+            # 不匹配或者无值的时候返回失败
+            if not info_value:
+                return False, ""
+            elif key == "production_countries":
+                info_values = [str(val.get("iso_3166_1")).upper() for val in info_value]
+            else:
+                if isinstance(info_value, list):
+                    info_values = [str(val).upper() for val in info_value]
+                else:
+                    info_values = [str(info_value).upper()]
+
+            if value.find(",") != -1:
+                values = [str(val).upper() for val in value.split(",")]
+            else:
+                values = [str(value).upper()]
+
+            if not set(values).intersection(set(info_values)):
+                return False, ""
+
+        return match_flag, ""
+
+    def get_category(self, categorys, tmdb_info):
         """
         根据 TMDB信息与分类配置文件进行比较，确定所属分类
         :param categorys: 分类配置
         :param tmdb_info: TMDB信息
         :return: 分类的名称
         """
-        if not tmdb_info:
-            return ""
-        if not categorys:
-            return ""
-        for key, item in categorys.items():
-            if not item:
-                return key
-            if not isinstance(item, dict):
-                continue
-            match_flag = True
-            for attr, value in item.items():
-                if not value:
-                    continue
-                info_value = tmdb_info.get(attr)
-                if not info_value:
-                    match_flag = False
-                    continue
-                elif attr == "production_countries":
-                    info_values = [str(val.get("iso_3166_1")).upper() for val in info_value]
-                else:
-                    if isinstance(info_value, list):
-                        info_values = [str(val).upper() for val in info_value]
-                    else:
-                        info_values = [str(info_value).upper()]
-
-                if value.find(",") != -1:
-                    values = [str(val).upper() for val in value.split(",")]
-                else:
-                    values = [str(value).upper()]
-
-                if not set(values).intersection(set(info_values)):
-                    match_flag = False
-            if match_flag:
-                return key
-        return ""
+        match_flag, path = self.get_category_path(categorys, tmdb_info)
+        return path
