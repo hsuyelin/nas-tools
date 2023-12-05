@@ -165,6 +165,8 @@ class Category:
                 return False, ""
             elif key == "production_countries":
                 info_values = [str(val.get("iso_3166_1")).upper() for val in info_value]
+            elif key == "vote_average":
+                info_values = [str(int(info_value)).upper()]
             else:
                 if isinstance(info_value, list):
                     info_values = [str(val).upper() for val in info_value]
