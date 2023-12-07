@@ -106,7 +106,7 @@ class PikPak(_IDownloadClient):
 
     def add_torrent(self, content, download_dir=None, **kwargs):
         try:
-            task = asyncio.run(self._client.offline_download(content))
+            task = asyncio.run(self._client.offline_download(content, download_dir))
             taskId = task.get('task', {}).get('id')
             return taskId is not None and bool(taskId)
         except Exception as e:
