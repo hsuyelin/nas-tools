@@ -5,7 +5,7 @@ RUN apk add --no-cache --virtual .build-deps \
         musl-dev \
         libxml2-dev \
         libxslt-dev \
-    && apk add --no-cache $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/hsuyelin/nas-tools/master/package_list.txt)) \
+    && apk add --no-cache $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/linsmalldragon/nas-tools/master/package_list.txt)) \
     && curl https://rclone.org/install.sh | bash \
     && if [ "$(uname -m)" = "x86_64" ]; then ARCH=amd64; elif [ "$(uname -m)" = "aarch64" ]; then ARCH=arm64; fi \
     && curl https://dl.min.io/client/mc/release/linux-${ARCH}/mc --create-dirs -o /usr/bin/mc \
@@ -29,7 +29,7 @@ ENV S6_SERVICES_GRACETIME=30000 \
     NASTOOL_CN_UPDATE=true \
     NASTOOL_VERSION=master \
     PS1="\u@\h:\w \$ " \
-    REPO_URL="https://github.com/hsuyelin/nas-tools.git" \
+    REPO_URL="https://github.com/linsmalldragon/nas-tools.git" \
     PYPI_MIRROR="https://pypi.tuna.tsinghua.edu.cn/simple" \
     ALPINE_MIRROR="mirrors.ustc.edu.cn" \
     PUID=0 \
