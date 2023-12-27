@@ -354,7 +354,7 @@ class Jackett(_IPluginModule):
                         continue
                     # if enclosure is start with http, then try to download it as torrent file and convert it to magnet
                     if enclosure.startswith("http"):
-                        self.info(f"【{self.module_name}】开始下载种子文件并转换为磁力链接：{enclosure}")
+                        # self.info(f"【{self.module_name}】开始下载种子文件并转换为磁力链接：{enclosure}")
                         try:
                             torrent_file = RequestUtils(timeout=10).get_res(enclosure)
                             if torrent_file:
