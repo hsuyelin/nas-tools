@@ -199,10 +199,10 @@ class BuiltinIndexer(_IIndexClient):
         # 索引花费的时间
         seconds = round((datetime.datetime.now() - start_time).seconds, 1)
         # 索引统计
-        self.dbhelper.insert_indexer_statistics(indexer=indexer.name,
-                                                itype=self.client_id,
-                                                seconds=seconds,
-                                                result='N' if error_flag else 'Y')
+        # self.dbhelper.insert_indexer_statistics(indexer=indexer.name,
+        #                                         itype=self.client_id,
+        #                                         seconds=seconds,
+        #                                         result='N' if error_flag else 'Y')
         # 返回结果
         if len(result_array) == 0:
             log.warn(f"【{self.client_name}】{indexer.name} 未搜索到数据")
@@ -257,10 +257,10 @@ class BuiltinIndexer(_IIndexClient):
         seconds = round((datetime.datetime.now() - start_time).seconds, 1)
 
         # 索引统计
-        self.dbhelper.insert_indexer_statistics(indexer=indexer.name,
-                                                itype=self.client_id,
-                                                seconds=seconds,
-                                                result='N' if error_flag else 'Y')
+        # self.dbhelper.insert_indexer_statistics(indexer=indexer.name,
+        #                                         itype=self.client_id,
+        #                                         seconds=seconds,
+        #                                         result='N' if error_flag else 'Y')
         return result_array
 
     @staticmethod
