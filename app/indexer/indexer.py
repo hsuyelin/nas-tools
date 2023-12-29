@@ -156,16 +156,20 @@ class Indexer(object):
             return []
         # 计算耗时
         start_time = datetime.datetime.now()
+        max_workers = len(indexers)
+        #最大4线程
+        if max_workers>4:
+            max_workers=4
         if filter_args and filter_args.get("site"):
             log.info(f"【{self._client_type.value}】开始搜索 %s，站点：%s ..." % (key_word, filter_args.get("site")))
             self.progress.update(ptype=ProgressKey.Search,
                                  text="开始搜索 %s，站点：%s ..." % (key_word, filter_args.get("site")))
         else:
-            log.info(f"【{self._client_type.value}】开始并行搜索 %s，线程数：%s ..." % (key_word, len(indexers)))
+            log.info(f"【{self._client_type.value}】开始并行搜索 %s，线程数：%s ..." % (key_word, max_workers))
             self.progress.update(ptype=ProgressKey.Search,
-                                 text="开始并行搜索 %s，线程数：%s ..." % (key_word, len(indexers)))
+                                 text="开始并行搜索 %s，线程数：%s ..." % (key_word, max_workers))
         # 多线程
-        executor = ThreadPoolExecutor(max_workers=len(indexers))
+        executor = ThreadPoolExecutor(max_workers=max_workers)
         all_task = []
         for index in indexers:
             order_seq = 100 - int(index.pri)

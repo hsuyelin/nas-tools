@@ -41,7 +41,7 @@ class Scheduler:
         """
         self.SCHEDULER = BackgroundScheduler(timezone=Config().get_timezone(),
                                              executors={
-                                                 'default': ThreadPoolExecutor(20)
+                                                 'default': ThreadPoolExecutor(4)
                                              })
         if not self.SCHEDULER:
             return
