@@ -137,6 +137,8 @@ class EventType(Enum):
     PluginReload = "plugin.reload"
     # 豆瓣想看同步
     DoubanSync = "douban.sync"
+    # 馒头助手
+    MTeamHelper = "mteamhelper.start"
     # 辅种任务开始
     AutoSeedStart = "autoseed.start"
     # 刷新媒体库

@@ -196,6 +196,9 @@ class Sites:
             return 0
         return max([int(site.get("pri")) for site in self._siteByIds.values()])
 
+    def get_all_site(self):
+        return list(self._siteByIds.values())
+
     def get_site_dict(self,
                       rss=False,
                       brush=False,
@@ -391,7 +394,7 @@ class Sites:
         site_url = StringUtils.get_base_url(site_info.get("signurl") or site_info.get("rssurl"))
         if not site_url:
             return False, None
-        
+
         if "hhanclub" in site_url:
             hhanclub_pattern = r'<a href="claim\.php\?uid=(\d+)">'
             return True, hhanclub_pattern
