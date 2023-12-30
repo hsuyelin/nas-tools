@@ -1,11 +1,11 @@
 # NAS媒体库管理工具
 
-[![GitHub stars](https://img.shields.io/github/stars/hsuyelin/nas-tools?style=plastic)](https://github.com/hsuyelin/nas-tools/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/hsuyelin/nas-tools?style=plastic)](https://github.com/hsuyelin/nas-tools/network/members)
-[![GitHub issues](https://img.shields.io/github/issues/hsuyelin/nas-tools?style=plastic)](https://github.com/hsuyelin/nas-tools/issues)
-[![GitHub license](https://img.shields.io/github/license/hsuyelin/nas-tools?style=plastic)](https://github.com/hsuyelin/nas-tools/blob/master/LICENSE.md)
-[![Docker pulls](https://img.shields.io/docker/pulls/hsuyelin/nas-tools?style=plastic)](https://hub.docker.com/r/hsuyelin/nas-tools)
-[![Platform](https://img.shields.io/badge/platform-amd64/arm64-pink?style=plastic)](https://hub.docker.com/r/hsuyelin/nas-tools)
+[![GitHub stars](https://img.shields.io/github/stars/linsmalldragon/nas-tools?style=plastic)](https://github.com/linsmalldragon/nas-tools/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/linsmalldragon/nas-tools?style=plastic)](https://github.com/linsmalldragon/nas-tools/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/linsmalldragon/nas-tools?style=plastic)](https://github.com/linsmalldragon/nas-tools/issues)
+[![GitHub license](https://img.shields.io/github/license/linsmalldragon/nas-tools?style=plastic)](https://github.com/linsmalldragon/nas-tools/blob/master/LICENSE.md)
+[![Docker pulls](https://img.shields.io/docker/pulls/linsmalldragon/nas-tools?style=plastic)](https://hub.docker.com/r/88277648/nas-tools)
+[![Platform](https://img.shields.io/badge/platform-amd64/arm64-pink?style=plastic)](https://hub.docker.com/r/88277648/nas-tools)
 
 ## 维护声明
 
@@ -19,7 +19,7 @@
 
 基于官方 3.2.3 版本
 
-[开发路线](https://github.com/hsuyelin/nas-tools/discussions/91)
+[开发路线](https://github.com/linsmalldragon/nas-tools/discussions/91)
 
 - [x] 支持Aria2/115/PikPak下载器
 - [x] 支持chromedriver114版本以上的谷歌浏览器
@@ -32,21 +32,21 @@
 - [x] 修复官方原版豆瓣同步方式近期动态与全量同步失效
 - [x] 修复官方原版高清空间签到cookies错误
 - [x] 持续更新索引站点
-- [x] 更多功能请查阅 [版本发布](https://github.com/hsuyelin/nas-tools/releases)  更新日志 
+- [x] 更多功能请查阅 [版本发布](https://github.com/linsmalldragon/nas-tools/releases)  更新日志 
 
 ## 安装
 ### 1、Docker
 ```
-docker pull hsuyelin/nas-tools:latest
+docker pull linsmalldragon/nas-tools:latest
 ```
-教程见 [这里](https://raw.githubusercontent.com/hsuyelin/nas-tools/master/docker/readme.md) 。
+教程见 [这里](https://raw.githubusercontent.com/linsmalldragon/nas-tools/master/docker/readme.md) 。
 
 如无法连接Github，注意不要开启自动更新开关(NASTOOL_AUTO_UPDATE=false)，将NASTOOL_CN_UPDATE设置为true可使用国内源加速安装依赖。
 
 ### 2、本地运行
 仅支持python3.10版本，需要预安装cython（python3 -m pip install Cython），如发现缺少依赖包需额外安装：
 ```
-git clone -b master https://github.com/hsuyelin/nas-tools --recurse-submodule 
+git clone -b master https://github.com/linsmalldragon/nas-tools --recurse-submodule 
 python3 -m pip install --force-reinstall -r requirements.txt
 export NASTOOL_CONFIG="/xxx/config/config.yaml"
 nohup python3 run.py & 

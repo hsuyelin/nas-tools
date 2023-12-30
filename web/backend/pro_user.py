@@ -308,8 +308,8 @@ class ProUser(UserMixin):
             recovery_msg = """
 ----------------------------------------------------------------------------------------------------------
 请检查是否曾经修改了 user.sites.bin 文件 (user.sites.bin 与官方或者其他版本不统一，不能相互覆盖)，请按照下面的方式尝试恢复:
-1. 如果曾经修改: 请去 https://raw.githubusercontent.com/hsuyelin/nas-tools-sites/master/user.sites.bin 下载后还原
-2. 如果从未修改: 请去 https://github.com/hsuyelin/nas-tools/issues 创建issue，并附上报错信息
+1. 如果曾经修改: 请去 https://raw.githubusercontent.com/linsmalldragon/nas-tools-sites/master/user.sites.bin 下载后还原
+2. 如果从未修改: 请去 https://github.com/linsmalldragon/nas-tools/issues 创建issue，并附上报错信息
 ----------------------------------------------------------------------------------------------------------
             """
             log.info(f"【User】\n{recovery_msg}")

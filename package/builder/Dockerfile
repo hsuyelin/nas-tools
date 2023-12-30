@@ -7,7 +7,7 @@ ENV py_site_packages=/usr/local/lib/python3.10/site-packages
 
 RUN python -m pip install --upgrade pip setuptools
 RUN pip install wheel cython pyinstaller==5.7.0
-RUN git clone --depth=1 -b ${branch} https://github.com/hsuyelin/nas-tools --recurse-submodule /nas-tools
+RUN git clone --depth=1 -b ${branch} https://github.com/linsmalldragon/nas-tools --recurse-submodule /nas-tools
 WORKDIR /nas-tools
 RUN pip install -r package/requirements.txt
 RUN pip install pyparsing

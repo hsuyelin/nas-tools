@@ -12,7 +12,7 @@ RUN apk add --no-cache --virtual .build-deps \
     && chmod +x /usr/bin/mc \
     && pip install --upgrade pip setuptools wheel \
     && pip install cython \
-    && pip install -r https://raw.githubusercontent.com/hsuyelin/nas-tools/master/requirements.txt \
+    && pip install -r https://raw.githubusercontent.com/linsmalldragon/nas-tools/master/requirements.txt \
     && apk del --purge .build-deps \
     && rm -rf /tmp/* /root/.cache /var/cache/apk/*
 ENV S6_SERVICES_GRACETIME=30000 \

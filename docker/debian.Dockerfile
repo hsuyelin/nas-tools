@@ -4,7 +4,7 @@ RUN set -xe && \
     export DEBIAN_FRONTEND="noninteractive" && \
     apt-get update -y && \
     apt-get install -y wget bash && \
-    apt-get install -y $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/hsuyelin/nas-tools/master/package_list_debian.txt)) && \
+    apt-get install -y $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/linsmalldragon/nas-tools/master/package_list_debian.txt)) && \
     ln -sf /command/with-contenv /usr/bin/with-contenv && \
     # zone time
     ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -29,7 +29,7 @@ RUN set -xe && \
     # Pip requirements
     pip install --upgrade pip setuptools wheel && \
     pip install cython && \
-    pip install -r https://raw.githubusercontent.com/hsuyelin/nas-tools/master/requirements.txt && \
+    pip install -r https://raw.githubusercontent.com/linsmalldragon/nas-tools/master/requirements.txt && \
     # Clear
     apt-get remove -y build-essential && \
     apt-get autoremove -y && \
@@ -51,7 +51,7 @@ ENV S6_SERVICES_GRACETIME=30000 \
     NASTOOL_AUTO_UPDATE=false \
     NASTOOL_CN_UPDATE=true \
     NASTOOL_VERSION=master \
-    REPO_URL="https://github.com/hsuyelin/nas-tools.git" \
+    REPO_URL="https://github.com/linsmalldragon/nas-tools.git" \
     PYPI_MIRROR="https://pypi.tuna.tsinghua.edu.cn/simple" \
     PUID=0 \
     PGID=0 \
