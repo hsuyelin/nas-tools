@@ -23,6 +23,7 @@ jobs:
   alpine:
     runs-on: ubuntu-latest
     name: Build Docker Image (Alpine)
+    environment: dockerHub
     steps:
       -
         name: Checkout
@@ -76,6 +77,7 @@ jobs:
   debian:
     runs-on: ubuntu-latest
     name: Build Docker Image (Debian)
+    environment: dockerHub
     steps:
       -
         name: Checkout
