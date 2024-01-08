@@ -35,6 +35,7 @@ ENV S6_SERVICES_GRACETIME=30000 \
     PUID=0 \
     PGID=0 \
     UMASK=000 \
+    PYTHONWARNINGS="ignore:semaphore_tracker:UserWarning" \
     WORKDIR="/nas-tools"
 WORKDIR ${WORKDIR}
 RUN mkdir ${HOME} \

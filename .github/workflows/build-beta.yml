@@ -10,14 +10,6 @@ on:
         description: 'docker user password'
         required: true
         default: ''
-    branches:
-      - beta
-    paths:
-      - version.py
-      - .github/workflows/build-beta.yml
-      - package_list.txt
-      - requirements.txt
-      - docker/beta.Dockerfile
 
 jobs:
   alpine:

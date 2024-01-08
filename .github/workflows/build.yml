@@ -10,14 +10,6 @@ on:
         description: 'docker user password'
         required: true
         default: ''
-    branches:
-      - master
-    paths:
-      - version.py
-      - .github/workflows/build.yml
-      - package_list.txt
-      - requirements.txt
-      - docker/Dockerfile
 
 jobs:
   alpine:
