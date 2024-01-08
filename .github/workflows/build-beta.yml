@@ -17,12 +17,12 @@ on:
       - .github/workflows/build-beta.yml
       - package_list.txt
       - requirements.txt
-      - docker/Dockerfile
+      - docker/beta.Dockerfile
 
 jobs:
   alpine:
     runs-on: ubuntu-latest
-    name: Build Docker Image (Alpine)
+    name: Build Docker Beta Image (Alpine)
     steps:
       -
         name: Checkout
@@ -33,7 +33,7 @@ jobs:
         id: release_version
         run: |
           app_version=$(cat version.py |sed -ne "s/APP_VERSION\s=\s'v\(.*\)'/\1/gp")
-          echo "app_version=${app_version}" >> $GITHUB_ENV
+          echo "app_version=${app_version}-beta" >> $GITHUB_ENV
 
       - name: Docker metadata
         id: meta
@@ -43,7 +43,7 @@ jobs:
             ${{ github.event.inputs.docker_username }}/nas-tools
           tags: |
             type=raw,value=${{ env.app_version }}
-            type=raw,value=latest
+            type=raw,value=beta
 
       -
         name: Set Up QEMU
@@ -65,7 +65,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: docker
-          file: docker/Dockerfile
+          file: docker/beta.Dockerfile
           platforms: |
             linux/amd64
             linux/arm64
@@ -75,7 +75,7 @@ jobs:
 
   debian:
     runs-on: ubuntu-latest
-    name: Build Docker Image (Debian)
+    name: Build Docker Beta Image (Debian)
     steps:
       -
         name: Checkout
@@ -86,7 +86,7 @@ jobs:
         id: release_version
         run: |
           app_version=$(cat version.py |sed -ne "s/APP_VERSION\s=\s'v\(.*\)'/\1/gp")
-          echo "app_version=${app_version}-debian" >> $GITHUB_ENV
+          echo "app_version=${app_version}-debian-beta" >> $GITHUB_ENV
 
       - name: Docker metadata
         id: meta
@@ -96,7 +96,7 @@ jobs:
             ${{ github.event.inputs.docker_username }}/nas-tools
           tags: |
             type=raw,value=${{ env.app_version }}
-            type=raw,value=debian
+            type=raw,value=debian-beta
 
       -
         name: Set Up QEMU
@@ -118,7 +118,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: docker
-          file: docker/debian.Dockerfile
+          file: docker/debian-beta.Dockerfile
           platforms: |
             linux/amd64
             linux/arm64
