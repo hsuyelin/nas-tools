@@ -10,7 +10,6 @@ on:
         description: 'docker user password'
         required: true
         default: ''
-  push:
     branches:
       - beta
     paths:
