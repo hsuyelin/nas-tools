@@ -2316,7 +2316,7 @@ class Media:
             return ""
         if not tv_id or not season_id or not episode_id:
             return ""
-        res = self.episode.images(tv_id, season_id, episode_id)
+        res = self.episode.images(tv_id, season_id, episode_id,'zh,null')
         if res:
             if orginal:
                 return Config().get_tmdbimage_url(res[-1].get("file_path"), prefix="original")
