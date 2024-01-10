@@ -655,7 +655,7 @@ class Scraper:
                 # episode thumb
                 if scraper_tv_pic.get("episode_thumb"):
                     episode_thumb = os.path.join(dir_path, file_name + "-thumb.jpg")
-                     if not force_pic \
+                    if not force_pic \
                             and not os.path.exists(episode_thumb):
                         # 优先从TMDB查询
                         episode_image = self.media.get_episode_images(tv_id=media.tmdb_id,
