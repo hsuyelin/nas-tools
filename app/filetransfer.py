@@ -1244,6 +1244,7 @@ class FileTransfer:
         episode_title = self.media.get_episode_title(media)
         # 英文标题
         en_title = self.media.get_tmdb_en_title(media)
+        decade = (int(media.year) // 10) * 10
         media_format_dict = {
             "title": StringUtils.clear_file_name(media.title),
             "en_title": StringUtils.clear_file_name(en_title),
@@ -1252,6 +1253,8 @@ class FileTransfer:
             "original_title": StringUtils.clear_file_name(media.original_title),
             "name": StringUtils.clear_file_name(media.get_name()),
             "year": media.year,
+            "decade_short": "%ds" % (decade),
+            "decade_long": "%d-%d" % (decade, decade + 9),
             "edition": media.get_edtion_string() or None,
             "videoFormat": media.resource_pix,
             "releaseGroup": media.resource_team,
@@ -1261,6 +1264,9 @@ class FileTransfer:
             "audioCodec": media.audio_encode,
             "tmdbid": media.tmdb_id,
             "imdbid": media.imdb_id,
+            "rating": media.vote_average,
+            "rating_short": int(media.vote_average),
+            "rating_long": "%d-%d" % (int(media.vote_average), int(media.vote_average) + 1),
             "season": media.get_season_seq(),
             "episode": media.get_episode_seqs(),
             "episode_title": StringUtils.clear_file_name(episode_title),
