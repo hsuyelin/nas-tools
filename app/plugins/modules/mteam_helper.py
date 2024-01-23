@@ -54,6 +54,7 @@ class MTeamHelper(_IPluginModule):
     _torrent_size = None
     _category = None
     _enable_message = False
+    _download_free = False
 
     baseUrl = "https://plus.92coco.cn:8443/api/%s"
 
@@ -69,6 +70,7 @@ class MTeamHelper(_IPluginModule):
             self._torrent_quantity = config.get("torrent_quantity")
             self._category = config.get("category")
             self._enable_message = config.get("enable_message")
+            self._download_free = config.get("download_free")
 
         # 停止现有任务
         self.stop_service()
@@ -98,13 +100,14 @@ class MTeamHelper(_IPluginModule):
                     "torrent_quantity": self._torrent_quantity,
                     "torrent_size": self._torrent_size,
                     "category": self._category,
-                    "enable_message": self._enable_message
+                    "enable_message": self._enable_message,
+                    "download_free": self._download_free
                 })
-            if self._enable_message:
-                self.send_message(title="【MTeamHelper 大包提醒】",
-                                  text="欢迎使用MTeamHelper，您已开启成功开启本插件的消息通知功能。",
-                                  image="https://pic.imgdb.cn/item/65aff27d871b83018a331f75.png"
-                                  )
+            # if self._enable_message:
+            #     self.send_message(title="【MTeamHelper 大包提醒】",
+            #                       text="欢迎使用MTeamHelper，您已开启成功开启本插件的消息通知功能。",
+            #                       image="https://pic.imgdb.cn/item/65aff27d871b83018a331f75.png"
+            #                       )
             if self._scheduler.get_jobs():
                 # 启动服务
                 self._scheduler.print_jobs()
@@ -171,6 +174,13 @@ class MTeamHelper(_IPluginModule):
                             'tooltip': '当监控到更新后自动下载，遵循站点管理 - 刷流任务的配置项，支持自动删种。',
                             'type': 'switch',
                             'id': 'autodownload',
+                        },
+                        {
+                            'title': '下载免费',
+                            'required': "",
+                            'tooltip': '当监控到更新后下载只下载免费类型，遵循站点管理 - 刷流任务的配置项，支持自动删种。',
+                            'type': 'switch',
+                            'id': 'download_free',
                         },
                     ],
                     [
@@ -322,7 +332,12 @@ class MTeamHelper(_IPluginModule):
             if not brushtask_info:
                 return
             if brushtask_info.get("id", None):
-                BrushTask().check_task_rss(brushtask_info.get("id", None), other_task=rows, task_info=brushtask_info)
+                try:
+                    brushtask_info['free'] = brushtask_info['free'] if self._download_free else "FREE"
+                    BrushTask().check_task_rss(brushtask_info.get("id", None), other_task=rows,
+                                               task_info=brushtask_info)
+                except Exception as e:
+                    self.error(f"刷流时出现异常：" + e)
 
     def get_brushtask_info(self):
         sites = Sites().get_all_site()
