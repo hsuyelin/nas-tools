@@ -12,6 +12,7 @@ from app.message import Message
 from app.plugins import EventHandler
 from app.plugins.modules._base import _IPluginModule
 from app.sites import Sites
+from app.utils import StringUtils
 from app.utils.types import EventType
 from config import Config
 
@@ -24,7 +25,7 @@ class MTeamHelper(_IPluginModule):
     # 插件描述
     module_desc = "监控馒头大包，自动添加订阅下载。"
     # 插件图标
-    module_icon = "mteamhelper.png"
+    module_icon = "mteamhelper.jpg"
     # 主题色
     module_color = "#05C711"
     # 插件版本
@@ -53,7 +54,8 @@ class MTeamHelper(_IPluginModule):
     _torrent_size = None
     _category = None
     _enable_message = False
-    _MTeam_info = {}
+
+    baseUrl = "https://plus.92coco.cn:8443/api/%s"
 
     def init_config(self, config: dict = None):
         self.debug(f"初始化配置")
@@ -98,6 +100,11 @@ class MTeamHelper(_IPluginModule):
                     "category": self._category,
                     "enable_message": self._enable_message
                 })
+            if self._enable_message:
+                self.send_message(title="【MTeamHelper 大包提醒】",
+                                  text="欢迎使用MTeamHelper，您已开启成功开启本插件的消息通知功能。",
+                                  image="https://pic.imgdb.cn/item/65aff27d871b83018a331f75.png"
+                                  )
             if self._scheduler.get_jobs():
                 # 启动服务
                 self._scheduler.print_jobs()
@@ -105,6 +112,25 @@ class MTeamHelper(_IPluginModule):
 
     def get_state(self):
         return self._enable
+
+    def get_notice(self):
+        """
+        获取公告
+        开启消息通知后才运行，且条公告每次最多被消费1次
+        """
+        url = self.baseUrl % "/system/notice/get"
+        resp_json = requests.get(url=url).json()
+        data = resp_json.get("data", None)
+        if data is None:
+            return {}
+        data_md5 = StringUtils.md5_hash(data)
+        notice_md5 = self.get_history("notice_md5")
+
+        if not notice_md5 or not data_md5.__eq__(notice_md5):
+            self.__update_history("notice_md5", data_md5)
+            return data
+
+        return {}
 
     @staticmethod
     def get_fields():
@@ -156,7 +182,7 @@ class MTeamHelper(_IPluginModule):
                             'content': [
                                 {
                                     'id': 'torrent_size',
-                                    'placeholder': '500,2000',
+                                    'placeholder': '100,2000',
                                 }
                             ]
                         },
@@ -174,6 +200,11 @@ class MTeamHelper(_IPluginModule):
                                         '3': '3',
                                         '4': '4',
                                         '5': '5',
+                                        '10': '10',
+                                        '15': '15',
+                                        '30': '30',
+                                        '60': '60',
+                                        '120': '120',
                                     },
                                     'default': '3',
                                 }
@@ -213,8 +244,11 @@ class MTeamHelper(_IPluginModule):
         }
 
     def get_mteam_all_torrent(self):
+        """
+        获取所有最新种子信息
+        """
         self.debug(f"加载全部馒头种子")
-        res = requests.post(url="https://plus.92coco.cn:8443/api/torrent/getAllMTeamTop")
+        res = requests.post(url=self.baseUrl % "/torrent/getAllMTeamTop")
         if res is None or res.status_code != 200:
             self.error(f"获取馒头置顶种子失败，请检查网络链接！")
         json_result = res.json()
@@ -231,8 +265,11 @@ class MTeamHelper(_IPluginModule):
 
     @EventHandler.register(EventType.MTeamHelper)
     def get_latest_torrents(self):
+        """
+        传入当前的md5种子信息，服务器自动对比信息，返回差集
+        """
         self.debug(f"获取馒头最新种子状况")
-        url = "https://plus.92coco.cn:8443/api/torrent/filterMTeamTop"
+        url = self.baseUrl % "/torrent/filterMTeamTop"
         if isinstance(self._torrent_size, str):
             temp_size = str(self._torrent_size).split(",")
         data = {
@@ -241,6 +278,7 @@ class MTeamHelper(_IPluginModule):
             "max": temp_size[1] + "GB" if temp_size == 2 else None,
             "md5": self.get_history("torrents_md5")
         }
+        data = {key: value for key, value in data.items() if value is not None}
         try:
             res = requests.post(url=url, json=data)
             resp_json = res.json()['data']
@@ -248,7 +286,7 @@ class MTeamHelper(_IPluginModule):
             total = resp_json['total']
             md5s = resp_json['md5s']
         except:
-            self.error(f"获取最新种子时出现异常。")
+            self.error(f"获取最新种子时出现异常，请确认参数是否填写异常。")
             return
         if total == 0:
             self.info(f"暂未获取到最新置顶种子")
@@ -261,21 +299,30 @@ class MTeamHelper(_IPluginModule):
 
         if self._enable_message:
             msg_title = f"【MTeamHelper 大包提醒】"
-            msg_text = f"共获取到{total}个新增\n"
+            msg_text = (f"共获取到{total}个新增\n")
+            notice = self.get_notice()
+            if notice:
+                msg_text += ("------------------\n"
+                             f"「新」{notice.get('noticeTitle')}"
+                             f"详情：\n"
+                             f"{notice.get('noticeContent')}\n")
             for one in rows:
-                msg_text += "--------------\n" \
+                msg_text += "------------------\n" \
                             f"类型:{one['type']}\n" \
                             f"主标题:{one['mainTitle']}\n" \
                             f"副标题:{one['subTitle']}\n" \
                             f"标签:{one['tag']}  大小:{one['readableSize']}\n" \
                             f"剩余免费时间:{one['remainingFreeTime']}\n" \
                             f"发布时间:{one['pubDate']}\n" \
-                            f"做种数:{one['seederCount']} | 下载数:{one['downloaderCount']} | 完成数:{one['completedCount']}"
+                            f"做种数:{one['seederCount']} | 下载数:{one['downloaderCount']} | 完成数:{one['completedCount']}\n"
             self.send_message(msg_title, msg_text, rows[0]['imgHref'])
         if self._autodownload:
             self.info(f"已开启自动下载，开始执行下载任务")
-            if self.get_brushtask_info()['id']:
-                BrushTask().check_task_rss(self.get_brushtask_info()['id'], other_task=rows)
+            brushtask_info = self.get_brushtask_info()
+            if not brushtask_info:
+                return
+            if brushtask_info.get("id", None):
+                BrushTask().check_task_rss(brushtask_info.get("id", None), other_task=rows, task_info=brushtask_info)
 
     def get_brushtask_info(self):
         sites = Sites().get_all_site()

@@ -148,7 +148,7 @@ class BrushTask(object):
         else:
             return self._brush_tasks if isinstance(self._brush_tasks, dict) else {}
 
-    def check_task_rss(self, taskid, other_task: list = []):
+    def check_task_rss(self, taskid, other_task: list = [], task_info: dict = {}):
         """
         检查RSS并添加下载，由定时服务调用
         :param taskid: 刷流任务的ID
@@ -157,15 +157,18 @@ class BrushTask(object):
             return
 
         enable_other_task = True if len(other_task) > 0 else False
-        # 任务信息
-        taskinfo = self.get_brushtask_info(taskid)
+        if enable_other_task:
+            # 任务信息
+            taskinfo = self.get_brushtask_info(taskid)
+        else:
+            taskinfo = task_info
         if not taskinfo:
             return
         # 任务属性
         task_name = taskinfo.get("name")
         site_id = taskinfo.get("site_id")
         rss_url = taskinfo.get("rss_url")
-        rss_rule = taskinfo.get("rss_rule") if not enable_other_task else {"free": "FREE"}
+        rss_rule = taskinfo.get("rss_rule")
         cookie = taskinfo.get("cookie")
         rss_free = taskinfo.get("free")
         downloader_id = taskinfo.get("downloader")
