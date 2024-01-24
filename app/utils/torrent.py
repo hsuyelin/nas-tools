@@ -207,7 +207,7 @@ class Torrent:
             file_name = unquote(url.split("/")[-1])
         else:
             file_name = str(datetime.datetime.now())
-        return file_name
+        return file_name.replace('/', '')
 
     @staticmethod
     def get_intersection_episodes(target, source, title):
