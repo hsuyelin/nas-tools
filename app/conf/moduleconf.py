@@ -68,6 +68,13 @@ class ModuleConf(object):
                         "tooltip": "接受消息通知的用户、群组或频道Chat ID，关注@getidsbot获取",
                         "type": "text"
                     },
+                    "thread_id": {
+                        "id": "telegram_thread_id",
+                        "required": False,
+                        "title": "Message Thread ID",
+                        "tooltip": "接受消息通知的群组话题 ID，https://api.telegram.org/bot${BOT_TOKEN}/getUpdates 获取",
+                        "type": "text"
+                    },
                     "user_ids": {
                         "id": "telegram_user_ids",
                         "required": False,
