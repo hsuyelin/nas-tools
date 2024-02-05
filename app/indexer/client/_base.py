@@ -122,7 +122,7 @@ class _IIndexClient(metaclass=ABCMeta):
                                 match_media.original_title in torrent_name or \
                                 match_media.org_string in description or \
                                 match_media.original_title in description
-                    year_match = match_media.year in torrent_name or \
+                    year_match = (not match_media.year) or match_media.year in torrent_name or \
                                  match_media.year in description
                 if (imdbid_match or name_match) and year_match and self.recognize_enhance_enable:
                     meta_info = MetaInfo(title=torrent_name,
