@@ -559,6 +559,9 @@ class WebAction:
         dl_setting = data.get("setting")
         results = Searcher().get_search_result_by_id(dl_id)
         for res in results:
+            dl_enclosure = res.ENCLOSURE if Sites().get_sites_by_url_domain(res.ENCLOSURE) else Torrent.format_enclosure(res.ENCLOSURE)
+            if not dl_enclosure:
+                continue
             media = Media().get_media_info(title=res.TORRENT_NAME, subtitle=res.DESCRIPTION)
             if not media:
                 continue
@@ -599,7 +602,7 @@ class WebAction:
             return {"code": -1, "msg": "种子信息有误"}
         media = Media().get_media_info(title=title, subtitle=description)
         media.site = site
-        media.enclosure = enclosure
+        media.enclosure = enclosure if Sites().get_sites_by_url_domain(enclosure) else Torrent.format_enclosure(enclosure)
         media.page_url = page_url
         media.size = size
         media.upload_volume_factor = float(uploadvolumefactor)
