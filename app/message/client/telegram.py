@@ -6,7 +6,7 @@ import requests
 import log
 from app.helper import ThreadHelper
 from app.message.client._base import _IMessageClient
-from app.utils import RequestUtils, ExceptionUtils
+from app.utils import RequestUtils, ExceptionUtils, StringUtils
 from config import Config
 
 lock = Lock()
@@ -200,7 +200,10 @@ class Telegram(_IMessageClient):
         if image:
             # 发送图文消息
             values = {"chat_id": chat_id, "photo": image, "caption": caption,
-                      "parse_mode": "Markdown", "message_thread_id": thread_id}
+                      "parse_mode": "Markdown"}
+            if StringUtils.is_string_and_not_empty(thread_id):
+                values.update({"message_thread_id": thread_id})
+
             sc_url = "%s/bot%s/sendPhoto?" % (self._telegram_domain,
                                               self._telegram_token)
             res = RequestUtils(proxies=proxies).get_res(
@@ -214,8 +217,9 @@ class Telegram(_IMessageClient):
                     sc_url = "%s/bot%s/sendPhoto" % (
                         self._telegram_domain, self._telegram_token)
                     data = {"chat_id": chat_id, "caption": caption,
-                            "parse_mode": "Markdown",
-                            "message_thread_id": thread_id}
+                            "parse_mode": "Markdown"}
+                    if StringUtils.is_string_and_not_empty(thread_id):
+                        data.update({"message_thread_id": thread_id})
                     files = {"photo": photo_req.content}
                     res = requests.post(
                         sc_url, proxies=proxies, data=data, files=files)
@@ -224,7 +228,9 @@ class Telegram(_IMessageClient):
                         return flag, msg
         # 发送文本消息
         values = {"chat_id": chat_id, "text": caption,
-                  "parse_mode": "Markdown", "message_thread_id": thread_id}
+                  "parse_mode": "Markdown"}
+        if StringUtils.is_string_and_not_empty(thread_id):
+            values.update({"message_thread_id": thread_id})
         sc_url = "%s/bot%s/sendMessage?" % (
             self._telegram_domain, self._telegram_token)
         res = RequestUtils(proxies=proxies).get_res(
