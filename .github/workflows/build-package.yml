@@ -6,12 +6,6 @@ on:
         description: 'github token'
         required: true
         default: ''
-    branches:
-      - master
-    paths:
-      - version.py
-      - .github/workflows/build-package.yml
-      - package/requirements.txt
 
 jobs:
   Windows-build:

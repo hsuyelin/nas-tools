@@ -1,9 +1,11 @@
+from app.media.tmdbv3api.as_obj import AsObj
 from app.media.tmdbv3api.tmdb import TMDb
-
+from app.utils import StringUtils
 
 class Episode(TMDb):
     _urls = {
-        "images": "/tv/%s/season/%s/episode/%s/images"
+        "images": "/tv/%s/season/%s/episode/%s/images",
+        "details": "/tv/%s/season/%s/episode/%s"
     }
 
     def images(self, tv_id, season_num, episode_num, include_image_language=None):
@@ -15,10 +17,25 @@ class Episode(TMDb):
         :param include_image_language: str
         :return:
         """
-        return self._get_obj(
-            self._call(
-                self._urls["images"] % (tv_id, season_num, episode_num),
-                "include_image_language=%s" % include_image_language if include_image_language else "",
-            ),
-            "stills"
-        )
+        try:
+            images = AsObj(
+                **self._call(
+                    self._urls["details"] % (tv_id, season_num, episode_num),
+                    "language=%s" % include_image_language if include_image_language else "" + "&append_to_response=images"
+                )
+            )
+            if not images:
+                return None
+            still_path = images.get("still_path")
+            if isinstance(still_path, str):
+                return [{"file_path": still_path}]
+            elif isinstance(still_path, list):
+                return [
+                    {"file_path": str(file_path)}
+                    for file_path in images
+                    if StringUtils.is_string_and_not_empty(file_path)
+                ]
+            else:
+                return None
+        except Exception as e:
+            return None
