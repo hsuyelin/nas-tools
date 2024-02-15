@@ -448,6 +448,22 @@
                     </div>
                     <div class="col-lg-4">
                         <div class="mb-3">
+                            <label class="form-label">当前站点下载任务数 <span class="form-help"
+                                                                           title="当前站点下载任务数超过此值时不再添加下载，为站点或刷流任务添加标签后生效"
+                                                                           data-bs-toggle="tooltip">?</span></label>
+                            <input type="text" id="brushtask_current_site_dlcount" class="form-control" placeholder="5">
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="mb-3">
+                            <label class="form-label">当前站点任务总数 <span class="form-help"
+                                                                           title="当前站点任务总数超过此值时不再添加下载，为站点或刷流任务添加标签后生效"
+                                                                           data-bs-toggle="tooltip">?</span></label>
+                            <input type="text" id="brushtask_current_site_count" class="form-control" placeholder="10">
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="mb-3">
                             <label class="form-label">包含 <span class="form-help"
                                                                  title="种子名称或副标题中包括对应关键字或者匹配正则式时才会下载"
                                                                  data-bs-toggle="tooltip">?</span></label>
@@ -819,6 +835,8 @@
           $("#brushtask_sendmessage").prop("checked", false);
         }
         $("#brushtask_dlcount").val(ret.task.rss_rule.dlcount)
+        $("#brushtask_current_site_count").val(ret.task.rss_rule.current_site_count)
+        $("#brushtask_current_site_dlcount").val(ret.task.rss_rule.current_site_dlcount)
         $("#brushtask_peercount").val(ret.task.rss_rule.peercount)
         $("#brushtask_include").val(ret.task.rss_rule.include);
         $("#brushtask_exclude").val(ret.task.rss_rule.exclude);
@@ -1025,6 +1043,22 @@
     } else {
       $("#brushtask_dlcount").removeClass("is-invalid");
     }
+    //当前站点任务总数
+    let brushtask_current_site_count = $("#brushtask_current_site_count").val();
+    if (brushtask_current_site_count && isNaN(brushtask_current_site_count)) {
+      $("#brushtask_current_site_count").addClass("is-invalid");
+      return;
+    } else {
+      $("#brushtask_current_site_count").removeClass("is-invalid");
+    }
+    //当前站点任务下载数
+    let brushtask_current_site_dlcount = $("#brushtask_current_site_dlcount").val();
+    if (brushtask_current_site_dlcount && isNaN(brushtask_current_site_dlcount)) {
+      $("#brushtask_current_site_dlcount").addClass("is-invalid");
+      return;
+    } else {
+      $("#brushtask_current_site_dlcount").removeClass("is-invalid");
+    }
     //上传限速
     let brushtask_upspeed = $("#brushtask_upspeed").val();
     if (brushtask_upspeed && isNaN(brushtask_upspeed)) {
@@ -1174,6 +1208,8 @@
       brushtask_include: brushtask_include,
       brushtask_exclude: brushtask_exclude,
       brushtask_dlcount: brushtask_dlcount,
+      brushtask_current_site_count: brushtask_current_site_count,
+      brushtask_current_site_dlcount: brushtask_current_site_dlcount,
       brushtask_peercount: brushtask_peercount_do + "#" + brushtask_peercount,
       brushtask_seedtime: brushtask_seedtime_do + "#" + brushtask_seedtime,
       brushtask_seedratio: brushtask_seedratio_do + "#" + brushtask_seedratio,
