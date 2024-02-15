@@ -203,7 +203,7 @@ class BrushTask(object):
                                            dlcount=rss_rule.get("dlcount"),
                                            current_site_count=rss_rule.get("current_site_count"),
                                            current_site_dlcount=rss_rule.get("current_site_dlcount"),
-                                           site_name=site_name):
+                                           site_info=site_info):
             return
 
         rss_result = self.rsshelper.parse_rssxml(url=rss_url, proxy=site_proxy)
@@ -266,7 +266,7 @@ class BrushTask(object):
                                                    torrent_size=size,
                                                    current_site_count=current_site_count,
                                                    current_site_dlcount=current_site_dlcount,
-                                                   site_name=site_name):
+                                                   site_info=site_info):
                     continue
                 # 检查是否已处理过
                 if self.is_torrent_handled(enclosure=enclosure):
@@ -291,7 +291,7 @@ class BrushTask(object):
                                                        dlcount=max_dlcount,
                                                        current_site_count=current_site_count,
                                                        current_site_dlcount=current_site_dlcount,
-                                                       site_name=site_name):
+                                                       site_info=site_info):
                         break
             except Exception as err:
                 ExceptionUtils.exception_traceback(err)
@@ -544,7 +544,7 @@ class BrushTask(object):
             except Exception as e:
                 ExceptionUtils.exception_traceback(e)
 
-    def __is_allow_new_torrent(self, taskinfo, dlcount, current_site_dlcount, current_site_count, site_name, torrent_size=None):
+    def __is_allow_new_torrent(self, taskinfo, dlcount, current_site_dlcount, current_site_count, site_info, torrent_size=None):
         """
         检查是否还能添加新的下载
         """
@@ -595,9 +595,12 @@ class BrushTask(object):
                 return False
 
         # 检查是否添加标签
-        label = taskinfo.get("label").split(',') if taskinfo.get("label") else None
-        if label is None:
+        label = list(set((taskinfo.get("label").split(',') if taskinfo.get("label") else []) +
+                 (site_info.get("tags").split(',') if site_info.get("tags") else [])))
+        if label is None or len(label) <= 0:
             return True
+
+        site_name = site_info.get("name")
 
         # 检查当前站点正在下载的任务数量
         if current_site_dlcount:
