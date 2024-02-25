@@ -10,6 +10,7 @@ import requests.exceptions
 
 from .as_obj import AsObj
 from .exceptions import TMDbException
+from app.utils.commons import ttl_lru
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +147,11 @@ class TMDb(object):
     def cached_request(method, url, data, proxies):
         return requests.request(method, url, data=data, proxies=eval(proxies), verify=False, timeout=10)
 
+    @staticmethod
+    @ttl_lru(seconds=60 * 60 * 6, maxsize=REQUEST_CACHE_MAXSIZE)
+    def ttl_cached_request(method, url, data, proxies):
+        return requests.request(method, url, data=data, proxies=eval(proxies), verify=False, timeout=10)
+
     def cache_clear(self):
         return self.cached_request.cache_clear()
 
@@ -165,7 +171,7 @@ class TMDb(object):
         )
 
         if self.cache and self.obj_cached and call_cached and method != "POST":
-            req = self.cached_request(method, url, data, self.proxies)
+            req = self.ttl_cached_request(method, url, data, self.proxies)
         else:
             req = self._session.request(method, url, data=data, proxies=eval(self.proxies), timeout=10, verify=False)
 
