@@ -152,6 +152,12 @@ class Sites:
             return {}
         return ret_sites
 
+    def get_sites_by_url_domain(self, url):
+        """
+        根据传入的url获取站点配置
+        """
+        return self._siteByUrls.get(StringUtils.get_url_domain(url))
+
     def check_ratelimit(self, site_id):
         """
         检查站点是否触发流控

@@ -4,7 +4,7 @@ RUN set -xe && \
     export DEBIAN_FRONTEND="noninteractive" && \
     apt-get update -y && \
     apt-get install -y wget bash && \
-    apt-get install -y $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/hsuyelin/nas-tools/master/package_list_debian.txt)) && \
+    apt-get install -y $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/hsuyelin/nas-tools/beta/package_list_debian.txt)) && \
     ln -sf /command/with-contenv /usr/bin/with-contenv && \
     # zone time
     ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -29,7 +29,7 @@ RUN set -xe && \
     # Pip requirements
     pip install --upgrade pip setuptools wheel && \
     pip install cython && \
-    pip install -r https://raw.githubusercontent.com/hsuyelin/nas-tools/master/requirements.txt && \
+    pip install -r https://raw.githubusercontent.com/hsuyelin/nas-tools/beta/requirements.txt && \
     # Clear
     apt-get remove -y build-essential && \
     apt-get autoremove -y && \
@@ -50,7 +50,7 @@ ENV S6_SERVICES_GRACETIME=30000 \
     NASTOOL_CONFIG="/config/config.yaml" \
     NASTOOL_AUTO_UPDATE=false \
     NASTOOL_CN_UPDATE=true \
-    NASTOOL_VERSION=master \
+    NASTOOL_VERSION=beta \
     REPO_URL="https://github.com/hsuyelin/nas-tools.git" \
     PYPI_MIRROR="https://pypi.tuna.tsinghua.edu.cn/simple" \
     PUID=0 \
@@ -69,7 +69,7 @@ RUN set -xe \
     && echo 'fs.inotify.max_user_instances=5242880' >> /etc/sysctl.conf \
     && echo "nt ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
     && git config --global pull.ff only \
-    && git clone -b master ${REPO_URL} ${WORKDIR} --depth=1 --recurse-submodule \
+    && git clone -b beta ${REPO_URL} ${WORKDIR} --depth=1 --recurse-submodule \
     && git config --global --add safe.directory ${WORKDIR}
 COPY --chmod=755 ./rootfs /
 EXPOSE 3000

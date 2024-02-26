@@ -235,7 +235,10 @@ class Sync(object):
 
                 # 不做识别重命名
                 if not rename:
-                    self.__link(event_path, mon_path, target_path, sync_mode)
+                    if '.!qB' in event_path:
+                        log.info(f"【Sync】{event_path} 还未下载完毕，不进行同步")
+                    else:
+                        self.__link(event_path, mon_path, target_path, sync_mode)
                 # 识别转移
                 else:
                     # 不是媒体文件不处理
@@ -390,7 +393,10 @@ class Sync(object):
             # 不做识别重命名
             if not rename:
                 for link_file in PathUtils.get_dir_files(mon_path):
-                    self.__link(link_file, mon_path, target_path, sync_mode)
+                    if '.!qB' in link_file:
+                        log.info(f"【Sync】{link_file} 还未下载完毕，不进行同步")
+                    else:
+                        self.__link(link_file, mon_path, target_path, sync_mode)
             else:
                 for path in PathUtils.get_dir_level1_medias(mon_path, RMT_MEDIAEXT):
                     if PathUtils.is_invalid_path(path):
