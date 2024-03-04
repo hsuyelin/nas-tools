@@ -235,9 +235,7 @@ class BrushTask(object):
                 # 发布时间
                 pubdate = res.get('pubdate')
 
-                if enclosure not in self._torrents_cache:
-                    self._torrents_cache.append(enclosure)
-                else:
+                if enclosure in self._torrents_cache:
                     log.debug("【Brush】%s 已处理过" % torrent_name)
                     continue
 
@@ -279,6 +277,7 @@ class BrushTask(object):
                     if not self.__is_allow_new_torrent(taskinfo=taskinfo,
                                                        dlcount=max_dlcount):
                         break
+                    self._torrents_cache.append(enclosure)
             except Exception as err:
                 ExceptionUtils.exception_traceback(err)
                 continue
@@ -684,6 +683,7 @@ class BrushTask(object):
                          cookie,
                          ua,
                          proxy):
+        log.info("【Brush】torrent：%s  size: %d" % (title, torrent_size))
         """
         检查种子是否符合刷流过滤条件
         :param rss_rule: 过滤条件字典
@@ -711,25 +711,31 @@ class BrushTask(object):
                         else:
                             max_size = 0
                         if rule_sizes[0] == "gt" and float(torrent_size) < float(min_size) * 1024 ** 3:
+                            log.info("【Brush】torrent：%s  err1" % title)
                             return False
                         if rule_sizes[0] == "lt" and float(torrent_size) > float(min_size) * 1024 ** 3:
+                            log.info("【Brush】torrent：%s  err2" % title)
                             return False
                         if rule_sizes[0] == "bw" and not float(min_size) * 1024 ** 3 < float(torrent_size) < float(
                                 max_size) * 1024 ** 3:
+                            log.info("【Brush】torrent：%s  err3" % title)
                             return False
 
             # 检查包含规则
             if rss_rule.get("include"):
                 if not re.search(r"%s" % rss_rule.get("include"), title):
+                    log.info("【Brush】torrent：%s include: %s err4" % (title, rss_rule.get("include")))
                     return False
 
             # 检查排除规则
             if rss_rule.get("exclude"):
                 if re.search(r"%s" % rss_rule.get("exclude"), title):
+                    log.info("【Brush】torrent：%s exclude: %s err5" % (title, rss_rule.get("exclude")))
                     return False
 
             # 站点流控
             if self.sites.check_ratelimit(siteid):
+                log.info("【Brush】torrent：%s err6" % (title))
                 return False
 
             torrent_attr = self.siteconf.check_torrent_attr(torrent_url=torrent_url,
@@ -742,17 +748,17 @@ class BrushTask(object):
             # 检查免费状态
             if rss_rule.get("free") == "FREE":
                 if not torrent_attr.get("free"):
-                    log.debug("【Brush】不是一个FREE资源，跳过")
+                    log.info("【Brush】不是一个FREE资源，跳过")
                     return False
             elif rss_rule.get("free") == "2XFREE":
                 if not torrent_attr.get("2xfree"):
-                    log.debug("【Brush】不是一个2XFREE资源，跳过")
+                    log.info("【Brush】不是一个2XFREE资源，跳过")
                     return False
 
             # 检查HR状态
             if rss_rule.get("hr"):
                 if torrent_attr.get("hr"):
-                    log.debug("【Brush】这是一个H&R资源，跳过")
+                    log.info("【Brush】这是一个H&R资源，跳过")
                     return False
 
             # 检查做种人数
@@ -774,15 +780,15 @@ class BrushTask(object):
                     else:
                         max_count = sys.maxsize
                     if peer_counts[0] == "gt" and torrent_peer_count <= min_count:
-                        log.debug("【Brush】%s `判断做种数, 判断条件: peer_count:%d %s threshold:%d" % (
+                        log.info("【Brush】%s `判断做种数, 判断条件: peer_count:%d %s threshold:%d" % (
                             title, torrent_peer_count, peer_counts[0], min_count))
                         return False
                     if peer_counts[0] == "lt" and torrent_peer_count >= min_count:
-                        log.debug("【Brush】%s `判断做种数, 判断条件: peer_count:%d %s threshold:%d" % (
+                        log.info("【Brush】%s `判断做种数, 判断条件: peer_count:%d %s threshold:%d" % (
                             title, torrent_peer_count, peer_counts[0], min_count))
                         return False
                     if peer_counts[0] == "bw" and not (min_count <= torrent_peer_count <= max_count):
-                        log.debug("【Brush】%s `判断做种数, 判断条件: left:%d %s peer_count:%d %s right:%d" % (
+                        log.info("【Brush】%s `判断做种数, 判断条件: left:%d %s peer_count:%d %s right:%d" % (
                             title, min_count, peer_counts[0], torrent_peer_count, peer_counts[0], max_count))
                         return False
 
@@ -797,20 +803,20 @@ class BrushTask(object):
                     localnowtime = datetime.now().astimezone(localtz)
                     localpubdate = pubdate.astimezone(localtz)
                     pudate_hour = int(localnowtime.timestamp() - localpubdate.timestamp()) / 3600
-                    log.debug('【Brush】发布时间：%s，当前时间：%s，时间间隔：%f hour' % (
+                    log.info('【Brush】发布时间：%s，当前时间：%s，时间间隔：%f hour' % (
                         localpubdate.isoformat(), localnowtime.isoformat(), pudate_hour))
                     if rule_pubdates[0] == "lt" and pudate_hour >= float(min_pubdate):
-                        log.debug("【Brush】%s `判断发布时间, 判断条件: pubdate: %s %d" % (
+                        log.info("【Brush】%s `判断发布时间, 判断条件: pubdate: %s %d" % (
                             title, rule_pubdates[0], float(min_pubdate)))
                         return False
                     if rule_pubdates[0] == "gt" and pudate_hour <= float(min_pubdate):
-                        log.debug("【Brush】%s `判断发布时间, 判断条件: pubdate: %s %d" % (
+                        log.info("【Brush】%s `判断发布时间, 判断条件: pubdate: %s %d" % (
                             title, rule_pubdates[0], float(min_pubdate)))
                         return False
                     if rule_pubdates[0] == "bw" and (
                             not max_pubdate or not (
                             float(min_pubdate) <= pudate_hour <= float(max_pubdate))):
-                        log.debug("【Brush】%s `判断发布时间, 判断条件: pubdate: %s %d %d" % (
+                        log.info("【Brush】%s `判断发布时间, 判断条件: pubdate: %s %d %d" % (
                             title, rule_pubdates[0], float(min_pubdate), float(max_pubdate or 0)))
                         return False
 
@@ -916,7 +922,7 @@ class BrushTask(object):
             # ID
             torrent_id = torrent.hashString
             # 做种时间
-            if not hasattr(torrent, 'date_done') or not torrent.date_done or torrent.date_done.timestamp() < 1:
+            if not torrent.date_done or torrent.date_done.timestamp() < 1:
                 seeding_time = 0
             else:
                 seeding_time = date_now - int(torrent.date_done.timestamp())
