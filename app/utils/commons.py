@@ -2,6 +2,8 @@
 import threading
 import time
 from collections import OrderedDict
+import functools
+import collections
 
 # 线程锁
 lock = threading.RLock()
@@ -58,3 +60,54 @@ def retry(ExceptionToCheck, tries=3, delay=3, backoff=2, logger=None):
         return f_retry
 
     return deco_retry
+
+def ttl_lru(seconds = 60, maxsize = 128, typed = False):
+    cache = collections.OrderedDict()
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            _remove_expired_entries()  # 在访问缓存之前删除过期条目
+            nonlocal cache
+            key = functools._make_key(args, kwargs, typed)
+            if key in cache:
+                cache.move_to_end(key)
+                return cache[key][0]  # 仅返回值，而不是过期时间
+            try:
+                result = func(*args, **kwargs)
+                cache[key] = (result, time.time() + seconds)  # 将结果与过期时间一起存储
+                if len(cache) > maxsize:
+                    cache.popitem(last=False)
+                return result
+            except Exception as e:
+                raise e
+
+        def _remove_expired_entries():
+            nonlocal cache
+            current_time = time.time()
+            for key, (value, expiration_time) in list(cache.items()):
+                if expiration_time < current_time:
+                    cache.pop(key)
+
+        def clear_cache():
+            nonlocal cache
+            cache.clear()
+
+        def cache_remove(*args, **kwargs):
+            nonlocal cache
+            key = functools._make_key(args, kwargs, typed)
+            if key in cache:
+                cache.pop(key)
+
+        def cache_replace(value, *args, **kwargs):
+            nonlocal cache
+            key = functools._make_key(args, kwargs, typed)
+            cache[key] = value
+
+        wrapper.clear_cache = clear_cache
+        wrapper.cache_remove = cache_remove
+        wrapper.cache_replace = cache_replace
+
+        return wrapper
+
+    return decorator
