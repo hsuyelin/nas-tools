@@ -235,9 +235,7 @@ class BrushTask(object):
                 # 发布时间
                 pubdate = res.get('pubdate')
 
-                if enclosure not in self._torrents_cache:
-                    self._torrents_cache.append(enclosure)
-                else:
+                if enclosure in self._torrents_cache:
                     log.debug("【Brush】%s 已处理过" % torrent_name)
                     continue
 
@@ -279,6 +277,7 @@ class BrushTask(object):
                     if not self.__is_allow_new_torrent(taskinfo=taskinfo,
                                                        dlcount=max_dlcount):
                         break
+                    self._torrents_cache.append(enclosure)
             except Exception as err:
                 ExceptionUtils.exception_traceback(err)
                 continue
