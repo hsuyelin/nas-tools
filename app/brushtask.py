@@ -148,15 +148,20 @@ class BrushTask(object):
         else:
             return self._brush_tasks if isinstance(self._brush_tasks, dict) else {}
 
-    def check_task_rss(self, taskid):
+    def check_task_rss(self, taskid, other_task: list = [], task_info: dict = {}):
         """
         检查RSS并添加下载，由定时服务调用
         :param taskid: 刷流任务的ID
         """
         if not taskid:
             return
-        # 任务信息
-        taskinfo = self.get_brushtask_info(taskid)
+
+        enable_other_task = True if len(other_task) > 0 else False
+        if enable_other_task:
+            # 任务信息
+            taskinfo = self.get_brushtask_info(taskid)
+        else:
+            taskinfo = task_info
         if not taskinfo:
             return
         # 任务属性
@@ -169,7 +174,7 @@ class BrushTask(object):
         downloader_id = taskinfo.get("downloader")
         ua = taskinfo.get("ua")
         state = taskinfo.get("state")
-        if state != 'Y':
+        if state != 'Y' and not enable_other_task:
             log.info("【Brush】刷流任务 %s 已停止下载新种！" % task_name)
             return
         # 查询站点信息
@@ -185,7 +190,7 @@ class BrushTask(object):
         if not site_brush_enable:
             log.error("【Brush】站点 %s 未开启刷流功能，无法刷流！" % site_name)
             return
-        if not rss_url:
+        if not rss_url and not enable_other_task:
             log.error("【Brush】站点 %s 未配置RSS订阅地址，无法刷流！" % site_name)
             return
         if rss_free and not cookie:
@@ -196,14 +201,14 @@ class BrushTask(object):
         if not downloader_cfg:
             log.error("【Brush】任务 %s 下载器不存在，无法刷流！" % task_name)
             return
-
         log.info("【Brush】开始站点 %s 的刷流任务：%s..." % (site_name, task_name))
         # 检查是否达到保种体积
         if not self.__is_allow_new_torrent(taskinfo=taskinfo,
                                            dlcount=rss_rule.get("dlcount")):
             return
 
-        rss_result = self.rsshelper.parse_rssxml(url=rss_url, proxy=site_proxy)
+        rss_result = other_task if enable_other_task else self.rsshelper.parse_rssxml(url=rss_url, proxy=site_proxy)
+
         if rss_result is None:
             # RSS链接过期
             log.error(f"【Brush】{task_name} RSS链接已过期，请重新获取！")
@@ -212,7 +217,7 @@ class BrushTask(object):
             log.warn("【Brush】%s RSS未下载到数据" % site_name)
             return
         else:
-            log.info("【Brush】%s RSS获取数据：%s" % (site_name, len(rss_result)))
+            log.info("【Brush】%s 获取数据：%s" % (site_name, len(rss_result)))
 
         # 同时下载数
         max_dlcount = rss_rule.get("dlcount")
@@ -225,15 +230,15 @@ class BrushTask(object):
         for res in rss_result:
             try:
                 # 种子名
-                torrent_name = res.get('title')
+                torrent_name = res.get('title') or res.get("mainTitle")
                 # 种子链接
-                enclosure = res.get('enclosure')
+                enclosure = res.get('enclosure') or res.get("downloadLink")
                 # 种子页面
-                page_url = res.get('link')
+                page_url = res.get('link') or res.get("detailsPageHref")
                 # 种子大小
                 size = res.get('size')
                 # 发布时间
-                pubdate = res.get('pubdate')
+                pubdate = res.get('pubdate') or res.get("pubDate")
 
                 if enclosure in self._torrents_cache:
                     log.debug("【Brush】%s 已处理过" % torrent_name)
@@ -253,7 +258,7 @@ class BrushTask(object):
                 # 检查能否添加当前种子，判断是否超过保种体积大小
                 if not self.__is_allow_new_torrent(taskinfo=taskinfo,
                                                    dlcount=max_dlcount,
-                                                   torrent_size=size):
+                                                   torrent_size=size) and not enable_other_task:
                     continue
                 # 检查是否已处理过
                 if self.is_torrent_handled(enclosure=enclosure):
