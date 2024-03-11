@@ -2538,7 +2538,7 @@ class DbHelper:
             INTERVAL=int(interval),
             ENABLED=int(enabled),
             SAMEDATA=int(samedata),
-            ONLYNASTOOL=int(onlynastool),
+            ONLY_NASTOOL=int(onlynastool),
             DOWNLOADER=downloader,
             CONFIG=json.dumps(config),
             NOTE=note

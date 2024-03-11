@@ -50,7 +50,7 @@ class Logger:
             logpath = os.environ.get('NASTOOL_LOG') or self.__config.get_config('app').get('logpath') or ""
             if logpath:
                 if not os.path.exists(logpath):
-                    os.makedirs(logpath)
+                    os.makedirs(logpath, exist_ok=True)
                 log_file_handler = RotatingFileHandler(filename=os.path.join(logpath, module + ".txt"),
                                                        maxBytes=5 * 1024 * 1024,
                                                        backupCount=3,

@@ -52,7 +52,7 @@ class CHDBits(_ISiteSigninHandler):
 
         # 创建正确答案存储目录
         if not os.path.exists(os.path.dirname(self._answer_file)):
-            os.makedirs(os.path.dirname(self._answer_file))
+            os.makedirs(os.path.dirname(self._answer_file), exist_ok=True)
 
         # 判断今日是否已签到
         index_res = RequestUtils(cookies=site_cookie,

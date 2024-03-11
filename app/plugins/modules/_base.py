@@ -119,7 +119,7 @@ class _IPluginModule(metaclass=ABCMeta):
             plugin_id = self.__class__.__name__
         data_path = os.path.join(Config().get_user_plugin_path(), plugin_id)
         if not os.path.exists(data_path):
-            os.makedirs(data_path)
+            os.makedirs(data_path, exist_ok=True)
         return data_path
 
     def history(self, key, value):

@@ -73,6 +73,16 @@
                     </label>
                     {% endfor %}
                   </div>
+                  <div class="subheader mb-2 mt-3">分辨率</div>
+                  <div class="form-selectgroup form-selectgroup-pills">
+                    {% for filter_respix in Item.filter.respix %}
+                    <label class="form-selectgroup-item">
+                      <input type="checkbox" name="filter_respix" value="{{ filter_respix }}" class="form-selectgroup-input"
+                        onclick="filter_medias(this, '{{ Item.key }}', true)">
+                      <span class="form-selectgroup-label">{{ filter_respix }}</span>
+                    </label>
+                    {% endfor %}
+                  </div>
                   <div class="subheader mb-2 mt-3">制作组</div>
                   <div class="form-selectgroup form-selectgroup-pills">
                     {% for filter_releasegroup in Item.filter.releasegroup %}
@@ -191,6 +201,7 @@
                                 <div class="list-group-item p-1 search_results_torrent"
                                   data-site="{{ torrent.site }}"
                                   data-releasegroup="{{ torrent.releasegroup or '未知' }}"
+                                  data-respix="{{ torrent.respix or '未知分辨率' }}"
                                   data-free="{{ torrent.uploadvalue|string + ' ' + torrent.downloadvalue|string }}"
                                   data-video="{{ torrent.video_encode }}"
                                   data-group="{{ group_key }}"
@@ -236,6 +247,9 @@
                                         {% endif %}
                                         {% if torrent.releasegroup %}
                                           <span class="badge text-white bg-cyan mb-1">{{ torrent.releasegroup }}</span>
+                                        {% endif %}
+                                        {% if torrent.respix %}
+                                          <span class="badge text-white bg-cyan mb-1">{{ torrent.respix }}</span>
                                         {% endif %}
                                         {% if torrent.uploadvalue != 1.0 %}
                                         <span class="badge text-white bg-azure mb-1">{{ (torrent.uploadvalue * 100) | int }}%UL</span>
@@ -336,6 +350,16 @@
               </label>
               {% endfor %}
             </div>
+            <div class="subheader mb-2 mt-3">分辨率</div>
+            <div class="form-selectgroup form-selectgroup-pills">
+              {% for filter_respix in Item.filter.respix %}
+              <label class="form-selectgroup-item">
+                <input type="checkbox" name="filter_respix" value="{{ filter_respix }}" class="form-selectgroup-input"
+                  onclick="filter_medias(this, '{{ Item.key }}', true)">
+                <span class="form-selectgroup-label">{{ filter_respix }}</span>
+              </label>
+              {% endfor %}
+            </div>
             <div class="subheader mb-2 mt-3">制作组</div>
             <div class="form-selectgroup form-selectgroup-pills">
               {% for filter_releasegroup in Item.filter.releasegroup %}
@@ -423,6 +447,8 @@
     let filter_site = select_GetSelectedVAL("filter_site")[0];
     // 过滤制作组
     let filter_releasegroup = select_GetSelectedVAL("filter_releasegroup")[0];
+    // 过滤分辨率
+    let filter_respix = select_GetSelectedVAL("filter_respix")[0];
     // 过滤促销
     let filter_free = select_GetSelectedVAL("filter_free")[0];
     // 过滤编码
@@ -430,7 +456,7 @@
     //过滤剧集
     let filter_season = select_GetSelectedVAL("filter_season")[0];
     // 有过滤则展开，无过滤则收起
-    if (filter_site || filter_free || filter_video|| filter_releasegroup) {
+    if (filter_site || filter_free || filter_video|| filter_releasegroup || filter_respix) {
       $(`${torrent_obj} .accordion-button`).each(function () {
         $(this).removeClass("collapsed");
       });
@@ -459,6 +485,16 @@
     if (filter_releasegroup) {
       $(`${torrent_obj} .search_results_torrent`).each(function () {
         if ($(this).attr("data-releasegroup") !== filter_releasegroup) {
+          if($(this).is(":visible")){
+            sub_group_total($(this).attr("data-group"), key, $(this).attr("data-season"));
+            $(this).hide();
+          }
+        }
+      });
+    }
+    if (filter_respix) {
+      $(`${torrent_obj} .search_results_torrent`).each(function () {
+        if ($(this).attr("data-respix") !== filter_respix) {
           if($(this).is(":visible")){
             sub_group_total($(this).attr("data-group"), key, $(this).attr("data-season"));
             $(this).hide();

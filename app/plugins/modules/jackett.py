@@ -8,7 +8,7 @@ import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from app.utils import RequestUtils
+from app.utils import RequestUtils, Torrent
 from app.indexer.indexerConf import IndexerConf
 from app.utils import ExceptionUtils, DomUtils, StringUtils
 

@@ -95,10 +95,10 @@ class Sync(object):
                 log.info(f"【Sync】{monpath} 不进行监控和同步：手动关闭")
             if target_path and not os.path.exists(target_path) and syncmode_enum not in ModuleConf.REMOTE_RMT_MODES:
                 log.info(f"【Sync】目的目录不存在，正在创建：{target_path}")
-                os.makedirs(target_path)
+                os.makedirs(target_path, exist_ok=True)
             if unknown_path and not os.path.exists(unknown_path):
                 log.info(f"【Sync】未识别目录不存在，正在创建：{unknown_path}")
-                os.makedirs(unknown_path)
+                os.makedirs(unknown_path, exist_ok=True)
             # 登记关系
             self._sync_path_confs[str(sid)] = {
                 'id': sid,
@@ -235,7 +235,10 @@ class Sync(object):
 
                 # 不做识别重命名
                 if not rename:
-                    self.__link(event_path, mon_path, target_path, sync_mode)
+                    if '.!qB' in event_path:
+                        log.info(f"【Sync】{event_path} 还未下载完毕，不进行同步")
+                    else:
+                        self.__link(event_path, mon_path, target_path, sync_mode)
                 # 识别转移
                 else:
                     # 不是媒体文件不处理
@@ -390,7 +393,10 @@ class Sync(object):
             # 不做识别重命名
             if not rename:
                 for link_file in PathUtils.get_dir_files(mon_path):
-                    self.__link(link_file, mon_path, target_path, sync_mode)
+                    if '.!qB' in link_file:
+                        log.info(f"【Sync】{link_file} 还未下载完毕，不进行同步")
+                    else:
+                        self.__link(link_file, mon_path, target_path, sync_mode)
             else:
                 for path in PathUtils.get_dir_level1_medias(mon_path, RMT_MEDIAEXT):
                     if PathUtils.is_invalid_path(path):

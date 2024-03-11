@@ -27,16 +27,13 @@ class PikPak(_IDownloadClient):
         self.init_config()
         self.connect()
 
+
     def init_config(self):
         if self._client_config:
             self.username = self._client_config.get("username")
             self.password = self._client_config.get("password")
             self.proxy = self._client_config.get("proxy")
-            if self.proxy:
-                if not self.proxy.startswith('http'):
-                    self.proxy = "http://" + self.host
-                if self.proxy.endswith('/'):
-                    self.proxy = self.host[:-1]
+
             if self.username and self.password:
                 self._client = PikPakApi(
                 username=self.username,
@@ -106,7 +103,7 @@ class PikPak(_IDownloadClient):
 
     def add_torrent(self, content, download_dir=None, **kwargs):
         try:
-            task = asyncio.run(self._client.offline_download(content))
+            task = asyncio.run(self._client.offline_download(content, download_dir))
             taskId = task.get('task', {}).get('id')
             return taskId is not None and bool(taskId)
         except Exception as e:

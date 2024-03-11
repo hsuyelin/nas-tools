@@ -122,7 +122,7 @@ class _IIndexClient(metaclass=ABCMeta):
                                 match_media.original_title in torrent_name or \
                                 match_media.org_string in description or \
                                 match_media.original_title in description
-                    year_match = match_media.year in torrent_name or \
+                    year_match = (not match_media.year) or match_media.year in torrent_name or \
                                  match_media.year in description
                 if (imdbid_match or name_match) and year_match and self.recognize_enhance_enable:
                     meta_info = MetaInfo(title=torrent_name,
@@ -218,12 +218,12 @@ class _IIndexClient(metaclass=ABCMeta):
                     # 洗版
                     if match_media.over_edition:
                         # 季集不完整的资源不要
-                        if media_info.type != MediaType.MOVIE \
+                        '''if media_info.type != MediaType.MOVIE \
                                 and media_info.get_episode_list():
                             log.info(f"【{self.client_name}】"
                                      f"{media_info.get_title_string()}{media_info.get_season_string()} "
                                      f"正在洗版，过滤掉季集不完整的资源：{torrent_name} {description}")
-                            continue
+                            continue'''
                         # 检查优先级是否更好
                         if match_media.res_order \
                                 and int(res_order) <= int(match_media.res_order):

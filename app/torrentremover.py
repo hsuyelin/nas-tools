@@ -53,7 +53,7 @@ class TorrentRemover(object):
                 "downloader": downloader_id,
                 "downloader_name": downloader_name,
                 "downloader_type": downloader_type,
-                "onlynastool": task.ONLYNASTOOL,
+                "onlynastool": task.ONLY_NASTOOL,
                 "samedata": task.SAMEDATA,
                 "action": task.ACTION,
                 "config": json.loads(config) if config else {},

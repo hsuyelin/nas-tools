@@ -559,6 +559,9 @@ class WebAction:
         dl_setting = data.get("setting")
         results = Searcher().get_search_result_by_id(dl_id)
         for res in results:
+            dl_enclosure = res.ENCLOSURE if Sites().get_sites_by_url_domain(res.ENCLOSURE) else Torrent.format_enclosure(res.ENCLOSURE)
+            if not dl_enclosure:
+                continue
             media = Media().get_media_info(title=res.TORRENT_NAME, subtitle=res.DESCRIPTION)
             if not media:
                 continue
@@ -599,7 +602,7 @@ class WebAction:
             return {"code": -1, "msg": "种子信息有误"}
         media = Media().get_media_info(title=title, subtitle=description)
         media.site = site
-        media.enclosure = enclosure
+        media.enclosure = enclosure if Sites().get_sites_by_url_domain(enclosure) else Torrent.format_enclosure(enclosure)
         media.page_url = page_url
         media.size = size
         media.upload_volume_factor = float(uploadvolumefactor)
@@ -3595,6 +3598,9 @@ class WebAction:
                 "value": f"{item.UPLOAD_VOLUME_FACTOR} {item.DOWNLOAD_VOLUME_FACTOR}",
                 "name": MetaBase.get_free_string(item.UPLOAD_VOLUME_FACTOR, item.DOWNLOAD_VOLUME_FACTOR)
             }
+            #分辨率
+            if respix == "":
+                respix = "未知分辨率"
             # 制作组、字幕组
             if item.OTHERINFO is None:
                 releasegroup = "未知"
@@ -3652,6 +3658,8 @@ class WebAction:
                     torrent_filter["free"].append(free_item)
                 if releasegroup not in torrent_filter.get("releasegroup"):
                     torrent_filter["releasegroup"].append(releasegroup)
+                if respix not in torrent_filter.get("respix"):
+                    torrent_filter["respix"].append(respix)
                 if item.SITE not in torrent_filter.get("site"):
                     torrent_filter["site"].append(item.SITE)
                 if video_encode \
@@ -3702,6 +3710,7 @@ class WebAction:
                         "site": [item.SITE],
                         "free": [free_item],
                         "releasegroup": [releasegroup],
+                        "respix": [respix],
                         "video": [video_encode] if video_encode else [],
                         "season": [filter_season] if filter_season else []
                     }

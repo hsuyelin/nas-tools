@@ -22,7 +22,7 @@ class SiteSubtitle:
         self.sites = Sites()
         self._save_tmp_path = Config().get_temp_path()
         if not os.path.exists(self._save_tmp_path):
-            os.makedirs(self._save_tmp_path)
+            os.makedirs(self._save_tmp_path, exist_ok=True)
 
     def download(self, media_info, site_id, cookie, ua, download_dir):
         """
@@ -71,7 +71,7 @@ class SiteSubtitle:
                 if ret and ret.status_code == 200:
                     # 创建目录
                     if not os.path.exists(download_dir):
-                        os.makedirs(download_dir)
+                        os.makedirs(download_dir, exist_ok=True)
                     # 保存ZIP
                     file_name = SiteHelper.get_url_subtitle_name(ret.headers.get('content-disposition'), sublink)
                     if not file_name:

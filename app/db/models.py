@@ -322,7 +322,7 @@ class TORRENTREMOVETASK(Base):
     INTERVAL = Column(Integer)
     ENABLED = Column(Integer)
     SAMEDATA = Column(Integer)
-    ONLYNASTOOL = Column(Integer)
+    ONLY_NASTOOL = Column(Integer)
     DOWNLOADER = Column(Text)
     CONFIG = Column(Text)
     NOTE = Column(Text)

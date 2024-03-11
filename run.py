@@ -20,7 +20,7 @@ if is_executable:
     os.environ["NASTOOL_LOG"] = os.path.join(config_path, "logs").replace("\\", "/")
     try:
         if not os.path.exists(config_path):
-            os.makedirs(config_path)
+            os.makedirs(config_path, exist_ok=True)
     except Exception as err:
         print(str(err))
 

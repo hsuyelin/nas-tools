@@ -5,6 +5,7 @@ from threading import Lock
 from app.message.client._base import _IMessageClient
 from app.utils import ExceptionUtils, RequestUtils, StringUtils
 from config import Config
+import log
 
 lock = Lock()
 
@@ -72,19 +73,29 @@ class SynologyChat(_IMessageClient):
             if url and image:
                 caption = f"{caption}\n\n<{url}|查看详情>"
             payload_data = {'text': quote(caption)}
-            if image:
-                payload_data['file_url'] = quote(image)
+            #if image:
+            #    payload_data['file_url'] = quote(image)
             if user_id:
                 payload_data['user_ids'] = [int(user_id)]
+                ret, msg = self.__send_request(payload_data)
+                if not ret:
+                    log.error(f"【Message Err1】%s" % msg)
+                    return ret, msg
             else:
                 userids = self.__get_bot_users()
                 if not userids:
                     return False, "机器人没有对任何用户可见"
-                payload_data['user_ids'] = userids
-            return self.__send_request(payload_data)
+                for userid in userids:
+                    payload_data['user_ids'] = [int(userid)]
+                    ret, msg = self.__send_request(payload_data)
+                    if not ret:
+                        log.error(f"【Message Err1】%s" % msg)
+                        return ret, msg
+            return True, ""
 
         except Exception as msg_e:
             ExceptionUtils.exception_traceback(msg_e)
+            log.error(f"【Message Err2】%x" % str(msg_e))
             return False, str(msg_e)
 
     def send_list_msg(self, medias: list, user_id="", title="", **kwargs):
@@ -123,10 +134,14 @@ class SynologyChat(_IMessageClient):
                 user_ids = self.__get_bot_users()
             payload_data = {
                 "text": quote(caption),
-                "file_url": quote(image),
-                "user_ids": user_ids
+                #"file_url": quote(image),
             }
-            return self.__send_request(payload_data)
+            for userid in user_ids:
+                payload_data["user_ids"] = [int(userid)]
+                ret, msg = self.__send_request(payload_data)
+                if not ret:
+                    return ret, msg
+            return True, ""
         except Exception as msg_e:
             ExceptionUtils.exception_traceback(msg_e)
             return False, str(msg_e)
@@ -152,10 +167,13 @@ class SynologyChat(_IMessageClient):
         发送消息请求
         """
         payload = f"payload={json.dumps(payload_data)}"
+        #log.error(f"【Message】%s" % payload)
+        #log.error(f"【url】%s" % self._webhook_url)
         ret = self._req.post_res(url=self._webhook_url, data=payload)
         if ret and ret.status_code == 200:
             result = ret.json()
             if result:
+                log.error(f"【ret】%s" % result)
                 errno = result.get('error', {}).get('code')
                 errmsg = result.get('error', {}).get('errors')
                 if not errno:

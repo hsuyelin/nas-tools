@@ -4,7 +4,7 @@ import time
 import re
 import tempfile
 import hashlib
-from urllib.parse import unquote, urlencode
+from urllib.parse import unquote, urlencode, urlparse
 
 import libtorrent
 from bencode import bencode, bdecode
@@ -22,7 +22,7 @@ class Torrent:
     def __init__(self):
         self._torrent_temp_path = Config().get_temp_path()
         if not os.path.exists(self._torrent_temp_path):
-            os.makedirs(self._torrent_temp_path)
+            os.makedirs(self._torrent_temp_path, exist_ok=True)
 
     def get_torrent_info(self, url, cookie=None, ua=None, referer=None, proxy=False):
         """
@@ -207,7 +207,7 @@ class Torrent:
             file_name = unquote(url.split("/")[-1])
         else:
             file_name = str(datetime.datetime.now())
-        return file_name
+        return file_name.replace('/', '')
 
     @staticmethod
     def get_intersection_episodes(target, source, title):
@@ -423,3 +423,41 @@ class Torrent:
             return True
         except Exception as e:
             return False
+
+    @staticmethod
+    def is_magnet(link):
+        """
+        判断是否是磁力
+        """
+        return link.lower().startswith("magnet:?xt=urn:btih:")
+
+    @staticmethod        
+    def maybe_torrent_url(link):
+        """
+        判断是否可能是种子url
+        """
+        try:
+            parsed = urlparse(link)
+            return bool(parsed.netloc) and parsed.scheme in ['http', 'https', 'ftp']
+        except Exception as err:
+            return False
+
+    @staticmethod
+    def format_enclosure(link):
+        """
+        格式化一个链接
+        如果是磁力链接或者为私有PT站点则直接返回
+        如果不是磁力链接看是否是种子链接，如果是则下载种子后转换为磁力链接
+        """
+        if not StringUtils.is_string_and_not_empty(link):
+            return None
+        if Torrent.is_magnet(link):
+            return link
+        if not Torrent.maybe_torrent_url(link):
+            return None
+
+        _, torrent_content, _, _, retmsg = Torrent().get_torrent_info(link)
+        if not torrent_content:
+            print(f"下载种子文件出错: {retmsg}")
+            return None
+        return torrent_content

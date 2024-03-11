@@ -401,7 +401,7 @@ class FileTransfer:
                 continue
             new_dir = os.path.dirname(new_file)
             if not os.path.exists(new_dir) and rmt_mode not in ModuleConf.REMOTE_RMT_MODES:
-                os.makedirs(new_dir)
+                os.makedirs(new_dir, exist_ok=True)
             retcode = self.__transfer_command(file_item=file,
                                               target_file=new_file,
                                               rmt_mode=rmt_mode)
@@ -431,7 +431,7 @@ class FileTransfer:
         target_dir = os.path.join(target_dir, parent_name)
         if not os.path.exists(target_dir) and rmt_mode not in ModuleConf.REMOTE_RMT_MODES:
             log.debug("【Rmt】正在创建目录：%s" % target_dir)
-            os.makedirs(target_dir)
+            os.makedirs(target_dir, exist_ok=True)
         # 目录
         if os.path.isdir(file_item):
             log.info("【Rmt】正在%s目录：%s 到 %s" % (rmt_mode.value, file_item, target_dir))
@@ -800,7 +800,7 @@ class FileTransfer:
                     elif rmt_mode not in ModuleConf.REMOTE_RMT_MODES:
                         # 创建目录
                         log.debug("【Rmt】正在创建目录：%s" % ret_dir_path)
-                        os.makedirs(ret_dir_path)
+                        os.makedirs(ret_dir_path, exist_ok=True)
                 # 转移蓝光原盘
                 if bluray_disk_dir:
                     ret = self.__transfer_bluray_dir(file_item, ret_dir_path, rmt_mode)
@@ -1229,7 +1229,7 @@ class FileTransfer:
             new_file = new_file_list[0]
         new_dir = os.path.dirname(new_file)
         if not os.path.exists(new_dir) and sync_transfer_mode not in ModuleConf.REMOTE_RMT_MODES:
-            os.makedirs(new_dir)
+            os.makedirs(new_dir, exist_ok=True)
         return self.__transfer_command(file_item=in_file,
                                        target_file=new_file,
                                        rmt_mode=sync_transfer_mode), ""
@@ -1244,6 +1244,10 @@ class FileTransfer:
         episode_title = self.media.get_episode_title(media)
         # 英文标题
         en_title = self.media.get_tmdb_en_title(media)
+        try:
+            decade = (int(media.year) // 10) * 10
+        except:
+            decade = 0
         media_format_dict = {
             "title": StringUtils.clear_file_name(media.title),
             "en_title": StringUtils.clear_file_name(en_title),
@@ -1252,6 +1256,8 @@ class FileTransfer:
             "original_title": StringUtils.clear_file_name(media.original_title),
             "name": StringUtils.clear_file_name(media.get_name()),
             "year": media.year,
+            "decade_short": "%ds" % (decade),
+            "decade_long": "%d-%d" % (decade, decade + 9),
             "edition": media.get_edtion_string() or None,
             "videoFormat": media.resource_pix,
             "releaseGroup": media.resource_team,
@@ -1261,6 +1267,9 @@ class FileTransfer:
             "audioCodec": media.audio_encode,
             "tmdbid": media.tmdb_id,
             "imdbid": media.imdb_id,
+            "rating": media.vote_average,
+            "rating_short": int(media.vote_average),
+            "rating_long": "%d-%d" % (int(media.vote_average), int(media.vote_average) + 1),
             "season": media.get_season_seq(),
             "episode": media.get_episode_seqs(),
             "episode_title": StringUtils.clear_file_name(episode_title),
