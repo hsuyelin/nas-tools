@@ -1,4 +1,5 @@
 import os
+import requests
 from urllib.parse import quote
 from functools import lru_cache
 from urllib.parse import quote_plus
@@ -64,7 +65,9 @@ class Plex(_IMediaClient):
             self._servername = self._client_config.get('servername')
             if self._host and self._token:
                 try:
-                    self._plex = PlexServer(self._host, self._token)
+                    session = requests.Session()
+                    session.verify = False
+                    self._plex = PlexServer(self._host, self._token, session=session)
                 except Exception as e:
                     ExceptionUtils.exception_traceback(e)
                     self._plex = None
