@@ -45,6 +45,7 @@ class ChromeHelper(object):
             return
         global driver_executable_path
         try:
+            print(Config().get_config('proxies'))
             os.environ["https_proxy"] = Config().get_config('proxies')['https']
             download_webdriver_path = ChromeDriverManager().install()
             SystemUtils.chmod755(download_webdriver_path)
