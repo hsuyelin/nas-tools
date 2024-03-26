@@ -5,6 +5,7 @@ from functools import reduce
 from threading import Lock
 
 import requests
+import os.environ
 import undetected_chromedriver as uc
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -44,6 +45,7 @@ class ChromeHelper(object):
             return
         global driver_executable_path
         try:
+            os.environ["https_proxy"] = Config().get_config('proxies')['https']
             download_webdriver_path = ChromeDriverManager().install()
             SystemUtils.chmod755(download_webdriver_path)
             driver_executable_path = download_webdriver_path
