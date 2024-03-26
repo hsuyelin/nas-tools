@@ -136,7 +136,7 @@ if __name__ == '__main__':
             p1.start()
 
     # 初始化浏览器驱动
-    #init_chrome()
+    init_chrome()
 
     # Flask启动
     App.run(**get_run_config(is_windows_exe))
