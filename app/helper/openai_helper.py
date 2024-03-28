@@ -1,7 +1,7 @@
 import json
 
 import openai
-
+import requests
 from app.utils import OpenAISessionCache
 from app.utils.commons import singleton
 from config import Config
@@ -11,6 +11,9 @@ from config import Config
 class OpenAiHelper:
     _api_key = None
     _api_url = None
+    _model = None
+    _verify_ssl = None
+    _prompt = None
 
     def __init__(self):
         self.init_config()
@@ -26,7 +29,23 @@ class OpenAiHelper:
             proxy_conf = Config().get_proxies()
             if proxy_conf and proxy_conf.get("https"):
                 openai.proxy = proxy_conf.get("https")
-
+        self._model = Config().get_config("openai").get("model")
+        self._verify_ssl = Config().get_config("openai").get("verify_ssl")
+        self._prompt = Config().get_config("openai").get("prompt")
+        if self._model:
+            openai._model = self._model
+        else:
+            openai._model = 'gpt-3.5-turbo'
+        if self._verify_ssl != None:
+            openai._verify_ssl = self._verify_ssl
+        else:
+            openai._verify_ssl = True
+        if self._prompt:
+            openai._prompt = self._prompt
+        else:
+            openai._prompt = "I will give you a movie/tvshow file name.You need to return a Json." \
+                               "\nPay attention to the correct identification of the film name." \
+                               "\n{\"title\":string,\"version\":string,\"part\":string,\"year\":string,\"resolution\":string,\"season\":number|null,\"episode\":number|null}"
     def get_state(self):
         return True if self._api_key else False
 
@@ -99,8 +118,12 @@ class OpenAiHelper:
                         "content": message
                     }
                 ]
+        if openai._verify_ssl == False:
+            session = requests.Session()
+            session.verify = False
+            openai.requestssession = session
         return openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=openai._model,
             user=user,
             messages=message,
             **kwargs
@@ -126,9 +149,7 @@ class OpenAiHelper:
             return None
         result = ""
         try:
-            _filename_prompt = "I will give you a movie/tvshow file name.You need to return a Json." \
-                               "\nPay attention to the correct identification of the film name." \
-                               "\n{\"title\":string,\"version\":string,\"part\":string,\"year\":string,\"resolution\":string,\"season\":number|null,\"episode\":number|null}"
+            _filename_prompt = openai._prompt
             completion = self.__get_model(prompt=_filename_prompt, message=filename)
             result = completion.choices[0].message.content
             return json.loads(result)
