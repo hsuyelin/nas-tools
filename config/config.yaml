@@ -134,6 +134,8 @@ plex:
   host: http://127.0.0.1:32400
   # 【X-Plex-Token】：Plex页面Cookie中的X-Plex-Token，如填写token则无需填写servername、username、password
   token:
+  # 【SSL证书校验】: 默认开启，如果PMS服务端使用自签证书，则需关闭证书校验
+  verify_ssl: true
   # 【Plex服务器的名称】
   servername:
   # 【Plex用户名】
@@ -168,6 +170,13 @@ openai:
   api_key:
   # 【openai api url】：自定义openai请求地址
   api_url:
+  # 【openai 模型】: 自定义openai模型，默认使用gpt-3.5-turbo
+  model:
+  # 【openai 提示词】: 自定义openai提示词，默认使用内置提示词，要求返回json格式内容，如下：
+  # {"title":string,"version":string,"part":string,"year":string,"resolution":string,"season":number|null,"episode":number|null}
+  prompt:
+  # 【openai api证书校验】: 默认开启，访问OpenAI API将进行证书校验，如果API接口使用自签证书或CHATGPT识别时日志报SSL相关错误请关闭
+  verify_ssl: true
 
 # 【OCR】
 ocr:

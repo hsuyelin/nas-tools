@@ -1,4 +1,5 @@
 import os
+import requests
 from urllib.parse import quote
 from functools import lru_cache
 from urllib.parse import quote_plus
@@ -24,6 +25,7 @@ class Plex(_IMediaClient):
     _client_config = {}
     _host = None
     _token = None
+    _verify_ssl = None
     _username = None
     _password = None
     _servername = None
@@ -42,12 +44,17 @@ class Plex(_IMediaClient):
         if self._client_config:
             self._host = self._client_config.get('host')
             self._token = self._client_config.get('token')
+            self._verify_ssl = self._client_config.get('verify_ssl')
             if self._host:
                 if not self._host.startswith('http'):
                     self._host = "http://" + self._host
                 if not self._host.endswith('/'):
                     self._host = self._host + "/"
             self._play_host = self._client_config.get('play_host')
+            if self._verify_ssl != None:
+                self._verify_ssl = self._client_config.get('verify_ssl')
+            else:
+                self._verify_ssl = True
             if not self._play_host:
                 self._play_host = self._host
             else:
@@ -64,7 +71,12 @@ class Plex(_IMediaClient):
             self._servername = self._client_config.get('servername')
             if self._host and self._token:
                 try:
-                    self._plex = PlexServer(self._host, self._token)
+                    session = requests.Session()
+                    if self._verify_ssl == False:
+                        session.verify = False
+                    else:
+                        session.verify = True
+                    self._plex = PlexServer(self._host, self._token, session=session)
                 except Exception as e:
                     ExceptionUtils.exception_traceback(e)
                     self._plex = None

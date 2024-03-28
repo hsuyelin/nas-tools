@@ -840,6 +840,13 @@ class ModuleConf(object):
                     "type": "text",
                     "placeholder": "http://127.0.0.1:32400"
                 },
+                "verify_ssl": {
+                        "id": "plex.verify_ssl",
+                        "required": False,
+                        "title": "SSL证书校验",
+                        "tooltip": "默认开启，如果PMS服务使用自签证书，请关闭证书校验",
+                        "type": "switch"
+                },
                 "token": {
                     "id": "plex.token",
                     "required": False,
