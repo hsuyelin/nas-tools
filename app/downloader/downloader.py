@@ -2,6 +2,8 @@ import os
 from threading import Lock
 from enum import Enum
 import json
+import re
+from urllib.parse import urlsplit
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -16,7 +18,7 @@ from app.mediaserver import MediaServer
 from app.message import Message
 from app.plugins import EventManager
 from app.sites import Sites, SiteSubtitle
-from app.utils import Torrent, StringUtils, SystemUtils, ExceptionUtils, NumberUtils
+from app.utils import Torrent, StringUtils, SystemUtils, ExceptionUtils, NumberUtils, RequestUtils
 from app.utils.commons import singleton
 from app.utils.types import MediaType, DownloaderType, SearchType, RmtMode, EventType, SystemConfigKey
 from config import Config, PT_TAG, RMT_MEDIAEXT, PT_TRANSFER_INTERVAL
@@ -319,6 +321,8 @@ class Downloader:
         else:
             # 没有种子文件解析链接
             url = media_info.enclosure
+            if 'm-team' in media_info.page_url and media_info.enclosure is None:
+                url = Downloader().get_download_url(media_info.page_url)
             if not url:
                 __download_fail("下载链接为空")
                 return None, None, "下载链接为空"
@@ -1485,3 +1489,19 @@ class Downloader:
         )
         self.init_config()
         return ret
+
+    @staticmethod
+    def get_download_url(page_url):
+        split_url = urlsplit(page_url)
+        base_url = f"{split_url.scheme}://{split_url.netloc}"
+        site_info = Sites().get_sites(siteurl=base_url)
+        cookie=site_info.get("cookie")
+        ua=site_info.get("ua")
+        proxy=site_info.get("proxy")
+        media_id = (re.findall(r'\d+', page_url) or [''])[0]
+        res = RequestUtils(headers=ua,
+                        cookies=cookie,
+                        proxies=proxy,
+                        timeout=15).post_res(url=f'{base_url}/api/torrent/genDlToken', data={'id': media_id})
+        if res and res.status_code == 200:
+            return res.json().get('data', '')
