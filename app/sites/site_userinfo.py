@@ -82,56 +82,70 @@ class SiteUserInfo(object):
             html_text = chrome.get_html()
         else:
             proxies = Config().get_proxies() if proxy else None
-            res = RequestUtils(cookies=site_cookie,
-                               session=session,
-                               headers=ua,
-                               proxies=proxies
-                               ).get_res(url=url)
+            if 'm-team' in url:
+                profile_url = url + '/api/member/profile'
+                res = RequestUtils(cookies=site_cookie,
+                                session=session,
+                                headers=ua,
+                                proxies=proxies
+                            ).post_res(url=profile_url, data={})
+            else:
+                res = RequestUtils(cookies=site_cookie,
+                                session=session,
+                                headers=ua,
+                                proxies=proxies
+                                ).get_res(url=url)
             if res and res.status_code == 200:
                 if "charset=utf-8" in res.text or "charset=UTF-8" in res.text:
                     res.encoding = "UTF-8"
                 else:
                     res.encoding = res.apparent_encoding
                 html_text = res.text
+                # 单独处理m-team
+                if 'm-team' in url:
+                    json_data = json.loads(html_text)
+                    if 'message' in json_data and json_data['message'] != "SUCCESS":
+                        return None
+                else:
                 # 第一次登录反爬
-                if html_text.find("title") == -1:
-                    i = html_text.find("window.location")
-                    if i == -1:
-                        return None
-                    tmp_url = url + html_text[i:html_text.find(";")] \
-                        .replace("\"", "").replace("+", "").replace(" ", "").replace("window.location=", "")
-                    res = RequestUtils(cookies=site_cookie,
-                                       session=session,
-                                       headers=ua,
-                                       proxies=proxies
-                                       ).get_res(url=tmp_url)
-                    if res and res.status_code == 200:
-                        if "charset=utf-8" in res.text or "charset=UTF-8" in res.text:
-                            res.encoding = "UTF-8"
-                        else:
-                            res.encoding = res.apparent_encoding
-                        html_text = res.text
-                        if not html_text:
+                    if html_text.find("title") == -1:
+                        i = html_text.find("window.location")
+                        if i == -1:
                             return None
-                    else:
-                        log.error("【Sites】站点 %s 被反爬限制：%s, 状态码：%s" % (site_name, url, res.status_code))
-                        return None
+                        tmp_url = url + html_text[i:html_text.find(";")] \
+                            .replace("\"", "").replace("+", "").replace(" ", "").replace("window.location=", "")
+                        res = RequestUtils(cookies=site_cookie,
+                                        session=session,
+                                        headers=ua,
+                                        proxies=proxies
+                                        ).get_res(url=tmp_url)
+                        if res and res.status_code == 200:
+                            if "charset=utf-8" in res.text or "charset=UTF-8" in res.text:
+                                res.encoding = "UTF-8"
+                            else:
+                                res.encoding = res.apparent_encoding
+                            html_text = res.text
+                            if not html_text:
+                                return None
+                        else:
+                            log.error("【Sites】站点 %s 被反爬限制：%s, 状态码：%s" % (site_name, url, res.status_code))
+                            return None
 
-                # 兼容假首页情况，假首页通常没有 <link rel="search" 属性
-                if '"search"' not in html_text and '"csrf-token"' not in html_text:
-                    res = RequestUtils(cookies=site_cookie,
-                                       session=session,
-                                       headers=ua,
-                                       proxies=proxies
-                                       ).get_res(url=url + "/index.php")
-                    if res and res.status_code == 200:
-                        if "charset=utf-8" in res.text or "charset=UTF-8" in res.text:
-                            res.encoding = "UTF-8"
-                        else:
-                            res.encoding = res.apparent_encoding
-                        html_text = res.text
-                        if not html_text:
-                            return None
+                    # 兼容假首页情况，假首页通常没有 <link rel="search" 属性
+                    if '"search"' not in html_text and '"csrf-token"' not in html_text:
+                        res = RequestUtils(cookies=site_cookie,
+                                        session=session,
+                                        headers=ua,
+                                        proxies=proxies
+                                        ).get_res(url=url + "/index.php")
+                        if res and res.status_code == 200:
+                            if "charset=utf-8" in res.text or "charset=UTF-8" in res.text:
+                                res.encoding = "UTF-8"
+                            else:
+                                res.encoding = res.apparent_encoding
+                            html_text = res.text
+                            if not html_text:
+                                return None
             elif res is not None:
                 log.error(f"【Sites】站点 {site_name} 连接失败，状态码：{res.status_code}")
                 return None
