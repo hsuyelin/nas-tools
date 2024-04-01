@@ -307,10 +307,18 @@ class Sites:
         else:
             # 计时
             start_time = datetime.now()
-            res = RequestUtils(cookies=site_cookie,
-                               headers=ua,
-                               proxies=Config().get_proxies() if site_info.get("proxy") else None
-                               ).get_res(url=site_url)
+            # m-team处理
+            if 'm-team' in site_url:
+                url = site_url + '/api/member/profile'
+                res = RequestUtils(cookies=site_cookie,
+                                headers=ua,
+                                proxies=Config().get_proxies() if site_info.get("proxy") else None
+                            ).post_res(url=url, data={})
+            else:
+                res = RequestUtils(cookies=site_cookie,
+                                headers=ua,
+                                proxies=Config().get_proxies() if site_info.get("proxy") else None
+                                ).get_res(url=site_url)
             seconds = int((datetime.now() - start_time).microseconds / 1000)
             if res and res.status_code == 200:
                 if not SiteHelper.is_logged_in(res.text):
