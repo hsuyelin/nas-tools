@@ -22,3 +22,14 @@ class JsonUtils:
                 return str(o)
 
         return json.loads(json.dumps(obj, default=lambda o: _try(o)))
+        
+    @staticmethod
+    def is_valid_json(text):
+        """
+        判断是否是有效的json格式字符串
+        """
+        try:
+            json.loads(text)
+            return True
+        except json.JSONDecodeError:
+            return False
