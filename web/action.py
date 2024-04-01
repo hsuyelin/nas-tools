@@ -11,7 +11,7 @@ import sqlite3
 import time
 from math import floor
 from pathlib import Path
-from urllib.parse import unquote
+from urllib.parse import unquote, urlsplit
 import ast
 import copy
 
@@ -559,13 +559,19 @@ class WebAction:
         dl_setting = data.get("setting")
         results = Searcher().get_search_result_by_id(dl_id)
         for res in results:
+            enclosure = ''
+            # 处理m-tem下载链接
+            if 'm-team' in res.PAGEURL and res.ENCLOSURE is None:
+                enclosure = Downloader().get_download_url(res.PAGEURL)
+            else:
+                enclosure = res.ENCLOSURE
             dl_enclosure = res.ENCLOSURE if Sites().get_sites_by_url_domain(res.ENCLOSURE) else Torrent.format_enclosure(res.ENCLOSURE)
             if not dl_enclosure:
                 continue
             media = Media().get_media_info(title=res.TORRENT_NAME, subtitle=res.DESCRIPTION)
             if not media:
                 continue
-            media.set_torrent_info(enclosure=res.ENCLOSURE,
+            media.set_torrent_info(enclosure=enclosure,
                                    size=res.SIZE,
                                    site=res.SITE,
                                    page_url=res.PAGEURL,
@@ -592,6 +598,9 @@ class WebAction:
         title = data.get("title")
         description = data.get("description")
         page_url = data.get("page_url")
+        # 处理m-tem下载链接
+        if 'm-team' in page_url and enclosure == 'None':
+            enclosure = Downloader().get_download_url(page_url)
         size = data.get("size")
         seeders = data.get("seeders")
         uploadvolumefactor = data.get("uploadvolumefactor")
@@ -618,6 +627,22 @@ class WebAction:
             return {"code": 1, "msg": ret_msg or "如连接正常，请检查下载任务是否存在"}
         return {"code": 0, "msg": "下载成功"}
 
+    # @staticmethod
+    # def __get_download_url(page_url):
+    #     split_url = urlsplit(page_url)
+    #     base_url = f"{split_url.scheme}://{split_url.netloc}"
+    #     site_info = Sites().get_sites(siteurl=base_url)
+    #     cookie=site_info.get("cookie")
+    #     ua=site_info.get("ua")
+    #     proxy=site_info.get("proxy")
+    #     media_id = (re.findall(r'\d+', page_url) or [''])[0]
+    #     res = RequestUtils(headers=ua,
+    #                     cookies=cookie,
+    #                     proxies=proxy,
+    #                     timeout=15).post_res(url=f'{base_url}/api/torrent/genDlToken', data={'id': media_id})
+    #     if res and res.status_code == 200:
+    #         return res.json().get('data', '')
+    
     @staticmethod
     def __download_torrent(data):
         """
