@@ -2,7 +2,6 @@ import datetime
 import os.path
 import time
 import re
-import tempfile
 import hashlib
 from urllib.parse import unquote, urlencode, urlparse
 
