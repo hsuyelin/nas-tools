@@ -728,10 +728,18 @@ class AutoSignIn(_IPluginModule):
                     checkin_text = "模拟登录"
                 self.info(f"开始站点{checkin_text}：{site}")
                 # 访问链接
-                res = RequestUtils(cookies=site_cookie,
-                                   headers=ua,
-                                   proxies=Config().get_proxies() if site_info.get("proxy") else None
-                                   ).get_res(url=site_url)
+                # m-team处理
+                if 'm-team' in site_url:
+                    url = site_url + 'api/member/profile'
+                    res = RequestUtils(cookies=site_cookie,
+                                    headers=ua,
+                                    proxies=Config().get_proxies() if site_info.get("proxy") else None
+                                ).post_res(url=url, data={})
+                else:
+                    res = RequestUtils(cookies=site_cookie,
+                                    headers=ua,
+                                    proxies=Config().get_proxies() if site_info.get("proxy") else None
+                                    ).get_res(url=site_url)
                 if res and res.status_code in [200, 500, 403]:
                     if not SiteHelper.is_logged_in(res.text):
                         if under_challenge(res.text):
