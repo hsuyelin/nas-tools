@@ -2,7 +2,7 @@ import re
 import json
 
 import log
-from app.utils import RequestUtils, StringUtils
+from app.utils import RequestUtils
 from config import Config
 
 
@@ -34,19 +34,6 @@ class MteamSpider(object):
     def init_config(self):
         self._size = Config().get_config('pt').get('site_search_result_num') or 100
 
-    def __get_torrent_url(self, mid):
-        if not self._domain:
-            return
-
-        res = RequestUtils(headers=self._ua,
-                           cookies=self._cookie,
-                           proxies=self._proxy,
-                           timeout=15).post_res(url=self._downloadurl, data={'id': mid})
-        if res and res.status_code == 200:
-            return res.json().get('data', '')
-        else:
-            return
-
     def search(self, keyword="", page=0):
         params = {
             "mode": "normal",
@@ -72,12 +59,12 @@ class MteamSpider(object):
             results = res.json().get('data', {}).get("data") or []
             for result in results:
                 imdbid = (re.findall(r'tt\d+', result.get('imdb')) or [''])[0]
-                enclosure = self.__get_torrent_url(result.get('id'))
+                # enclosure = self.__get_torrent_url(result.get('id'))
                 torrent = {
                     'indexer': self._indexerid,
                     'title': result.get('name'),
                     'description': result.get('smallDescr'),
-                    'enclosure': enclosure,
+                    'enclosure': None,
                     'pubdate': result.get('createdDate'),
                     'size': result.get('size'),
                     'seeders': result.get('status').get('seeders'),
