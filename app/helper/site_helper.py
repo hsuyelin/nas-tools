@@ -2,10 +2,11 @@
 from datetime import datetime
 import os
 import re
+import json
 
 from lxml import etree
 
-from app.utils import SystemUtils
+from app.utils import SystemUtils, JsonUtils
 from config import RMT_SUBEXT
 
 
@@ -18,6 +19,13 @@ class SiteHelper:
         :param html_text:
         :return:
         """
+        if JsonUtils.is_valid_json(html_text):
+            json_data = json.loads(html_text)
+            if json_data.get('message') == 'SUCCESS':
+                return True
+            else:
+                return False
+                
         html = etree.HTML(html_text)
         if not html:
             return False
