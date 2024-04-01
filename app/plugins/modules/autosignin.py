@@ -730,6 +730,8 @@ class AutoSignIn(_IPluginModule):
                 # 访问链接
                 # m-team处理
                 if 'm-team' in site_url:
+                    if not site_url.endswith('/'):
+                        site_url = site_url + '/'
                     url = site_url + 'api/member/profile'
                     res = RequestUtils(cookies=site_cookie,
                                     headers=ua,
