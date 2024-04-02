@@ -321,7 +321,7 @@ class Downloader:
         else:
             # 没有种子文件解析链接
             url = media_info.enclosure
-            if 'm-team' in media_info.page_url and media_info.enclosure is None:
+            if media_info.page_url and 'm-team' in media_info.page_url and media_info.enclosure is None:
                 url = Downloader().get_download_url(media_info.page_url)
             if not url:
                 __download_fail("下载链接为空")
