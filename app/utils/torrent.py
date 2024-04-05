@@ -24,12 +24,13 @@ class Torrent:
         if not os.path.exists(self._torrent_temp_path):
             os.makedirs(self._torrent_temp_path, exist_ok=True)
 
-    def get_torrent_info(self, url, cookie=None, ua=None, referer=None, proxy=False):
+    def get_torrent_info(self, url, cookie=None, ua=None, apikey=None, referer=None, proxy=False):
         """
         把种子下载到本地，返回种子内容
         :param url: 种子链接
         :param cookie: 站点Cookie
         :param ua: 站点UserAgent
+        :param apikey: 站点Api-Key
         :param referer: 关联地址，有的网站需要这个否则无法下载
         :param proxy: 是否使用内置代理
         :return: 种子保存路径、种子内容、种子文件列表主目录、种子文件列表、错误信息
@@ -43,6 +44,7 @@ class Torrent:
             file_path, content, errmsg = self.save_torrent_file(url=url,
                                                                 cookie=cookie,
                                                                 ua=ua,
+                                                                apikey=apikey,
                                                                 referer=referer,
                                                                 proxy=proxy)
             if not file_path:
@@ -55,7 +57,7 @@ class Torrent:
         except Exception as err:
             return None, None, "", [], "下载种子文件出现异常：%s" % str(err)
 
-    def save_torrent_file(self, url, cookie=None, ua=None, referer=None, proxy=False):
+    def save_torrent_file(self, url, cookie=None, ua=None, apikey=None, referer=None, proxy=False):
         """
         把种子下载到本地
         :return: 种子保存路径，错误信息

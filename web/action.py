@@ -661,6 +661,7 @@ class WebAction:
                 url=url,
                 cookie=site_info.get("cookie"),
                 ua=site_info.get("ua"),
+                apikey=site_info.get("apikey"),
                 proxy=site_info.get("proxy")
             )
             if not file_path:

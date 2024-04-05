@@ -69,6 +69,7 @@ class RenderSpider(object):
             if not chrome.visit(url=search_url,
                                 cookie=self._indexer.cookie,
                                 ua=self._indexer.ua,
+                                apikey=self._indexer.apikey,
                                 proxy=self._indexer.proxy):
                 return True, []
             cloudflare = chrome.pass_cloudflare()
@@ -100,6 +101,7 @@ class RenderSpider(object):
             if not chrome.visit(url=search_url,
                                 cookie=self._indexer.cookie,
                                 ua=self._indexer.ua,
+                                apikey=self._indexer.apikey,
                                 proxy=self._indexer.proxy):
                 return True, []
             cloudflare = chrome.pass_cloudflare()

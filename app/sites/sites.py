@@ -87,6 +87,7 @@ class Sites:
                 "statistic_enable": statistic_enable,
                 "uses": uses,
                 "ua": site_note.get("ua"),
+                "apikey": site_note.get("apikey"),
                 "parse": True if site_note.get("parse") == "Y" else False,
                 "unread_msg_notify": True if site_note.get("message") == "Y" else False,
                 "chrome": True if site_note.get("chrome") == "Y" else False,
@@ -264,6 +265,31 @@ class Sites:
                     return site.get("tags")
         return None
 
+    def test_mt_connection(self, site_info):
+        # 计时
+        start_time = datetime.now()
+        site_url = StringUtils.get_base_url(site_info.get("signurl")) + "/api/system/hello"
+        headers = {
+            "Content-Type": "application/json; charset=UTF-8",
+            "User-Agent": site_info.get("ua"),
+            "x-api-key": site_info.get("apikey"),
+            "Accept": "application/json"
+        }
+        res = RequestUtils(headers=headers,
+                           proxies=Config().get_proxies() if site_info.get("proxy") else None
+                           ).post_res(url=site_url)
+        seconds = int((datetime.now() - start_time).microseconds / 1000)
+        if res and res.status_code == 200:
+            msg = res.json().get("message") or "null"
+            if msg == "SUCCESS":
+                return True, "连接成功", seconds
+            else:
+                return False, msg, seconds
+        elif res is not None:
+            return False, f"连接失败，状态码：{res.status_code}", seconds
+        else:
+            return False, "无法打开网站", seconds
+
     def test_connection(self, site_id):
         """
         测试站点连通性
@@ -277,6 +303,7 @@ class Sites:
         if not site_cookie:
             return False, "未配置站点Cookie", 0
         ua = site_info.get("ua") or Config().get_ua()
+        apikey = site_info.get("apikey")
         site_url = StringUtils.get_base_url(site_info.get("signurl") or site_info.get("rssurl"))
         if not site_url:
             return False, "未配置站点地址", 0
@@ -285,11 +312,13 @@ class Sites:
             site_url = site_url + '/index.php'
         elif 'zmpt' in site_url:
             site_url = site_url + '/index.php'
+        elif 'm-team' in site_url:
+            return self.test_mt_connection(site_info);
         chrome = ChromeHelper()
         if site_info.get("chrome") and chrome.get_status():
             # 计时
             start_time = datetime.now()
-            if not chrome.visit(url=site_url, ua=ua, cookie=site_cookie, proxy=site_info.get("proxy")):
+            if not chrome.visit(url=site_url, ua=ua, apikey=apikey, cookie=site_cookie, proxy=site_info.get("proxy")):
                 return False, "Chrome模拟访问失败", 0
             # 循环检测是否过cf
             cloudflare = chrome.pass_cloudflare()

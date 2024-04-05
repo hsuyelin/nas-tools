@@ -63,7 +63,7 @@ class DiscuzUserInfo(_ISiteUserInfo):
         if ratio_text:
             ratio_match = re.search(r"\(([\d,.]+)\)", ratio_text[0])
             if ratio_match and ratio_match.group(1).strip():
-                self.bonus = StringUtils.str_float(ratio_match.group(1))
+                self.ratio = StringUtils.str_float(ratio_match.group(1))
 
         # 积分
         bouns_text = html.xpath('//li[em[text()="积分"]]/text()')

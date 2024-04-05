@@ -657,6 +657,7 @@ class AutoSignIn(_IPluginModule):
             site_url = site_info.get("signurl")
             site_cookie = site_info.get("cookie")
             ua = site_info.get("ua")
+            apikey = site_info.get("apikey")
             if not site_url or not site_cookie:
                 self.warn("未配置 %s 的站点地址或Cookie，无法签到" % str(site))
                 return ""
@@ -667,7 +668,7 @@ class AutoSignIn(_IPluginModule):
                 home_url = StringUtils.get_base_url(site_url)
                 if "1ptba" in home_url:
                     home_url = f"{home_url}/index.php"
-                if not chrome.visit(url=home_url, ua=ua, cookie=site_cookie, proxy=site_info.get("proxy")):
+                if not chrome.visit(url=home_url, ua=ua, apikey=apikey, cookie=site_cookie, proxy=site_info.get("proxy")):
                     self.warn("%s 无法打开网站" % site)
                     return f"【{site}】仿真签到失败，无法打开网站！"
                 # 循环检测是否过cf

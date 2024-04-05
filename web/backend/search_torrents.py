@@ -261,6 +261,7 @@ def search_media_by_message(input_str, in_from: SearchType, user_id, user_name=N
                 url=input_str,
                 cookie=site_info.get("cookie"),
                 ua=site_info.get("ua"),
+                apikey=site_info.get("apikey"),
                 proxy=site_info.get("proxy")
             )
             # 下载种子出错

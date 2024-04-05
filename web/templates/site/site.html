@@ -212,6 +212,15 @@
           </div>
         </div>
         <div class="row">
+          <div class="col-lg-12">
+            <div class="mb-3">
+              <label class="form-label">Api-Key <span class="form-help"
+                                                         title="站点签到/数据获取/搜索请求时使用的api-key，一些网站必须用api-key拉取数据，如新版mt" data-bs-toggle="tooltip">?</span></label>
+              <input type="text" class="form-control" id="site_apikey" value="" placeholder="站点访问Api-Key">
+            </div>
+          </div>
+        </div>
+        <div class="row">
           <div class="col-lg-4">
             <div class="mb-3">
               <label class="form-label required">RSS解析种子详情 <span class="form-help"
@@ -480,6 +489,7 @@
     $("#site_cookie").val('');
     $("#site_rule").val('');
     $("#site_ua").val('');
+    $("#site_apikey").val('');
     $("#site_chrome").val('N');
     $("#site_proxy").val('N');
     $("#site_parse").val('Y');
@@ -508,6 +518,7 @@
         $("#site_signurl").val(ret.site.signurl);
         $("#site_cookie").val(ret.site.cookie);
         $("#site_ua").val(ret.site.ua);
+        $("#site_apikey").val(ret.site.apikey);
         $("#site_download_setting").val(ret.site.download_setting);
         if (ret.site.parse) {
           $("#site_parse").val("Y");
@@ -606,6 +617,7 @@
       $("#site_rssurl").removeClass("is-invalid");
     };
     let ua = $("#site_ua").val();
+    let apikey = $("#site_apikey").val();
     let chrome = $("#site_chrome").val();
     let proxy = $("#site_proxy").val();
     let subtitle = $("#site_subtitle").val();
@@ -645,6 +657,7 @@
         "download_setting": site_download_setting,
         "parse": site_parse,
         "ua": ua,
+        "apikey": apikey,
         "chrome": chrome,
         "proxy": proxy,
         "message": site_unread_msg_notify,
