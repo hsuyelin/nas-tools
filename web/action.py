@@ -1981,6 +1981,8 @@ class WebAction:
         brushtask_include = data.get("brushtask_include")
         brushtask_exclude = data.get("brushtask_exclude")
         brushtask_dlcount = data.get("brushtask_dlcount")
+        brushtask_current_site_count = data.get("brushtask_current_site_count")
+        brushtask_current_site_dlcount = data.get("dl")
         brushtask_peercount = data.get("brushtask_peercount")
         brushtask_seedtime = data.get("brushtask_seedtime")
         brushtask_seedratio = data.get("brushtask_seedratio")
@@ -1999,6 +2001,8 @@ class WebAction:
             "include": brushtask_include,
             "exclude": brushtask_exclude,
             "dlcount": brushtask_dlcount,
+            "current_site_count": brushtask_current_site_count,
+            "current_site_dlcount": brushtask_current_site_dlcount,
             "peercount": brushtask_peercount,
             "pubdate": brushtask_pubdate,
             "upspeed": brushtask_upspeed,

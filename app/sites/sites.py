@@ -265,6 +265,31 @@ class Sites:
                     return site.get("tags")
         return None
 
+    def test_mt_connection(self, site_info):
+        # 计时
+        start_time = datetime.now()
+        site_url = StringUtils.get_base_url(site_info.get("signurl")) + "/api/system/hello"
+        headers = {
+            "Content-Type": "application/json; charset=UTF-8",
+            "User-Agent": site_info.get("ua"),
+            "x-api-key": site_info.get("apikey"),
+            "Accept": "application/json"
+        }
+        res = RequestUtils(headers=headers,
+                           proxies=Config().get_proxies() if site_info.get("proxy") else None
+                           ).post_res(url=site_url)
+        seconds = int((datetime.now() - start_time).microseconds / 1000)
+        if res and res.status_code == 200:
+            msg = res.json().get("message") or "null"
+            if msg == "SUCCESS":
+                return True, "连接成功", seconds
+            else:
+                return False, msg, seconds
+        elif res is not None:
+            return False, f"连接失败，状态码：{res.status_code}", seconds
+        else:
+            return False, "无法打开网站", seconds
+
     def test_connection(self, site_id):
         """
         测试站点连通性
