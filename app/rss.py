@@ -118,6 +118,7 @@ class Rss:
                 site_id = site_info.get("id")
                 site_cookie = site_info.get("cookie")
                 site_ua = site_info.get("ua")
+                site_apikey = site_info.get("apikey")
                 # 是否解析种子详情
                 site_parse = site_info.get("parse")
                 # 是否使用代理
@@ -195,6 +196,7 @@ class Rss:
                             site_cookie=site_cookie,
                             site_parse=site_parse,
                             site_ua=site_ua,
+                            site_apikey=site_apikey,
                             site_proxy=site_proxy)
                         for msg in match_msg:
                             log.info(f"【Rss】{msg}")
@@ -329,6 +331,7 @@ class Rss:
                           site_cookie,
                           site_parse,
                           site_ua,
+                          site_apikey,
                           site_proxy):
         """
         判断种子是否命中订阅
@@ -340,6 +343,7 @@ class Rss:
         :param site_cookie: 站点的Cookie
         :param site_parse: 是否解析种子详情
         :param site_ua: 站点请求UA
+        :param site_apikey: 站点apikey
         :param site_proxy: 是否使用代理
         :return: 匹配到的订阅ID、是否洗版、总集数、匹配规则的资源顺序、上传因子、下载因子，匹配的季（电视剧）
         """
@@ -453,16 +457,10 @@ class Rss:
                 torrent_attr = self.siteconf.check_torrent_attr(torrent_url=media_info.page_url,
                                                                 cookie=site_cookie,
                                                                 ua=site_ua,
+                                                                apikey=site_apikey,
                                                                 proxy=site_proxy)
-                if torrent_attr.get('2xfree'):
-                    download_volume_factor = 0.0
-                    upload_volume_factor = 2.0
-                elif torrent_attr.get('free'):
-                    download_volume_factor = 0.0
-                    upload_volume_factor = 1.0
-                else:
-                    upload_volume_factor = 1.0
-                    download_volume_factor = 1.0
+                download_volume_factor = float(torrent_attr.get("download_volume_factor", 1))
+                upload_volume_factor = float(torrent_attr.get("upload_volume_factor", 1))
                 if torrent_attr.get('hr'):
                     hit_and_run = True
                 # 设置属性

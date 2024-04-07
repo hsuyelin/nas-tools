@@ -333,6 +333,7 @@ class Downloader:
                     url=url,
                     cookie=site_info.get("cookie"),
                     ua=site_info.get("ua"),
+                    apikey=site_info.get("apikey"),
                     referer=page_url if site_info.get("referer") else None,
                     proxy=proxy if proxy is not None else site_info.get("proxy")
                 )
@@ -510,6 +511,7 @@ class Downloader:
                             site_info.get("id"),
                             site_info.get("cookie"),
                             site_info.get("ua"),
+                            site_info.get("apikey"),
                             subtitle_dir
                         )
                     )
@@ -1246,6 +1248,7 @@ class Downloader:
             url=url,
             cookie=site_info.get("cookie"),
             ua=site_info.get("ua"),
+            apikey=site_info.get("apikey"),
             referer=page_url if site_info.get("referer") else None,
             proxy=site_info.get("proxy")
         )

@@ -12,6 +12,7 @@ class IndexerConf(object):
                  proxy=False,
                  parser=None,
                  ua=None,
+                 apikey=None,
                  render=None,
                  builtin=True,
                  language=None,
@@ -46,6 +47,8 @@ class IndexerConf(object):
         self.cookie = cookie
         # User-Agent
         self.ua = ua
+        # Api-Key
+        self.apikey = apikey
         # 过滤规则
         self.rule = rule
         # 是否公开站点
@@ -73,6 +76,7 @@ class IndexerConf(object):
             "category": self.category or {},
             "cookie": self.cookie or "",
             "ua": self.ua or "",
+            "apikey": self.apikey or "",
             "rule": self.rule or "",
             "public": self.public or False,
             "proxy": self.proxy or "",

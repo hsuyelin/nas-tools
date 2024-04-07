@@ -99,6 +99,7 @@ class SiteSchema(Enum):
     TorrentLeech = "TorrentLeech"
     FileList = "FileList"
     TNode = "TNode"
+    MTeamTorrent = "MTeamTorrent"
 
 
 # 可监听事件

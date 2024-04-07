@@ -15,6 +15,7 @@ from app.sites.sites import Sites
 from app.utils import RequestUtils, ExceptionUtils, StringUtils
 from app.utils.commons import singleton
 from config import Config
+from app.sites.siteuserinfo.mteam_torrent import MTeamTorrentUserInfo
 
 lock = Lock()
 
@@ -57,20 +58,25 @@ class SiteUserInfo(object):
         return None
 
     def build(self, url, site_id, site_name,
-              site_cookie=None, ua=None, emulate=None, proxy=False):
+              site_cookie=None, ua=None, apikey=None, emulate=None, proxy=False):
         if not site_cookie:
             return None
         session = requests.Session()
-        log.debug(f"【Sites】站点 {site_name} url={url} site_cookie={site_cookie} ua={ua}")
+        log.debug(f"【Sites】站点 {site_name} url={url} site_cookie={site_cookie} ua={ua} apikey={apikey}")
 
         # 站点流控
         if self.sites.check_ratelimit(site_id):
             return
 
+        # 避免馒头首页返回xml内容修改无法绑定，且效率高
+        site_domain_url = StringUtils.get_base_url(url)
+        if 'm-team' in site_domain_url:
+            return MTeamTorrentUserInfo(site_name, site_domain_url, site_cookie, "", session=session, ua=ua, apikey=apikey, emulate=emulate, proxy=proxy)
+
         # 检测环境，有浏览器内核的优先使用仿真签到
         chrome = ChromeHelper()
         if emulate and chrome.get_status():
-            if not chrome.visit(url=url, ua=ua, cookie=site_cookie, proxy=proxy):
+            if not chrome.visit(url=url, ua=ua, apikey=apikey, cookie=site_cookie, proxy=proxy):
                 log.error("【Sites】%s 无法打开网站" % site_name)
                 return None
             # 循环检测是否过cf
@@ -144,10 +150,10 @@ class SiteUserInfo(object):
             log.error("【Sites】站点 %s 无法识别站点类型" % site_name)
             return None
 
-        parsed_url = urlparse(url)
-        if parsed_url.netloc:
-            site_domain_url = urlunparse((parsed_url.scheme, parsed_url.netloc, "", "", "", ""))
-        return site_schema(site_name, site_domain_url, site_cookie, html_text, session=session, ua=ua, emulate=emulate, proxy=proxy)
+        #parsed_url = urlparse(url)
+        #if parsed_url.netloc:
+        #    site_domain_url = urlunparse((parsed_url.scheme, parsed_url.netloc, "", "", "", ""))
+        return site_schema(site_name, site_domain_url, site_cookie, html_text, session=session, ua=ua, apikey=apikey, emulate=emulate, proxy=proxy)
 
     def __refresh_site_data(self, site_info):
         """
@@ -163,6 +169,7 @@ class SiteUserInfo(object):
             return
         site_cookie = site_info.get("cookie")
         ua = site_info.get("ua")
+        apikey = site_info.get("apikey")
         unread_msg_notify = site_info.get("unread_msg_notify")
         chrome = site_info.get("chrome")
         proxy = site_info.get("proxy")
@@ -189,6 +196,7 @@ class SiteUserInfo(object):
                                         site_name=site_name,
                                         site_cookie=site_cookie,
                                         ua=ua,
+                                        apikey=apikey,
                                         emulate=chrome,
                                         proxy=proxy)
             if site_user_info:
