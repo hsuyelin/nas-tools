@@ -240,7 +240,9 @@ class BuiltinIndexer(_IIndexClient):
         # 计算耗时
         start_time = datetime.datetime.now()
 
-        if indexer.parser == "RenderSpider":
+        if 'm-team' in indexer.domain:
+            error_flag, result_array = MTSpider(indexer).search(keyword=keyword, page=page)
+        elif indexer.parser == "RenderSpider":
             error_flag, result_array = RenderSpider(indexer).search(keyword=keyword,
                                                                     page=page)
         elif indexer.parser == "TNodeSpider":

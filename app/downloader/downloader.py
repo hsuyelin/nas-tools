@@ -19,6 +19,7 @@ from app.sites import Sites, SiteSubtitle
 from app.utils import Torrent, StringUtils, SystemUtils, ExceptionUtils, NumberUtils
 from app.utils.commons import singleton
 from app.utils.types import MediaType, DownloaderType, SearchType, RmtMode, EventType, SystemConfigKey
+from app.apis import MTeamApi
 from config import Config, PT_TAG, RMT_MEDIAEXT, PT_TRANSFER_INTERVAL
 
 lock = Lock()
@@ -319,6 +320,12 @@ class Downloader:
         else:
             # 没有种子文件解析链接
             url = media_info.enclosure
+            if not url:
+                base_url = StringUtils.get_base_url(page_url)
+                log.info(f"【Downloader】下载器检查馒头下载地址：%s" % (page_url))
+                if "m-team" in base_url:
+                    site_info = self.sites.get_sites_by_url_domain(base_url)
+                    url = MTeamApi.get_torrent_url_by_detail_url(base_url, page_url, site_info)
             if not url:
                 __download_fail("下载链接为空")
                 return None, None, "下载链接为空"

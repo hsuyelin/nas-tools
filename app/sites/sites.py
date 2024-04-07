@@ -8,7 +8,7 @@ from app.sites.site_limiter import SiteRateLimiter
 from app.utils import RequestUtils, StringUtils
 from app.utils.commons import singleton
 from config import Config
-
+from app.apis import MTeamApi
 
 @singleton
 class Sites:
@@ -265,31 +265,6 @@ class Sites:
                     return site.get("tags")
         return None
 
-    def test_mt_connection(self, site_info):
-        # 计时
-        start_time = datetime.now()
-        site_url = StringUtils.get_base_url(site_info.get("signurl")) + "/api/system/hello"
-        headers = {
-            "Content-Type": "application/json; charset=UTF-8",
-            "User-Agent": site_info.get("ua"),
-            "x-api-key": site_info.get("apikey"),
-            "Accept": "application/json"
-        }
-        res = RequestUtils(headers=headers,
-                           proxies=Config().get_proxies() if site_info.get("proxy") else None
-                           ).post_res(url=site_url)
-        seconds = int((datetime.now() - start_time).microseconds / 1000)
-        if res and res.status_code == 200:
-            msg = res.json().get("message") or "null"
-            if msg == "SUCCESS":
-                return True, "连接成功", seconds
-            else:
-                return False, msg, seconds
-        elif res is not None:
-            return False, f"连接失败，状态码：{res.status_code}", seconds
-        else:
-            return False, "无法打开网站", seconds
-
     def test_connection(self, site_id):
         """
         测试站点连通性
@@ -313,7 +288,7 @@ class Sites:
         elif 'zmpt' in site_url:
             site_url = site_url + '/index.php'
         elif 'm-team' in site_url:
-            return self.test_mt_connection(site_info);
+            return MTeamApi.test_mt_connection(site_info);
         chrome = ChromeHelper()
         if site_info.get("chrome") and chrome.get_status():
             # 计时

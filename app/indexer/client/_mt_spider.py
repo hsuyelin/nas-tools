@@ -18,7 +18,6 @@ class MTSpider(object):
     _token = None
     _size = 100
     _searchurl = "%sapi/torrent/search"
-    _downloadurl = "%sapi/torrent/genDlToken"
     _detailurl = "%sdetail/%d"
     _categoryurl = "%sapi/torrent/categoryList"
 
@@ -26,7 +25,6 @@ class MTSpider(object):
         self._indexerid = indexer.id
         self._domain = indexer.domain
         self._searchurl = self._searchurl % self._domain
-        self._downloadurl = self._downloadurl % self._domain
         self._categoryurl = self._categoryurl % self._domain
         self._name = indexer.name
         if indexer.proxy:
@@ -34,7 +32,7 @@ class MTSpider(object):
         self._ua = indexer.ua
         self._apikey = indexer.apikey
         self.init_config()
-        self.check_category_list()
+        # self.check_category_list()
 
     def init_config(self):
         self._size = Config().get_config('pt').get('site_search_result_num') or 100
@@ -64,41 +62,11 @@ class MTSpider(object):
             results = res.json().get('data', {}).get("list") or []
             for result in results:
                 mt_category_list.append(result.get('id'))
-            log.info("【INDEXER】%s 拉取分类成功，获取分类：%d项", self._name, len(mt_category_list))
+            log.info("【INDEXER】%s 拉取分类成功，获取分类：%d项" % (self._name, len(mt_category_list)))
         elif res is not None:
             log.warn(f"【INDEXER】{self._name} 拉取分类失败，错误码：{res.status_code}")
         else:
             log.warn(f"【INDEXER】{self._name} 拉取分类失败，无法连接 {self._domain}")
-
-    # 取种子下载连接
-    def get_torrent_url(self, torrentid):
-        if not self._apikey:
-            log.warn(f"【INDEXER】{self._name} 未设置站点Api-Key，无法获取种子连接")
-            return
-        res = RequestUtils(
-            headers={
-                'x-api-key': self._apikey,
-                "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent": f"{self._ua}",
-                "Accept": "application/json"
-            },
-            proxies=self._proxy,
-            timeout=30
-        ).post_res(url=self._downloadurl, data=("id=%d" % torrentid))
-        if res and res.status_code == 200:
-            res_json = res.json()
-            msg = res_json.get('message')
-            torrent_url = res_json.get('data')
-            if msg != "SUCCESS":
-                log.warn(f"【INDEXER】{self._name} 获取种子连接失败：{msg}")
-                return ""
-            #log.info(f"【INDEXER】{self._name} 获取种子连接成功: {torrent_url}")
-            return torrent_url
-        elif res is not None:
-            log.warn(f"【INDEXER】{self._name} 获取种子连接失败，错误码：{res.status_code}")
-        else:
-            log.warn(f"【INDEXER】{self._name} 获取种子连接失败，无法连接 {self._domain}")
-        return ""
 
     def search(self, keyword, page=0):
         if not self._apikey:
@@ -134,12 +102,12 @@ class MTSpider(object):
                     'indexer': self._indexerid,
                     'title': result.get('name'),
                     'description': result.get('smallDescr'),
-                    'enclosure': self.get_torrent_url(torrentid),   # 种子连接
+                    'enclosure': "",  # 为了减少接口调用，种子连接在下载的时候查询
                     'pubdate': StringUtils.timestamp_to_date(result.get('lastModifiedDate')),
                     'size': result.get('size'),
                     'seeders': status.get('seeders'),
-                    'peers': result.get('leechers'),
-                    'grabs': result.get('timesCompleted'),
+                    'peers': status.get('leechers'),
+                    'grabs': status.get('timesCompleted'),
                     'downloadvolumefactor': 1.0,
                     'uploadvolumefactor': 1.0,
                     'page_url': self._detailurl % (self._domain, torrentid),  # 种子详情页
@@ -174,6 +142,7 @@ class MTSpider(object):
                 elif discount == "FREE":
                     torrent["downloadvolumefactor"] = 0
                     torrent["uploadvolumefactor"] = 1.0
+                # log.warn(f"【INDEXER】{self._name} 搜索成功：{torrent}")
                 torrents.append(torrent)
         elif res is not None:
             log.warn(f"【INDEXER】{self._name} 搜索失败，错误码：{res.status_code}")

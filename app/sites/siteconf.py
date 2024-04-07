@@ -12,7 +12,7 @@ from app.utils.commons import singleton
 from config import Config
 from web.backend.pro_user import ProUser
 from urllib import parse
-
+from app.apis import MTeamApi
 
 @singleton
 class SiteConf:
@@ -99,87 +99,6 @@ class SiteConf:
                 return v
         return {}
 
-    # 检查m-team种子属性
-    def check_mt_torrent_attr(self, torrent_url, ua=None, apikey=None, proxy=False):
-        ret_attr = {
-            "free": False,
-            "2xfree": False,
-            "hr": False,
-            "peer_count": 0,
-            "downloadvolumefactor": 1.0,
-            "uploadvolumefactor": 1.0,
-        }
-        addr = parse.urlparse(torrent_url)
-        # /detail/770**
-        m = re.match("/detail/([0-9]+)", addr.path)
-        if not m:
-            log.warn(f"【SiteConf】获取馒头种子属性失败 path：{addr.path}")
-            return ret_attr
-        torrentid = int(m.group(1))
-        if not apikey:
-            log.warn(f"【SiteConf】获取馒头种子属性失败, 未设置站点Api-Key")
-            return ret_attr
-        site_url = "%s/api/torrent/detail" % StringUtils.get_base_url(torrent_url)
-        res = RequestUtils(
-            headers={
-                'x-api-key': apikey,
-                "Content-Type": "application/x-www-form-urlencoded",
-                "User-Agent": ua,
-                "Accept": "application/json"
-            },
-            proxies=proxy,
-            timeout=30
-        ).post_res(url=site_url, data=("id=%d" % torrentid))
-        if res and res.status_code == 200:
-            msg = res.json().get('message')
-            if msg != "SUCCESS":
-                log.warn(f"【SiteConf】获取馒头种子{torrentid}属性失败：{msg}")
-                return ret_attr
-            result = res.json().get('data', {})
-            status = result.get('status')
-            ret_attr["peer_count"] = status.get('seeders')
-            """
-            NORMAL:上传下载都1倍
-            _2X_FREE:上傳乘以二倍，下載不計算流量。
-            _2X_PERCENT_50:上傳乘以二倍，下載計算一半流量。
-            _2X:上傳乘以二倍，下載計算正常流量。
-            PERCENT_50:上傳計算正常流量，下載計算一半流量。
-            PERCENT_30:上傳計算正常流量，下載計算該種子流量的30%。
-            FREE:上傳計算正常流量，下載不計算流量。
-            """
-            discount = status.get('discount')
-            if discount == "_2X_FREE":
-                ret_attr["2xfree"] = True
-                ret_attr["free"] = True
-                ret_attr["downloadvolumefactor"] = 0
-                ret_attr["uploadvolumefactor"] = 2.0
-            elif discount == "_2X_PERCENT_50":
-                ret_attr["2xfree"] = True
-                ret_attr["free"] = True
-                ret_attr["downloadvolumefactor"] = 0.5
-                ret_attr["uploadvolumefactor"] = 2.0
-            elif discount == "_2X":
-                ret_attr["2xfree"] = True
-                ret_attr["free"] = True
-                ret_attr["downloadvolumefactor"] = 1.0
-                ret_attr["uploadvolumefactor"] = 2.0
-            elif discount == "PERCENT_50":
-                ret_attr["downloadvolumefactor"] = 0.5
-                ret_attr["uploadvolumefactor"] = 1.0
-            elif discount == "PERCENT_30":
-                ret_attr["downloadvolumefactor"] = 0.3
-                ret_attr["uploadvolumefactor"] = 1.0
-            elif discount == "FREE":
-                ret_attr["free"] = True
-                ret_attr["downloadvolumefactor"] = 0
-                ret_attr["uploadvolumefactor"] = 1.0
-            # log.info(f"【SiteConf】获取馒头种子{torrentid}属性成功: {ret_attr}")
-        elif res is not None:
-            log.warn(f"【SiteConf】获取馒头种子{torrentid}属性失败，错误码：{res.status_code}")
-        else:
-            log.warn(f"【SiteConf】获取馒头种子{torrentid}属性失败，无法连接 {site_url}")
-        return ret_attr
-
     def check_torrent_attr(self, torrent_url, cookie, ua=None, apikey=None, proxy=False):
         """
         检验种子是否免费，当前做种人数
@@ -202,7 +121,7 @@ class SiteConf:
             return ret_attr
         domain = StringUtils.get_url_domain(torrent_url)
         if 'm-team' in domain:
-            return self.check_mt_torrent_attr(torrent_url, ua, apikey, proxy)
+            return MTeamApi.check_torrent_attr(torrent_url, ua, apikey, proxy)
         xpath_strs = self.get_grap_conf(torrent_url)
         if not xpath_strs:
             return ret_attr
