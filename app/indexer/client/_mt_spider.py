@@ -142,7 +142,6 @@ class MTSpider(object):
                 elif discount == "FREE":
                     torrent["downloadvolumefactor"] = 0
                     torrent["uploadvolumefactor"] = 1.0
-                # log.warn(f"【INDEXER】{self._name} 搜索成功：{torrent}")
                 torrents.append(torrent)
         elif res is not None:
             log.warn(f"【INDEXER】{self._name} 搜索失败，错误码：{res.status_code}")

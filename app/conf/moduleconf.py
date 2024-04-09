@@ -450,6 +450,59 @@ class ModuleConf(object):
                     }
                 }
             },
+            "webhook": {
+                "name": "Webhook",
+                "img_url": "../static/img/webhook_icon.png",
+                "config": {
+                    "url": {
+                        "id": "url",
+                        "required": True,
+                        "title": "URL",
+                        "tooltip": "",
+                        "type": "text",
+                        "placeholder": "https://xxx.com/your_api/"
+                    },
+                    "method": {
+                        "id": "method",
+                        "required": True,
+                        "title": "HTTP方法",
+                        "tooltip": "GET方法中请求体将被忽略，由于查询参数不支持复杂格式，发送列表类消息请使用POST",
+                        "type": "select",
+                        "options": {
+                            "GET": "GET",
+                            "POST": "POST",
+                            "PUT": "PUT",
+                            "PATCH": "PATCH",
+                            "DELETE": "DELETE",
+                        },
+                        "default": "POST"
+                    },
+                    "query_params": {
+                        "id": "query_params",
+                        "required": False,
+                        "title": "额外查询参数",
+                        "tooltip": "JSON字符串",
+                        "type": "text",
+                        "placeholder": """{"search": "keyword"}"""
+                    },
+                    "json_body": {
+                        "id": "json_body",
+                        "required": False,
+                        "title": "额外请求体",
+                        "tooltip": "JSON字符串，GET方法中被忽略，请勿使用title/text/image/url/user_id/medias作为key",
+                        "type": "text",
+                        "placeholder": """{"id": 123, "name": "abcd"}"""
+                    },
+                    "token": {
+                        "id": "token",
+                        "required": False,
+                        "title": "Token",
+                        "tooltip": "会放在Header的Authorization中",
+                        "type": "text",
+                        "placeholder": """Authorization-Token"""
+                    },
+                }
+            },
         },
         "switch": {
             "download_start": {
