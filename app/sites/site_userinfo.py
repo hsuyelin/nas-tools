@@ -59,7 +59,7 @@ class SiteUserInfo(object):
 
     def build(self, url, site_id, site_name,
               site_cookie=None, ua=None, apikey=None, emulate=None, proxy=False):
-        if not site_cookie:
+        if not site_cookie and not apikey:
             return None
         session = requests.Session()
         log.debug(f"【Sites】站点 {site_name} url={url} site_cookie={site_cookie} ua={ua} apikey={apikey}")
