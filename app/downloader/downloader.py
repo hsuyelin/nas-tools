@@ -788,6 +788,13 @@ class Downloader:
 
         # 下载掉所有的电影
         for item in download_list:
+            # 没有种子文件解析链接
+            if not item.enclosure:
+                base_url = StringUtils.get_base_url(item.page_url)
+                log.info(f"【Downloader】下载器检查馒头下载地址：%s" % (item.page_url))
+                if "m-team" in base_url:
+                    site_info = self.sites.get_sites_by_url_domain(base_url)
+                    item.enclosure = MTeamApi.get_torrent_url_by_detail_url(base_url, item.page_url, site_info)
             if item.type == MediaType.MOVIE:
                 __download(item)
 
@@ -1249,6 +1256,12 @@ class Downloader:
         解析种子文件，获取集数
         :return: 集数列表、种子路径
         """
+        if not url and page_url:
+            base_url = StringUtils.get_base_url(page_url)
+            log.info(f"【Downloader】检查馒头下载地址：%s" % (page_url))
+            if "m-team" in base_url:
+                site_info = self.sites.get_sites_by_url_domain(base_url)
+                url = MTeamApi.get_torrent_url_by_detail_url(base_url, page_url, site_info)
         site_info = self.sites.get_sites(siteurl=url)
         # 保存种子文件
         file_path, _, _, files, retmsg = Torrent().get_torrent_info(
