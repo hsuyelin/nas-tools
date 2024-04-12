@@ -173,7 +173,7 @@ class SynologyChat(_IMessageClient):
         if ret and ret.status_code == 200:
             result = ret.json()
             if result:
-                log.error(f"【ret】%s" % result)
+                # log.error(f"【ret】%s" % result)
                 errno = result.get('error', {}).get('code')
                 errmsg = result.get('error', {}).get('errors')
                 if not errno:
