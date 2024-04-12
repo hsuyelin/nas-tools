@@ -168,6 +168,28 @@ def login():
                                img_link=img_link,
                                err_msg=errmsg)
 
+    user_name = request.headers.get("Remote-User")
+    log.info("from: %s" % request.access_route)
+    oidc = Config().get_config('app').get('oidc_enable')
+    if oidc and user_name:
+        GoPage = request.form.get('next') or ""
+        if GoPage.startswith('/'):
+            GoPage = GoPage[1:]
+        user_info = ProUser().get_user(user_name)
+        if user_info:
+            if current_user.is_authenticated:
+                username = current_user.username
+                if user_info.username != username:
+                    login_user(user_info)
+                    log.info("redirect : echostr= %s" % "here")
+                    # 登录成功
+                    return redirect_to_navigation()
+            else:
+                login_user(user_info)
+                log.info("redirect : echostr= %s" % "here")
+                # 登录成功
+                return redirect_to_navigation()
+
     # 登录认证
     if request.method == 'GET':
         GoPage = request.args.get("next") or ""
