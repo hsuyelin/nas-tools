@@ -7,6 +7,7 @@ import json
 from urllib.parse import urlparse, urlunparse
 
 import requests
+import traceback
 
 import log
 from app.helper import ChromeHelper, SubmoduleHelper, DbHelper
@@ -240,7 +241,7 @@ class SiteUserInfo(object):
 
         except Exception as e:
             ExceptionUtils.exception_traceback(e)
-            log.error(f"【Sites】站点 {site_name} 获取流量数据失败：{str(e)}")
+            log.error(f"【Sites】站点 {site_name} 获取流量数据失败：{str(e)} - {traceback.format_exc()}")
 
     def __notify_unread_msg(self, site_name, site_user_info, unread_msg_notify):
         if site_user_info.message_unread <= 0:
