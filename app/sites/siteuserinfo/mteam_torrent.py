@@ -51,7 +51,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
         if not self._apikey:
             self.err_msg = "未设置站点Api-Key"
             log.warn(f"【MTeamUserInfo】 获取馒头系统角色失败, 未设置站点Api-Key")
-            return None
+            return
         site_url = "%s/api/member/sysRoleList" % self._base_url
         res = RequestUtils(
             headers={
@@ -126,6 +126,8 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
 
     def _mt_get_user_level(self, roleid):
         global g_sys_role_list
+        if roleid is None:
+            return ""
         for sysrole in g_sys_role_list:
             if sysrole._id == roleid:
                 return sysrole._nameEng
@@ -138,19 +140,21 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
         self._user_detail_page = ""
         self._mt_get_sys_roles()
         user_data = self._mt_getprofile()
+        if user_data is None:
+            return
         memberCount = user_data.get("memberCount", {})
         # 用户等级
         self.user_level = self._mt_get_user_level(user_data.get("role"))
         # 加入日期
-        self.join_at = user_data.get("createdDate")
+        self.join_at = user_data.get("createdDate", "")
         # 分享率
-        self.ratio = memberCount.get("shareRate")
+        self.ratio = memberCount.get("shareRate", 0)
         # 积分
-        self.bonus = memberCount.get("bonus")
+        self.bonus = memberCount.get("bonus", 0)
         # 上传
-        self.upload = int(memberCount.get("uploaded"))
+        self.upload = int(memberCount.get("uploaded", 0))
         # 下载
-        self.download = int(memberCount.get("downloaded"))
+        self.download = int(memberCount.get("downloaded", 0))
         # 拉取做种信息
         self._mt_get_seeding_info()
         # 拉取下载信息
@@ -172,7 +176,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
         if not self._apikey:
             self.err_msg = "未设置站点Api-Key"
             log.warn(f"【MTeamUserInfo】 获取做种信息失败, 未设置站点Api-Key")
-            return None
+            return
         site_url = "%s/api/member/getUserTorrentList" % self._base_url
         params = {
             "userid":self.userid,
@@ -222,7 +226,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
         if not self._apikey:
             self.err_msg = "未设置站点Api-Key"
             log.warn(f"【MTeamUserInfo】 获取下载信息失败, 未设置站点Api-Key")
-            return None
+            return
         site_url = "%s/api/member/getUserTorrentList" % self._base_url
         params = {
             "userid":self.userid,
