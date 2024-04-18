@@ -5,6 +5,7 @@ import log
 from app.sites.siteuserinfo._base import _ISiteUserInfo, SITE_BASE_ORDER
 from app.utils import StringUtils, RequestUtils
 from app.utils.types import SiteSchema
+from config import Config
 
 g_sys_role_list = []
 
@@ -53,6 +54,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
             log.warn(f"【MTeamUserInfo】 获取馒头系统角色失败, 未设置站点Api-Key")
             return
         site_url = "%s/api/member/sysRoleList" % self._base_url
+        proxies = Config().get_proxies() if self._proxy else None
         res = RequestUtils(
             headers={
                 'x-api-key': self._apikey,
@@ -60,7 +62,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
                 "User-Agent": self._ua,
                 "Accept": "application/json"
             },
-            proxies=self._proxy,
+            proxies=proxies,
             timeout=30
         ).post_res(url=site_url)
         if res and res.status_code == 200:
@@ -98,6 +100,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
             log.warn(f"【MTeamUserInfo】 获取馒头用户属性失败, 未设置站点Api-Key")
             return None
         site_url = "%s/api/member/profile" % self._base_url
+        proxies = Config().get_proxies() if self._proxy else None
         res = RequestUtils(
             headers={
                 'x-api-key': self._apikey,
@@ -105,7 +108,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
                 "User-Agent": self._ua,
                 "Accept": "application/json"
             },
-            proxies=self._proxy,
+            proxies=proxies,
             timeout=30
         ).post_res(url=site_url)
         if res and res.status_code == 200:
@@ -184,6 +187,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
             "pageNumber":page_num,
             "pageSize":page_size
         }
+        proxies = Config().get_proxies() if self._proxy else None
         res = RequestUtils(
             headers={
                 'x-api-key': self._apikey,
@@ -191,7 +195,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
                 "User-Agent": self._ua,
                 "Accept": "application/json"
             },
-            proxies=self._proxy,
+            proxies=proxies,
             timeout=30
         ).post_res(url=site_url, json=params)
         if res and res.status_code == 200:
@@ -234,6 +238,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
             "pageNumber":page_num,
             "pageSize":page_size
         }
+        proxies = Config().get_proxies() if self._proxy else None
         res = RequestUtils(
             headers={
                 'x-api-key': self._apikey,
@@ -241,7 +246,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
                 "User-Agent": self._ua,
                 "Accept": "application/json"
             },
-            proxies=self._proxy,
+            proxies=proxies,
             timeout=30
         ).post_res(url=site_url, json=params)
         if res and res.status_code == 200:
