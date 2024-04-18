@@ -5,6 +5,7 @@ import log
 from app.sites.siteuserinfo._base import _ISiteUserInfo, SITE_BASE_ORDER
 from app.utils import StringUtils, RequestUtils
 from app.utils.types import SiteSchema
+from config import Config
 
 g_sys_role_list = []
 
