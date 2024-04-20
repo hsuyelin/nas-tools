@@ -450,6 +450,19 @@
                 </div>
             </div>
           </div>
+          <div class="row">
+            <div class="col-lg">
+              <div class="mb-3">
+                <label class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="media.filename_keep_punctuation" {% if
+                    Config.media.filename_keep_punctuation %}checked{% endif %}>
+                  <span class="form-check-label">保留中文标点符号 <span class="form-help"
+                                                                      title="开启后，文件名中的中文问号、逗号将被保留。"
+                                                                      data-bs-toggle="tooltip">?</span></span>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
           <div class="card-footer">
                 <div class="row align-items-center">
