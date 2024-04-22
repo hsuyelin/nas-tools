@@ -305,16 +305,19 @@ class StringUtils:
         if not name:
             return None
 
+        media = Config().get_config('media')
+        cleaned_name = name
+
         replacement_dict = {
-            r"[*?\\/\"<>~|,，？]": "",
+            r"[*?\\/\"<>~|,]": "",
             r"[\s]+": " ",
         }
-
-        cleaned_name = name
+        filename_keep_punctuation = media.get("filename_keep_punctuation", False) or False
+        if not filename_keep_punctuation:
+            replacement_dict[r"[，？]"] = ""
         for pattern, replacement in replacement_dict.items():
             cleaned_name = re.sub(pattern, replacement, cleaned_name, flags=re.IGNORECASE).strip()
 
-        media = Config().get_config('media')
         filename_prefer_barre = media.get("filename_prefer_barre", False) or False
         if filename_prefer_barre:
             cleaned_name = cleaned_name.replace(":", " - ").replace("：", " - ")
