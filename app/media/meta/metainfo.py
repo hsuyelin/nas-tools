@@ -96,6 +96,7 @@ def MetaInfo(title,
     meta_info.ignored_words = used_info.get("ignored")
     meta_info.replaced_words = used_info.get("replaced")
     meta_info.offset_words = used_info.get("offset")
+    meta_info.set_tmdb_info(file_media_info)
 
     return meta_info
 
