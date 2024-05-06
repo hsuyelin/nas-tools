@@ -275,8 +275,8 @@ class Jackett(_IPluginModule):
                 return []
             if not ret.json():
                 return []
-            indexers = [IndexerConf({"id": f'{v["id"]}-jackett',
-                                 "name": f'{v["name"]}(Jackett)',
+            indexers = [IndexerConf({"id": f'{v["id"]}-{self.module_name}',
+                                 "name": f'【{self.module_name}】{v["name"]}',
                                  "domain": f'{self._host}/api/v2.0/indexers/{v["id"]}/results/torznab/',
                                  "public": True if v['type'] == 'public' else False,
                                  "builtin": False,
