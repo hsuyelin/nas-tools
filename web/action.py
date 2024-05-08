@@ -4637,7 +4637,7 @@ class WebAction:
         """
         key = data.get("key")
         value = data.get("value")
-        if not key or not value:
+        if not key:
             return {"code": 1}
         try:
             SystemConfig().set(key=key, value=value)

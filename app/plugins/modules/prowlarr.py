@@ -255,8 +255,8 @@ class Prowlarr(_IPluginModule):
             if not ret or ret_indexers == [] or ret is None:
                 return []
 
-            indexers = [IndexerConf({"id": f'{v["indexerName"]}-prowlarr',
-                                 "name": f'{v["indexerName"]}(Prowlarr)',
+            indexers = [IndexerConf({"id": f'{v["indexerName"]}-{self.module_name}',
+                                 "name": f'【{self.module_name}】{v["indexerName"]}',
                                  "domain": f'{self._host}/api/v1/indexer/{v["indexerId"]}',
                                  "public": True,
                                  "builtin": False,
