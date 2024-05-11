@@ -60,7 +60,7 @@ def MetaInfo(title,
     org_title = title
     # 应用自定义识别词，获取识别词处理后名称
 
-    rev_title, subtitle, used_info = process_title(rev_title, tmdb_id, gid, subtitle)
+    rev_title, subtitle, global_used_info = process_title(rev_title, tmdb_id, gid, subtitle)
 
     # 判断是否处理文件
     if org_title and os.path.splitext(org_title)[-1] in RMT_MEDIAEXT:
@@ -79,6 +79,11 @@ def MetaInfo(title,
         return meta_info
     
     meta_info = gen_meta_info(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
+
+    # 设置应用的识别词
+    meta_info.ignored_words = global_used_info.get("ignored")
+    meta_info.replaced_words = global_used_info.get("replaced")
+    meta_info.offset_words = global_used_info.get("offset")
     
     # 为了正确应用识别词，我们再次生成一遍 MetaInfo
     if not tmdb_id:
@@ -88,14 +93,17 @@ def MetaInfo(title,
             tmdb_id = file_media_info.get('id')
             rev_title, subtitle, used_info = process_title(rev_title, tmdb_id, gid, subtitle)
             meta_info = gen_meta_info(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
+            # 设置应用的识别词
+            meta_info.ignored_words = used_info.get("ignored")
+            meta_info.replaced_words = used_info.get("replaced")
+            meta_info.offset_words = used_info.get("offset")
+            meta_info.ignored_words.extend(global_used_info.get("ignored"))
+            meta_info.replaced_words.extend(global_used_info.get("replaced"))
+            meta_info.offset_words.extend(global_used_info.get("offset"))
     # 设置原始名称
     meta_info.org_string = org_title
     # 设置识别词处理后名称
     meta_info.rev_string = rev_title
-    # 设置应用的识别词
-    meta_info.ignored_words = used_info.get("ignored")
-    meta_info.replaced_words = used_info.get("replaced")
-    meta_info.offset_words = used_info.get("offset")
     meta_info.set_tmdb_info(file_media_info)
 
     return meta_info
