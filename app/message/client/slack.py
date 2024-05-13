@@ -111,7 +111,7 @@ class Slack(_IMessageClient):
                 channel = user_id
             else:
                 # 消息广播
-                channel = self.__find_public_channel()
+                channel = self.__find_channel()
             # 拼装消息内容
             titles = str(title).split('\n')
             if len(titles) > 1:
@@ -176,7 +176,7 @@ class Slack(_IMessageClient):
                 channel = user_id
             else:
                 # 消息广播
-                channel = self.__find_public_channel()
+                channel = self.__find_channel()
             title = f"共找到{len(medias)}条相关信息，请选择"
             # 消息主体
             title_section = {
@@ -246,15 +246,15 @@ class Slack(_IMessageClient):
             ExceptionUtils.exception_traceback(msg_e)
             return False, str(msg_e)
 
-    def __find_public_channel(self):
+    def __find_channel(self):
         """
-        查找公共频道
+        查找频道
         """
         if not self._client:
             return ""
         conversation_id = ""
         try:
-            for result in self._client.conversations_list():
+            for result in self._client.conversations_list(types="public_channel,private_channel"):
                 if conversation_id:
                     break
                 for channel in result["channels"]:
