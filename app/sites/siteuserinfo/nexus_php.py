@@ -27,6 +27,7 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
         html_text = self._prepare_html_text(html_text)
 
         user_detail = re.search(r"userdetails.php\?id=(\d+)", html_text)
+
         if user_detail and user_detail.group().strip():
             self._user_detail_page = user_detail.group().strip().lstrip('/')
             self.userid = user_detail.group(1)
@@ -357,6 +358,12 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
     def __get_user_level(self, html):
         # 等级 获取同一行等级数据，图片格式等级，取title信息，否则取文本信息
         user_levels_text = html.xpath('//tr/td[text()="等級" or text()="等级" or *[text()="等级"]]/'
+                                      'following-sibling::td[1]/img[1]/@title')
+        if user_levels_text:
+            self.user_level = user_levels_text[0].strip()
+            return
+
+        user_levels_text = html.xpath('//tr/td[contains(text(), "等级")]/'
                                       'following-sibling::td[1]/img[1]/@title')
         if user_levels_text:
             self.user_level = user_levels_text[0].strip()
