@@ -213,7 +213,7 @@
   // 文件区刷新硬链接标记
   function refresh_hardlink_mark(folder){
     // 获取文件夹路径的MD5找到目录树节点
-    let node = $(`#mediafile_tree a[rel='${folder}']`);
+    let node = $(`#mediafile_tree a[rel='${folder.replaceAll("'", "\\'")}']`);
     let locating = false;
     let mark = $("#mediafile_hardlink_mark");
     // 解绑所有事件
