@@ -866,7 +866,14 @@ class Downloader:
                                 continue
                             item_episodes = item.get_episode_list()
                             if not item_episodes:
-                                continue
+                                # 有时，就算标题副标题没有集数，种子内文件名本身仍然可能是含有集数的。我们打开种子文件来一探究竟。
+                                torrent_episodes, torrent_path = self.get_torrent_episodes(
+                                    url=item.enclosure,
+                                    page_url=item.page_url)
+                                if not torrent_episodes:
+                                    continue
+                                else:
+                                    item_episodes = torrent_episodes
                             # 为需要集的子集则下载
                             if set(item_episodes).issubset(set(need_episodes)):
                                 _, download_id = __download(item)
