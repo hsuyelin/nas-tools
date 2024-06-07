@@ -10,6 +10,7 @@ from app.utils.types import MediaType
 from app.utils import StringUtils
 from config import Config, RMT_MEDIAEXT
 from app.helper import FfmpegHelper
+from typing import List
 
 def MetaInfo(title,
              subtitle=None,
@@ -27,7 +28,29 @@ def MetaInfo(title,
     :param mtype: 指定识别类型，为空则自动识别类型
     :return: MetaAnime、MetaVideo
     """
+    gid = [-1]
+    rev_title = title
+    laboratory = Config().get_config('laboratory')
+    recognize_enhance_enable = False
+    if laboratory:
+        recognize_enhance_enable = laboratory.get('recognize_enhance_enable', False) or False
 
+    def process_title(rev_title, tmdb_id, gid, subtitle):
+        if tmdb_id:
+            custom_words_group = WordsHelper().get_custom_word_groups(tmdbid=tmdb_id)
+            if len(custom_words_group) != 0:
+                gid.append(custom_words_group[0].ID)
+        for i in gid:
+            rev_title, msg, used_info = WordsHelper(gid=i).process(rev_title)
+            if msg:
+                for msg_item in msg:
+                    log.warn("【Meta】%s" % msg_item)
+        if rev_title and ffmpeg_video_meta_enable and filePath:
+            rev_title = __complete_rev_title(rev_title, filePath)
+        if subtitle:
+            subtitle, _, _ = WordsHelper().process(subtitle)
+        return rev_title, subtitle, used_info
+    
     # 使用ffmpeg获取视频元数据状态
     media = Config().get_config('media')
     ffmpeg_video_meta_enable = False
@@ -36,15 +59,8 @@ def MetaInfo(title,
     # 记录原始名称
     org_title = title
     # 应用自定义识别词，获取识别词处理后名称
-    rev_title, msg, used_info = WordsHelper().process(title)
-    if rev_title and ffmpeg_video_meta_enable and filePath:
-        rev_title = __complete_rev_title(rev_title, filePath)
-    if subtitle:
-        subtitle, _, _ = WordsHelper().process(subtitle)
 
-    if msg:
-        for msg_item in msg:
-            log.warn("【Meta】%s" % msg_item)
+    rev_title, subtitle, global_used_info = process_title(rev_title, tmdb_id, gid, subtitle)
 
     # 判断是否处理文件
     if org_title and os.path.splitext(org_title)[-1] in RMT_MEDIAEXT:
@@ -52,26 +68,43 @@ def MetaInfo(title,
     else:
         fileflag = False
 
-    laboratory = Config().get_config('laboratory')
-    recognize_enhance_enable = False
-    if laboratory:
-        recognize_enhance_enable = laboratory.get('recognize_enhance_enable', False) or False
-
-    if recognize_enhance_enable:
-         meta_info = MetaVideoV2(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
-    else:
-        if mtype == MediaType.ANIME or is_anime(rev_title):
-            meta_info = MetaAnime(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
+    def gen_meta_info(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id):
+        if recognize_enhance_enable:
+             meta_info = MetaVideoV2(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
         else:
-            meta_info = MetaVideo(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
+            if mtype == MediaType.ANIME or is_anime(rev_title):
+                meta_info = MetaAnime(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
+            else:
+                meta_info = MetaVideo(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
+        return meta_info
+    
+    meta_info = gen_meta_info(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
+
+    # 设置应用的识别词
+    meta_info.ignored_words = global_used_info.get("ignored")
+    meta_info.replaced_words = global_used_info.get("replaced")
+    meta_info.offset_words = global_used_info.get("offset")
+    
+    # 为了正确应用识别词，我们再次生成一遍 MetaInfo
+    if not tmdb_id:
+        from app.media import Media
+        file_media_info = Media().get_tmdb_info_by_meta_info(meta_info=meta_info)
+        if file_media_info:
+            tmdb_id = file_media_info.get('id')
+            rev_title, subtitle, used_info = process_title(rev_title, tmdb_id, gid, subtitle)
+            meta_info = gen_meta_info(rev_title, subtitle, fileflag, filePath, media_type, cn_name, en_name, tmdb_id, imdb_id)
+            # 设置应用的识别词
+            meta_info.ignored_words = used_info.get("ignored")
+            meta_info.replaced_words = used_info.get("replaced")
+            meta_info.offset_words = used_info.get("offset")
+            meta_info.ignored_words.extend(global_used_info.get("ignored"))
+            meta_info.replaced_words.extend(global_used_info.get("replaced"))
+            meta_info.offset_words.extend(global_used_info.get("offset"))
     # 设置原始名称
     meta_info.org_string = org_title
     # 设置识别词处理后名称
     meta_info.rev_string = rev_title
-    # 设置应用的识别词
-    meta_info.ignored_words = used_info.get("ignored")
-    meta_info.replaced_words = used_info.get("replaced")
-    meta_info.offset_words = used_info.get("offset")
+    meta_info.set_tmdb_info(file_media_info)
 
     return meta_info
 

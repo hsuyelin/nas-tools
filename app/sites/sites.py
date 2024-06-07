@@ -8,7 +8,7 @@ from app.sites.site_limiter import SiteRateLimiter
 from app.utils import RequestUtils, StringUtils
 from app.utils.commons import singleton
 from config import Config
-
+from app.apis import MTeamApi
 
 @singleton
 class Sites:
@@ -60,12 +60,13 @@ class Sites:
             site_rssurl = site.RSSURL
             site_signurl = site.SIGNURL
             site_cookie = site.COOKIE
+            site_apikey = site_note.get("apikey")
             site_uses = site.INCLUDE or ''
             uses = []
             if site_uses:
                 rss_enable = True if "D" in site_uses and site_rssurl else False
-                brush_enable = True if "S" in site_uses and site_rssurl and site_cookie else False
-                statistic_enable = True if "T" in site_uses and (site_rssurl or site_signurl) and site_cookie else False
+                brush_enable = True if "S" in site_uses and site_rssurl and (site_cookie or site_apikey) else False
+                statistic_enable = True if "T" in site_uses and (site_rssurl or site_signurl) and (site_cookie or site_apikey) else False
                 uses.append("D") if rss_enable else None
                 uses.append("S") if brush_enable else None
                 uses.append("T") if statistic_enable else None
@@ -87,6 +88,7 @@ class Sites:
                 "statistic_enable": statistic_enable,
                 "uses": uses,
                 "ua": site_note.get("ua"),
+                "apikey": site_note.get("apikey"),
                 "parse": True if site_note.get("parse") == "Y" else False,
                 "unread_msg_notify": True if site_note.get("message") == "Y" else False,
                 "chrome": True if site_note.get("chrome") == "Y" else False,
@@ -264,6 +266,31 @@ class Sites:
                     return site.get("tags")
         return None
 
+    def test_mt_connection(self, site_info):
+        # 计时
+        start_time = datetime.now()
+        site_url = StringUtils.get_base_url(site_info.get("signurl")) + "/api/system/hello"
+        headers = {
+            "Content-Type": "application/json; charset=UTF-8",
+            "User-Agent": site_info.get("ua"),
+            "x-api-key": site_info.get("apikey"),
+            "Accept": "application/json"
+        }
+        res = RequestUtils(headers=headers,
+                           proxies=Config().get_proxies() if site_info.get("proxy") else None
+                           ).post_res(url=site_url)
+        seconds = int((datetime.now() - start_time).microseconds / 1000)
+        if res and res.status_code == 200:
+            msg = res.json().get("message") or "null"
+            if msg == "SUCCESS":
+                return True, "连接成功", seconds
+            else:
+                return False, msg, seconds
+        elif res is not None:
+            return False, f"连接失败，状态码：{res.status_code}", seconds
+        else:
+            return False, "无法打开网站", seconds
+
     def test_connection(self, site_id):
         """
         测试站点连通性
@@ -274,8 +301,9 @@ class Sites:
         if not site_info:
             return False, "站点不存在", 0
         site_cookie = site_info.get("cookie")
-        if not site_cookie:
-            return False, "未配置站点Cookie", 0
+        site_apikey = site_info.get("apikey")
+        if not site_apikey and not site_cookie:
+            return False, "未配置站点Cookie或ApiKey", 0
         ua = site_info.get("ua") or Config().get_ua()
         site_url = StringUtils.get_base_url(site_info.get("signurl") or site_info.get("rssurl"))
         if not site_url:
@@ -285,11 +313,13 @@ class Sites:
             site_url = site_url + '/index.php'
         elif 'zmpt' in site_url:
             site_url = site_url + '/index.php'
+        elif 'm-team' in site_url:
+            return MTeamApi.test_mt_connection(site_info);
         chrome = ChromeHelper()
         if site_info.get("chrome") and chrome.get_status():
             # 计时
             start_time = datetime.now()
-            if not chrome.visit(url=site_url, ua=ua, cookie=site_cookie, proxy=site_info.get("proxy")):
+            if not chrome.visit(url=site_url, ua=ua, apikey=site_apikey, cookie=site_cookie, proxy=site_info.get("proxy")):
                 return False, "Chrome模拟访问失败", 0
             # 循环检测是否过cf
             cloudflare = chrome.pass_cloudflare()

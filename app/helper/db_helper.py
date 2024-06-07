@@ -2296,9 +2296,8 @@ class DbHelper:
         """
         if gid:
             return self._db.query(CUSTOMWORDGROUPS).filter(CUSTOMWORDGROUPS.ID == int(gid)).all()
-        if tmdbid and gtype:
-            return self._db.query(CUSTOMWORDGROUPS).filter(CUSTOMWORDGROUPS.TMDBID == int(tmdbid),
-                                                           CUSTOMWORDGROUPS.TYPE == int(gtype)).all()
+        if tmdbid:
+            return self._db.query(CUSTOMWORDGROUPS).filter(CUSTOMWORDGROUPS.TMDBID == int(tmdbid)).all()
         return self._db.query(CUSTOMWORDGROUPS).all()
 
     def is_custom_word_group_existed(self, tmdbid=None, gtype=None):

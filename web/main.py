@@ -1,6 +1,7 @@
 import base64
 import datetime
 import hashlib
+import ipaddress
 import mimetypes
 import os.path
 import re
@@ -167,6 +168,53 @@ def login():
                                img_title=img_title,
                                img_link=img_link,
                                err_msg=errmsg)
+
+    log.info("from: %s" % request.access_route)
+    proxy_ip = request.environ.get('werkzeug.proxy_fix.orig', {}).get('REMOTE_ADDR') or request.remote_addr
+
+    # 获取forward auth相关配置
+    forward_auth = Config().get_config('app').get('forward_auth', {})
+    forward_auth_enable = forward_auth.get("enable", False)
+    trusted_proxies = forward_auth.get("trusted_proxies", ["127.0.0.1"])
+    forward_auth_header = forward_auth.get("header", "Remote-User")
+
+    if isinstance(trusted_proxies, str):
+        trusted_proxies = [trusted_proxies]
+
+    # 检查代理IP是否在受信任代理列表中
+    try:
+        is_trusted_forward = any(
+            ipaddress.ip_address(proxy_ip) in ipaddress.ip_network(proxy, strict=False) for proxy in trusted_proxies)
+        if forward_auth_enable and not is_trusted_forward:
+            log.warn(f"代理IP不在受信任代理列表中, proxy_ip={proxy_ip}, trusted_proxies={trusted_proxies}")
+    except ValueError as e:
+        log.error(f"app.forward_auth.trusted_proxies 配置错误, {e}")
+        is_trusted_forward = False
+
+    # 获取用户名称
+    if forward_auth_enable and is_trusted_forward:
+        user_name = request.headers.get(forward_auth_header)
+    else:
+        user_name = None
+
+    if forward_auth_enable and is_trusted_forward and user_name:
+        GoPage = request.form.get('next') or ""
+        if GoPage.startswith('/'):
+            GoPage = GoPage[1:]
+        user_info = ProUser().get_user(user_name)
+        if user_info:
+            if current_user.is_authenticated:
+                username = current_user.username
+                if user_info.username != username:
+                    login_user(user_info)
+                    log.info("redirect : echostr= %s" % "here")
+                    # 登录成功
+                    return redirect_to_navigation()
+            else:
+                login_user(user_info)
+                log.info("redirect : echostr= %s" % "here")
+                # 登录成功
+                return redirect_to_navigation()
 
     # 登录认证
     if request.method == 'GET':

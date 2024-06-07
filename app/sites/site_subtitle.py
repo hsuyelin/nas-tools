@@ -1,6 +1,6 @@
 import os
 import shutil
-
+import re
 from lxml import etree
 
 import log
@@ -9,7 +9,8 @@ from app.sites.siteconf import SiteConf
 from app.helper import SiteHelper
 from app.utils import RequestUtils, StringUtils, PathUtils, ExceptionUtils
 from config import Config, RMT_SUBEXT
-
+from urllib import parse
+from app.apis import MTeamApi
 
 class SiteSubtitle:
 
@@ -24,7 +25,7 @@ class SiteSubtitle:
         if not os.path.exists(self._save_tmp_path):
             os.makedirs(self._save_tmp_path, exist_ok=True)
 
-    def download(self, media_info, site_id, cookie, ua, download_dir):
+    def download(self, media_info, site_id, cookie, ua, apikey, download_dir):
         """
         从站点下载字幕文件，并保存到本地
         """
@@ -36,10 +37,14 @@ class SiteSubtitle:
         if not download_dir:
             log.warn("【Sites】未找到字幕下载目录")
             return
-
         # 站点流控
         if self.sites.check_ratelimit(site_id):
+            log.warn(f"【Sites】{site_id}触发了站点流控，停止下载字幕")
             return
+        # 馒头特殊处理
+        domain = StringUtils.get_url_domain(media_info.page_url)
+        if 'm-team' in domain:
+            return MTeamApi.download_subtitle(media_info, site_id, cookie, ua, apikey, download_dir)
 
         # 读取网站代码
         request = RequestUtils(cookies=cookie, headers=ua)

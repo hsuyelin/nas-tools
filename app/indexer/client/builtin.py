@@ -9,6 +9,7 @@ from app.indexer.client._base import _IIndexClient
 from app.indexer.client._render_spider import RenderSpider
 from app.indexer.client._spider import TorrentSpider
 from app.indexer.client._tnode import TNodeSpider
+from app.indexer.client._mt_spider import MTSpider
 from app.indexer.client._torrentleech import TorrentLeech
 from app.indexer.client._plugins import PluginsSpider
 from app.sites import Sites
@@ -75,6 +76,7 @@ class BuiltinIndexer(_IIndexClient):
                                          siteid=site.get("id"),
                                          cookie=site.get("cookie"),
                                          ua=site.get("ua"),
+                                         apikey=site.get("apikey"),
                                          name=site.get("name"),
                                          rule=site.get("rule"),
                                          pri=site.get('pri'),
@@ -94,13 +96,15 @@ class BuiltinIndexer(_IIndexClient):
         for site in self.sites.get_sites():
             url = site.get("signurl") or site.get("rssurl")
             cookie = site.get("cookie")
-            if not url or not cookie:
+            apikey = site.get("apikey")
+            if not url or (not apikey and not cookie):
                 continue
             render = False if not chrome_ok else site.get("chrome")
             indexer = self.user.get_indexer(url=url,
                                             siteid=site.get("id"),
                                             cookie=cookie,
                                             ua=site.get("ua"),
+                                            apikey=apikey,
                                             name=site.get("name"),
                                             rule=site.get("rule"),
                                             pri=site.get('pri'),
@@ -176,7 +180,9 @@ class BuiltinIndexer(_IIndexClient):
         # 开始索引
         result_array = []
         try:
-            if indexer.parser == "TNodeSpider":
+            if 'm-team' in indexer.domain:
+                error_flag, result_array = MTSpider(indexer).search(keyword=search_word)
+            elif indexer.parser == "TNodeSpider":
                 error_flag, result_array = TNodeSpider(indexer).search(keyword=search_word)
             elif indexer.parser == "RenderSpider":
                 error_flag, result_array = RenderSpider(indexer).search(
@@ -234,7 +240,9 @@ class BuiltinIndexer(_IIndexClient):
         # 计算耗时
         start_time = datetime.datetime.now()
 
-        if indexer.parser == "RenderSpider":
+        if 'm-team' in indexer.domain:
+            error_flag, result_array = MTSpider(indexer).search(keyword=keyword, page=page)
+        elif indexer.parser == "RenderSpider":
             error_flag, result_array = RenderSpider(indexer).search(keyword=keyword,
                                                                     page=page)
         elif indexer.parser == "TNodeSpider":

@@ -130,6 +130,7 @@ class BrushTask(object):
                 "rss_url_show": task.RSSURL,
                 "cookie": site_info.get("cookie"),
                 "ua": site_info.get("ua"),
+                "apikey": site_info.get("apikey"),
                 "download_count": task.DOWNLOAD_COUNT,
                 "remove_count": task.REMOVE_COUNT,
                 "download_size": StringUtils.str_filesize(task.DOWNLOAD_SIZE),
@@ -168,6 +169,7 @@ class BrushTask(object):
         rss_free = taskinfo.get("free")
         downloader_id = taskinfo.get("downloader")
         ua = taskinfo.get("ua")
+        apikey = taskinfo.get("apikey")
         state = taskinfo.get("state")
         if state != 'Y':
             log.info("【Brush】刷流任务 %s 已停止下载新种！" % task_name)
@@ -188,8 +190,8 @@ class BrushTask(object):
         if not rss_url:
             log.error("【Brush】站点 %s 未配置RSS订阅地址，无法刷流！" % site_name)
             return
-        if rss_free and not cookie:
-            log.warn("【Brush】站点 %s 未配置Cookie，无法开启促销刷流" % site_name)
+        if rss_free and not apikey and not cookie:
+            log.warn("【Brush】站点 %s 未配置Cookie或Api-Key，无法开启促销刷流" % site_name)
             return
         # 下载器参数
         downloader_cfg = self.downloader.get_downloader_conf(downloader_id)
@@ -200,7 +202,10 @@ class BrushTask(object):
         log.info("【Brush】开始站点 %s 的刷流任务：%s..." % (site_name, task_name))
         # 检查是否达到保种体积
         if not self.__is_allow_new_torrent(taskinfo=taskinfo,
-                                           dlcount=rss_rule.get("dlcount")):
+                                           dlcount=rss_rule.get("dlcount"),
+                                           current_site_count=rss_rule.get("current_site_count"),
+                                           current_site_dlcount=rss_rule.get("current_site_dlcount"),
+                                           site_info=site_info):
             return
 
         rss_result = self.rsshelper.parse_rssxml(url=rss_url, proxy=site_proxy)
@@ -221,6 +226,11 @@ class BrushTask(object):
         if max_dlcount:
             downloading_count = self.__get_downloading_count(downloader_id) or 0
             new_torrent_count = int(max_dlcount) - int(downloading_count)
+
+        # 当前站点任务总数
+        current_site_count = rss_rule.get("current_site_count")
+        # 当前站点下载任务数
+        current_site_dlcount = rss_rule.get("current_site_dlcount")
 
         for res in rss_result:
             try:
@@ -248,12 +258,16 @@ class BrushTask(object):
                                              siteid=site_id,
                                              cookie=cookie,
                                              ua=ua,
+                                             apikey=apikey,
                                              proxy=site_proxy):
                     continue
                 # 检查能否添加当前种子，判断是否超过保种体积大小
                 if not self.__is_allow_new_torrent(taskinfo=taskinfo,
                                                    dlcount=max_dlcount,
-                                                   torrent_size=size):
+                                                   torrent_size=size,
+                                                   current_site_count=current_site_count,
+                                                   current_site_dlcount=current_site_dlcount,
+                                                   site_info=site_info):
                     continue
                 # 检查是否已处理过
                 if self.is_torrent_handled(enclosure=enclosure):
@@ -275,7 +289,10 @@ class BrushTask(object):
 
                     # 再判断一次
                     if not self.__is_allow_new_torrent(taskinfo=taskinfo,
-                                                       dlcount=max_dlcount):
+                                                       dlcount=max_dlcount,
+                                                       current_site_count=current_site_count,
+                                                       current_site_dlcount=current_site_dlcount,
+                                                       site_info=site_info):
                         break
                     self._torrents_cache.append(enclosure)
             except Exception as err:
@@ -529,7 +546,7 @@ class BrushTask(object):
             except Exception as e:
                 ExceptionUtils.exception_traceback(e)
 
-    def __is_allow_new_torrent(self, taskinfo, dlcount, torrent_size=None):
+    def __is_allow_new_torrent(self, taskinfo, dlcount, current_site_dlcount, current_site_count, site_info, torrent_size=None):
         """
         检查是否还能添加新的下载
         """
@@ -570,21 +587,59 @@ class BrushTask(object):
 
         # 检查正在下载的任务数
         if dlcount:
-            downloading_count = self.__get_downloading_count(downloader_id)
-            if downloading_count is None:
+            downloading_total_count = self.__get_downloading_count(downloader_id)
+            if downloading_total_count is None:
                 log.error("【Brush】任务 %s 下载器 %s 无法连接" % (task_name, downloader_name))
                 return False
-            if int(downloading_count) >= int(dlcount):
+            if int(downloading_total_count) >= int(dlcount):
                 log.warn("【Brush】下载器 %s 正在下载任务数：%s，超过设定上限，暂不添加下载" % (
-                    downloader_name, downloading_count))
+                    downloader_name, downloading_total_count))
                 return False
+
+        # 检查是否添加标签
+        label = list(set((taskinfo.get("label").split(',') if taskinfo.get("label") else []) +
+                 (site_info.get("tags").split(',') if site_info.get("tags") else [])))
+        if label is None or len(label) <= 0:
+            return True
+
+        site_name = site_info.get("name")
+
+        # 检查当前站点正在下载的任务数量
+        if current_site_dlcount:
+            current_site_count_downloading = self.__get_downloading_count(downloader_id, tag=label)
+            if current_site_count_downloading is None:
+                log.error("【Brush】任务 %s 下载器 %s 无法连接" % (task_name, downloader_name))
+                return False
+            if int(current_site_count_downloading) >= int(current_site_count):
+                log.warn("【Brush】站点 %s 正在下载任务数：%s，超过设定上限，暂不添加下载" % (
+                    site_name, current_site_count_downloading))
+                return False
+
+        # 检查当前站点任务数量
+        if current_site_count:
+            current_site_count_total = self.__get_task_count(downloader_id, tag=label)
+            if current_site_count_total is None:
+                log.error("【Brush】任务 %s 下载器 %s 无法连接" % (task_name, downloader_name))
+                return False
+            if int(current_site_count_total) >= int(current_site_count):
+                log.warn("【Brush】站点 %s 任务总数：%s，超过设定上限，暂不添加下载" % (
+                    site_name, current_site_count_total))
+                return False
+
         return True
 
-    def __get_downloading_count(self, downloader_id):
+    def __get_downloading_count(self, downloader_id, tag=None):
         """
-        查询当前正在下载的任务数
+        查询当前正在下载的任务数，支持限定 tag
         """
-        torrents = self.downloader.get_downloading_torrents(downloader_id=downloader_id) or []
+        torrents = self.downloader.get_downloading_torrents(downloader_id=downloader_id, tag=tag) or []
+        return len(torrents)
+
+    def __get_task_count(self, downloader_id, tag):
+        """
+        查询当前任务总数，限定 tag
+        """
+        torrents = self.downloader.get_torrents(downloader_id=downloader_id, tag=tag) or []
         return len(torrents)
 
     def __download_torrent(self,
@@ -682,6 +737,7 @@ class BrushTask(object):
                          siteid,
                          cookie,
                          ua,
+                         apikey,
                          proxy):
         """
         检查种子是否符合刷流过滤条件
@@ -693,6 +749,7 @@ class BrushTask(object):
         :param siteid: 站点ID
         :param cookie: Cookie
         :param ua: User-Agent
+        :param apikey: Api-Key
         :return: 是否命中
         """
         if not rss_rule:
@@ -734,6 +791,7 @@ class BrushTask(object):
             torrent_attr = self.siteconf.check_torrent_attr(torrent_url=torrent_url,
                                                             cookie=cookie,
                                                             ua=ua,
+                                                            apikey=apikey,
                                                             proxy=proxy)
             torrent_peer_count = torrent_attr.get("peer_count")
             log.debug("【Brush】%s 解析详情, %s" % (title, torrent_attr))

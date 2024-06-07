@@ -12,6 +12,7 @@ class TNodeSpider(object):
     _proxy = None
     _cookie = None
     _ua = None
+    _apikey = None
     _token = None
     _size = 100
     _searchurl = "%sapi/torrent/advancedSearch"
@@ -28,6 +29,7 @@ class TNodeSpider(object):
                 self._proxy = Config().get_proxies()
             self._cookie = indexer.cookie
             self._ua = indexer.ua
+            self._apikey = indexer.apikey
         self.init_config()
 
     def init_config(self):

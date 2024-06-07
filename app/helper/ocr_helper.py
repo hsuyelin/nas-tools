@@ -22,7 +22,7 @@ class OcrHelper:
             if StringUtils.is_string_and_not_empty(custom_oc_url):
                 self._ocr_b64_url = custom_oc_url.rstrip('/')
 
-    def get_captcha_text(self, image_url=None, image_b64=None, cookie=None, ua=None):
+    def get_captcha_text(self, image_url=None, image_b64=None, cookie=None, ua=None, apikey=None):
         """
         根据图片地址，获取验证码图片，并识别内容
         :param image_url: 图片地址

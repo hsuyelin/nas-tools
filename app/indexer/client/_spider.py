@@ -58,6 +58,8 @@ class TorrentSpider(feapder.AirSpider):
     cookie = None
     # 站点UA
     ua = None
+    # 站点Api-Key
+    apikey = None
     # 代理
     proxies = None
     # 是否渲染
@@ -123,6 +125,8 @@ class TorrentSpider(feapder.AirSpider):
             self.ua = indexer.ua
         else:
             self.ua = Config().get_ua()
+        if indexer.apikey:
+            self.apikey = indexer.apikey
         if indexer.proxy:
             self.proxies = Config().get_proxies()
         if indexer.cookie:
