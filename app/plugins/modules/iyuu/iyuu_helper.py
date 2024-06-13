@@ -42,7 +42,7 @@ class IyuuHelper(object):
             if result.get('code') == 0:
                 return result.get('data'), ""
             else:
-                return None, f"请求IYUU失败，状态码：{result.get('ret')}，返回信息：{result.get('msg')}"
+                return None, f"请求IYUU失败，状态码：{result.get('code')}，返回信息：{result.get('msg')}"
         elif ret is not None:
             return None, f"请求IYUU失败，状态码：{ret.status_code}，错误原因：{ret.reason}"
         else:
