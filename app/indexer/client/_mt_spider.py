@@ -3,6 +3,7 @@ import json
 import log
 from app.utils import RequestUtils, StringUtils
 from config import Config
+from app.apis import MTeamApi
 
 # 全局配置
 mt_category_list = []
@@ -17,15 +18,15 @@ class MTSpider(object):
     _apikey = None
     _token = None
     _size = 100
-    _searchurl = "%sapi/torrent/search"
-    _detailurl = "%sdetail/%d"
-    _categoryurl = "%sapi/torrent/categoryList"
+    _searchurl = "%s/api/torrent/search"
+    _detailurl = "%s/detail/%d"
+    _categoryurl = "%s/api/torrent/categoryList"
 
     def __init__(self, indexer):
         self._indexerid = indexer.id
         self._domain = indexer.domain
-        self._searchurl = self._searchurl % self._domain
-        self._categoryurl = self._categoryurl % self._domain
+        self._searchurl = self._searchurl % MTeamApi.parse_api_domain(self._domain)
+        self._categoryurl = self._categoryurl % MTeamApi.parse_api_domain(self._domain)
         self._name = indexer.name
         if indexer.proxy:
             self._proxy = Config().get_proxies()
@@ -66,7 +67,7 @@ class MTSpider(object):
         elif res is not None:
             log.warn(f"【INDEXER】{self._name} 拉取分类失败，错误码：{res.status_code}")
         else:
-            log.warn(f"【INDEXER】{self._name} 拉取分类失败，无法连接 {self._domain}")
+            log.warn(f"【INDEXER】{self._name} 拉取分类失败，无法连接 {self._categoryurl}")
 
     def search(self, keyword, page=0):
         if not self._apikey:
@@ -110,7 +111,7 @@ class MTSpider(object):
                     'grabs': status.get('timesCompleted'),
                     'downloadvolumefactor': 1.0,
                     'uploadvolumefactor': 1.0,
-                    'page_url': self._detailurl % (self._domain, torrentid),  # 种子详情页
+                    'page_url': self._detailurl % (StringUtils.get_base_url(self._domain), torrentid),  # 种子详情页
                     'imdbid': result.get('imdb')
                 }
                 discount = status.get('discount')
@@ -147,6 +148,6 @@ class MTSpider(object):
             log.warn(f"【INDEXER】{self._name} 搜索失败，错误码：{res.status_code}")
             return True, []
         else:
-            log.warn(f"【INDEXER】{self._name} 搜索失败，无法连接 {self._domain}")
+            log.warn(f"【INDEXER】{self._name} 搜索失败，无法连接 {self._searchurl}")
             return True, []
         return False, torrents

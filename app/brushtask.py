@@ -793,7 +793,7 @@ class BrushTask(object):
                                                             ua=ua,
                                                             apikey=apikey,
                                                             proxy=proxy)
-            torrent_peer_count = torrent_attr.get("peer_count")
+            torrent_peer_count = int(torrent_attr.get("peer_count"))
             log.debug("【Brush】%s 解析详情, %s" % (title, torrent_attr))
 
             # 检查免费状态
