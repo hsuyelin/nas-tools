@@ -23,12 +23,14 @@ class Slack(_IMessageClient):
     _service = None
     _channel = None
     _client = None
+    _userid = None
 
     def __init__(self, config):
         self._config = Config()
         self._client_config = config
         self._interactive = config.get("interactive")
         self._channel = config.get("channel") or "全体"
+        self._userid = ""
         self.init_config()
 
     def init_config(self):
@@ -47,7 +49,10 @@ class Slack(_IMessageClient):
             @slack_app.event("message")
             def slack_message(message):
                 local_res = requests.post(self._ds_url, json=message, timeout=10)
+                # 获取私信响应的用户ID
+                self._userid = self.__find_userid(message)
                 log.debug("【Slack】message: %s processed, response is: %s" % (message, local_res.text))
+                log.debug("【Slack】message UserID: %s" % (self._userid))
 
             @slack_app.action(re.compile(r"actionId-\d+"))
             def slack_action(ack, body):
@@ -59,6 +64,8 @@ class Slack(_IMessageClient):
             def slack_mention(say, body):
                 say(f"收到，请稍等... <@{body.get('event', {}).get('user')}>")
                 local_res = requests.post(self._ds_url, json=body, timeout=10)
+                # 公共、私有频道清除ID，避免影响频道中@也回复至上个ID
+                self._userid = ""
                 log.debug("【Slack】message: %s processed, response is: %s" % (body, local_res.text))
 
             @slack_app.shortcut(re.compile(r"/*"))
@@ -109,6 +116,8 @@ class Slack(_IMessageClient):
         try:
             if user_id:
                 channel = user_id
+            elif self._userid and self._userid is not None:
+                channel = self._userid
             else:
                 # 消息广播
                 channel = self.__find_channel()
@@ -174,6 +183,8 @@ class Slack(_IMessageClient):
         try:
             if user_id:
                 channel = user_id
+            elif self._userid and self._userid is not None:
+                channel = self._userid
             else:
                 # 消息广播
                 channel = self.__find_channel()
@@ -264,3 +275,16 @@ class Slack(_IMessageClient):
         except SlackApiError as e:
             print(f"Slack Error: {e}")
         return conversation_id
+        
+    def __find_userid(self,json):
+        # 响应中获取用户ID
+        for key in json.keys():
+            if key == "event" and "user" in json[key].keys():
+                userid = json['event']['user']
+            elif key == "user":
+                userid = json['user']
+            else:
+                userid = None
+            if userid.startswith("U"):
+                break
+        return userid
