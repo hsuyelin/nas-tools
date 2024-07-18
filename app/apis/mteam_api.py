@@ -15,12 +15,26 @@ from config import Config, RMT_SUBEXT
 from urllib import parse
 
 class MTeamApi:
+    # 根据站点域名解析api域名
+    @staticmethod
+    def parse_api_domain(url):
+        if not url:
+            return ""
+        scheme, netloc = StringUtils.get_url_netloc(url)
+        parts = netloc.split('.')
+        domain = ""
+        if len(parts) > 2:
+            parts[0] = "api"
+            domain = '.'.join(parts)
+        else:
+            domain = "api."+'.'.join(parts)
+        return f"{scheme}://{domain}"
     # 测试站点连通性
     @staticmethod
     def test_mt_connection(site_info):
         # 计时
         start_time = datetime.now()
-        site_url = StringUtils.get_base_url(site_info.get("signurl")) + "/api/system/hello"
+        site_url = MTeamApi.parse_api_domain(site_info.get("signurl")) + "/api/system/hello"
         headers = {
             "Content-Type": "application/json; charset=UTF-8",
             "User-Agent": site_info.get("ua"),
@@ -54,7 +68,7 @@ class MTeamApi:
         if not apikey:
             log.warn(f"【MTeanApi】 {torrentid}未设置站点Api-Key，无法获取种子连接")
             return ""
-        downloadurl = "%s/api/torrent/genDlToken" % base_url
+        downloadurl = "%s/api/torrent/genDlToken" % MTeamApi.parse_api_domain(base_url)
         res = RequestUtils(
             headers={
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -77,7 +91,7 @@ class MTeamApi:
         elif res is not None:
             log.warn(f"【MTeanApi】 {torrentid}获取种子连接失败，错误码：{res.status_code}")
         else:
-            log.warn(f"【MTeanApi】 {torrentid}获取种子连接失败，无法连接 {base_url}")
+            log.warn(f"【MTeanApi】 {torrentid}获取种子连接失败，无法连接 {downloadurl}")
         return ""
 
     # 拉取馒头字幕列表
@@ -188,7 +202,7 @@ class MTeamApi:
         if not apikey:
             log.warn(f"【MTeanApi】 获取馒头字幕失败, 未设置站点Api-Key")
             return
-        base_url = StringUtils.get_base_url(media_info.page_url)
+        base_url = MTeamApi.parse_api_domain(media_info.page_url)
         subtitle_list = MTeamApi.get_subtitle_list(base_url, torrentid, ua, apikey)
         # 下载所有字幕文件
         for subtitle_info in subtitle_list:
@@ -215,7 +229,7 @@ class MTeamApi:
         if not apikey:
             log.warn(f"【MTeanApi】 获取馒头种子属性失败, 未设置站点Api-Key")
             return ret_attr
-        site_url = "%s/api/torrent/detail" % StringUtils.get_base_url(torrent_url)
+        site_url = "%s/api/torrent/detail" % MTeamApi.parse_api_domain(torrent_url)
         res = RequestUtils(
             headers={
                 'x-api-key': apikey,
@@ -233,7 +247,7 @@ class MTeamApi:
                 return ret_attr
             result = res.json().get('data', {})
             status = result.get('status')
-            ret_attr["peer_count"] = status.get('seeders')
+            ret_attr["peer_count"] = int(status.get('seeders'))
             """
             NORMAL:上传下载都1倍
             _2X_FREE:上傳乘以二倍，下載不計算流量。

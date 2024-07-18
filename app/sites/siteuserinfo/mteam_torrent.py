@@ -6,6 +6,7 @@ from app.sites.siteuserinfo._base import _ISiteUserInfo, SITE_BASE_ORDER
 from app.utils import StringUtils, RequestUtils
 from app.utils.types import SiteSchema
 from config import Config
+from app.apis import MTeamApi
 
 g_sys_role_list = []
 
@@ -53,7 +54,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
             self.err_msg = "未设置站点Api-Key"
             log.warn(f"【MTeamUserInfo】 获取馒头系统角色失败, 未设置站点Api-Key")
             return
-        site_url = "%s/api/member/sysRoleList" % self._base_url
+        site_url = "%s/api/member/sysRoleList" % MTeamApi.parse_api_domain(self._base_url)
         proxies = Config().get_proxies() if self._proxy else None
         res = RequestUtils(
             headers={
@@ -99,7 +100,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
             self.err_msg = "未设置站点Api-Key"
             log.warn(f"【MTeamUserInfo】 获取馒头用户属性失败, 未设置站点Api-Key")
             return None
-        site_url = "%s/api/member/profile" % self._base_url
+        site_url = "%s/api/member/profile" % MTeamApi.parse_api_domain(self._base_url)
         proxies = Config().get_proxies() if self._proxy else None
         res = RequestUtils(
             headers={
@@ -180,7 +181,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
             self.err_msg = "未设置站点Api-Key"
             log.warn(f"【MTeamUserInfo】 获取做种信息失败, 未设置站点Api-Key")
             return
-        site_url = "%s/api/member/getUserTorrentList" % self._base_url
+        site_url = "%s/api/member/getUserTorrentList" % MTeamApi.parse_api_domain(self._base_url)
         params = {
             "userid":self.userid,
             "type":"SEEDING",
@@ -231,7 +232,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
             self.err_msg = "未设置站点Api-Key"
             log.warn(f"【MTeamUserInfo】 获取下载信息失败, 未设置站点Api-Key")
             return
-        site_url = "%s/api/member/getUserTorrentList" % self._base_url
+        site_url = "%s/api/member/getUserTorrentList" % MTeamApi.parse_api_domain(self._base_url)
         params = {
             "userid":self.userid,
             "type":"LEECHING",
