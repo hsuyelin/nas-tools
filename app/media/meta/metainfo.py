@@ -42,13 +42,13 @@ def MetaInfo(title,
                 gid.append(custom_words_group[0].ID)
         for i in gid:
             rev_title, msg, used_info = WordsHelper(gid=i).process(rev_title)
+            if subtitle:
+                subtitle, _, _ = WordsHelper(gid=i).process(subtitle)
             if msg:
                 for msg_item in msg:
                     log.warn("【Meta】%s" % msg_item)
         if rev_title and ffmpeg_video_meta_enable and filePath:
             rev_title = __complete_rev_title(rev_title, filePath)
-        if subtitle:
-            subtitle, _, _ = WordsHelper().process(subtitle)
         return rev_title, subtitle, used_info
     
     # 使用ffmpeg获取视频元数据状态
