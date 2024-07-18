@@ -100,7 +100,7 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
             download_match = re.search(r'<span class="font-bold">下[载載]量?[:：]</span><span>([\d.]+ [A-Za-z]+)</span>', html_text)
         self.download = StringUtils.num_filesize(download_match.group(1).strip()) if download_match else 0
 
-        ratio_match = re.search(r"分享率[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+)", html_text)
+        ratio_match = re.search(r"分享率[:：_<>/a-zA-Z-=\"'\s#;]+[^>]+>[:：=\"'\s]?([\d,.\s]+)", html_text)
         # 计算分享率
         calc_ratio = 0.0 if self.download <= 0.0 else round(self.upload / self.download, 3)
         # 优先使用页面上的分享率
@@ -273,7 +273,7 @@ class NexusPhpSiteUserInfo(_ISiteUserInfo):
             download_match = re.search(r'<span class="font-bold">下[载載]量?[:：]</span><span>([\d.]+ [A-Za-z]+)</span>', html_text)
         self.download = StringUtils.num_filesize(download_match.group(1).strip()) if download_match else 0
 
-        ratio_match = re.search(r"分享率[:：_<>/a-zA-Z-=\"'\s#;]+([\d,.\s]+)", html_text)
+        ratio_match = re.search(r"分享率[:：_<>/a-zA-Z-=\"'\s#;]+[^>]+>[:：=\"'\s]?([\d,.\s]+)", html_text)
         # 计算分享率
         calc_ratio = 0.0 if self.download <= 0.0 else round(self.upload / self.download, 3)
         # 优先使用页面上的分享率
