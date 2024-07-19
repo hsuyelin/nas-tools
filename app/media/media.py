@@ -699,7 +699,7 @@ class Media:
         """
         if not meta_info:
             return None
-        return f"[{meta_info.type.value}]{meta_info.get_name()}-{meta_info.year}-{meta_info.begin_season}"
+        return f"[{'电视剧' if meta_info.type.value == '动漫' else meta_info.type.value}]{meta_info.get_name()}-{meta_info.year}-{meta_info.begin_season}"
 
     def get_cache_info(self, meta_info):
         """
