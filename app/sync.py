@@ -415,6 +415,10 @@ class Sync(object):
         """
         if self.dbhelper.is_sync_in_history(event_path, target_path):
             return
+        ep_size = os.stat(event_path).st_size
+        if ep_size < self.filetransfer._min_filesize:
+            log.info("【Sync】跳过同步 %s size=%.2fMB" % (event_path, ep_size / (1024 * 1024)))
+            return
         log.info("【Sync】开始同步 %s" % event_path)
         try:
             ret, msg = self.filetransfer.link_sync_file(src_path=mon_path,
