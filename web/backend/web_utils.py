@@ -154,7 +154,6 @@ class WebUtils:
         else:
             meta_info = MetaInfo(title=content)
             tmdbinfos = Media().get_tmdb_infos(title=meta_info.get_name(),
-                                               year=meta_info.year,
                                                mtype=mtype,
                                                page=page)
             medias = []
