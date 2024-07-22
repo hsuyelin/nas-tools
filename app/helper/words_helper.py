@@ -2,20 +2,22 @@ import regex as re
 import cn2an
 
 from app.helper.db_helper import DbHelper
+from app.utils.commons import singleton
 from app.utils.exception_utils import ExceptionUtils
 
 
+@singleton
 class WordsHelper:
     dbhelper = None
     # 识别词
     words_info = []
 
-    def __init__(self, gid=None):
-        self.init_config(gid=gid)
+    def __init__(self):
+        self.init_config()
 
-    def init_config(self, gid=None):
+    def init_config(self):
         self.dbhelper = DbHelper()
-        self.words_info = self.dbhelper.get_custom_words(gid=gid, enabled=1)
+        self.words_info = self.dbhelper.get_custom_words(enabled=1)
 
     def process(self, title):
         # 错误信息
