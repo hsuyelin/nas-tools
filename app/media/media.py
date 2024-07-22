@@ -824,13 +824,7 @@ class Media:
                                                      append_to_response=append_to_response)
             else:
                 file_media_info = None
-        # 重新处理 meta_info，赋值TMDB信息并返回
-        meta_info = MetaInfo(title, subtitle=subtitle, tmdb_id=file_media_info.get('id'))
-        if not meta_info.get_name() or not meta_info.type:
-            log.warn("【Rmt】%s 未识别出有效信息！" % meta_info.org_string)
-            return None
-        if mtype:
-            meta_info.type = mtype
+        # 赋值TMDB信息并返回
         meta_info.set_tmdb_info(file_media_info)
         return meta_info
 
