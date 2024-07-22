@@ -1,5 +1,6 @@
 import os
 import threading
+import time
 import traceback
 
 from watchdog.events import FileSystemEventHandler
@@ -414,6 +415,14 @@ class Sync(object):
         只转移不识别
         """
         if self.dbhelper.is_sync_in_history(event_path, target_path):
+            return
+        ep_size = 0
+        # fix size to small: wait till copy finishes
+        while ep_size != (cur_size := os.stat(event_path).st_size):
+            ep_size = cur_size
+            time.sleep(1)
+        if ep_size < self.filetransfer._min_filesize:
+            log.info("【Sync】跳过同步 %s size=%.2fMB" % (event_path, ep_size / (1024 * 1024)))
             return
         log.info("【Sync】开始同步 %s" % event_path)
         try:
