@@ -555,7 +555,7 @@ class MetaBase(object):
             self.tvdb_id = info.get("external_ids", {}).get("tvdb_id", 0)
             self.imdb_id = info.get("external_ids", {}).get("imdb_id", "")
         self.tmdb_info = info
-        self.vote_average = round(float(info.get('vote_average')), 1) if info.get('vote_average') else 0
+        self.vote_average = round(float(info.get('vote_average')), 1) if (info.get('vote_average') and info.get('vote_count') > 10) else 0
         self.overview = info.get('overview')
         self.original_language = info.get('original_language')
         self.networks = [network.get("name") for network in info.get('networks') or []]
