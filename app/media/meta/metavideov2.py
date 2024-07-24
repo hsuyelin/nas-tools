@@ -37,20 +37,20 @@ class MetaVideoV2(MetaBase):
     _seasons_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(季)?\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(季)"
     _seasons_re_2 = r"(?:[Ss]0*|Season|season)([0-9]+)\s*\.\s*(?:[Ss]0*|Season|season)([0-9]+)"
     _season_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(季)"
-    _season_re_2 = r"(?<![a-zA-Z0-9_])(?i)[sS](eason)?\s*0*\d+"
+    _season_re_2 = r"(?<![a-zA-Z0-9_])[sS](eason)?\s*0*\d+"
     _season_all_re = r"(?<![^\s.\\-])\s*(?<!第)(?:\d+|[一二三四五六七八九十]+)\s*(季)\s*(全)(?![^\s.\\-]*[\d一二三四五六七八九十])"
     _season_all_re_2 = r"(全|共)\s*(?:\d+|[一二三四五六七八九十]+)\s*(季)"
     _episodes_re = r"(?:第)?\s*(?<![sS])(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)?\s*\.\s*(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
     _episodes_re_2 = r"(?:[Ee]0*|episode|ep)([0-9]+)\s*\.\s*(?:[Ee]0*|episode|ep)([0-9]+)"
     _episode_re = r"(?:第)?\s*(?:\d+|[一二三四五六七八九十]+)\s*(?:集|话|話)"
-    _episode_re_2 = r"(?<![a-zA-Z0-9_])(?i)(?:e|ep|episode)\s*0*\d+"
+    _episode_re_2 = r"(?<![a-zA-Z0-9_])(?:e|ep|episode)\s*0*\d+"
     _episode_all_re = r"(?<![^\s.\\-])\s*(?<!第)(?:\d+|[一二三四五六七八九十]+)\s*(寄|集|话|話)\s*(全)(?![^\s.\\-]*[\d一二三四五六七八九十])"
     _episode_all_re_2 = r"(全|共)\s*(?:\d+|[一二三四五六七八九十]+)\s*(寄|集|话|話)"
     _numbers_re = r"\d+|[一二三四五六七八九十]+"
     _years_re = r"(\d{4}(?!p|P))\s*\.\s*(\d{4})(?![pP])"
     _release_date_re = r"\d{2,4}年\d+(?:月)?(?:新番|合集|)"
     _other_re = r"\[(?:★|❤|GB|JP|KR|CN|TW|US|SG|招募翻译(?:校对)?|招募翻譯(?:校對)?|)\]"
-    _special_resource_team = r"(?i)(HDCTV)"
+    _special_resource_team = r"(HDCTV)"
     _special_streaming_service = r"(?i)(Jade|ViuTv)"
 
     def __init__(self,
@@ -311,10 +311,10 @@ class MetaVideoV2(MetaBase):
         self.resource_type = re.sub(r'(?i)disney', 'DSNP', self.resource_type)
         self.resource_type = re.sub(r'(?i)hbo max', 'HMAX', self.resource_type)
 
-        if re.findall(r'%s' % self._special_resource_team, self._original_title):
+        if re.findall(r'%s' % self._special_resource_team, self._original_title, flags=re.IGNORECASE):
             self.resource_type = re.sub(r'(?i)ctv', '', self.resource_type)
 
-        special_streaming_services_matches = re.findall(r'%s' % self._special_streaming_service, self._original_title)
+        special_streaming_services_matches = re.findall(r'%s' % self._special_streaming_service, self._original_title, flags=re.IGNORECASE)
         if len(special_streaming_services_matches) > 1:
             special_streaming_services_text = ' '.join(special_streaming_services_matches)
         else:
@@ -468,7 +468,7 @@ class MetaVideoV2(MetaBase):
             else:
                 self.resource_team = None
 
-        special_resource_team_matches = re.findall(r'%s' % self._special_resource_team, self._original_title)
+        special_resource_team_matches = re.findall(r'%s' % self._special_resource_team, self._original_title, flags=re.IGNORECASE)
         if len(special_resource_team_matches) > 1:
             special_resource_team_text = ' '.join(special_resource_team_matches)
         else:
