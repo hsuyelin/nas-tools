@@ -26,6 +26,7 @@ class MTeamSysRole(object):
     _shareRateLimit = 0
     _sortPoint = 0
 
+
 # 馒头站点解析
 class MTeamTorrentUserInfo(_ISiteUserInfo):
     schema = SiteSchema.MTeamTorrent
@@ -54,24 +55,26 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
             self.err_msg = "未设置站点Api-Key"
             log.warn(f"【MTeamUserInfo】 获取馒头系统角色失败, 未设置站点Api-Key")
             return
-        site_url = "%s/api/member/sysRoleList" % MTeamApi.parse_api_domain(self._base_url)
+        site_url = "%s/api/member/sysRoleList" % MTeamApi.parse_api_domain(
+            self._base_url
+        )
         proxies = Config().get_proxies() if self._proxy else None
         res = RequestUtils(
             headers={
-                'x-api-key': self._apikey,
+                "x-api-key": self._apikey,
                 "Content-Type": "application/json",
                 "User-Agent": self._ua,
-                "Accept": "application/json"
+                "Accept": "application/json",
             },
             proxies=proxies,
-            timeout=30
+            timeout=30,
         ).post_res(url=site_url)
         if res and res.status_code == 200:
-            msg = res.json().get('message')
+            msg = res.json().get("message")
             if msg != "SUCCESS":
                 log.warn(f"【MTeamUserInfo】 获取馒头系统角色失败：{msg}")
                 return
-            results = res.json().get('data', [])
+            results = res.json().get("data", [])
             for result in results:
                 sysrole = MTeamSysRole()
                 sysrole._id = result.get("id")
@@ -80,17 +83,21 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
                 sysrole._nameEng = result.get("nameEng")
                 sysrole._image = result.get("image")
                 sysrole._color = result.get("color")
-                sysrole._readAccess = int(result.get("readAccess"))
-                sysrole._classUp = int(result.get("classUp"))
-                sysrole._registerWeek = int(result.get("registerWeek"))
-                sysrole._downloaded = int(result.get("downloaded"))
-                sysrole._shareRate = int(result.get("shareRate"))
-                sysrole._shareRateLimit = int(result.get("shareRateLimit"))
-                sysrole._sortPoint = int(result.get("sortPoint"))
+                sysrole._readAccess = toint(result.get("readAccess"))
+                sysrole._classUp = toint(result.get("classUp"))
+                sysrole._registerWeek = toint(result.get("registerWeek"))
+                sysrole._downloaded = toint(result.get("downloaded"))
+                sysrole._shareRate = toint(result.get("shareRate"))
+                sysrole._shareRateLimit = toint(result.get("shareRateLimit"))
+                sysrole._sortPoint = toint(result.get("sortPoint"))
                 g_sys_role_list.append(sysrole)
-            log.info(f"【MTeamUserInfo】 获取馒头系统角色成功，共有{len(g_sys_role_list)}个角色")
+            log.info(
+                f"【MTeamUserInfo】 获取馒头系统角色成功，共有{len(g_sys_role_list)}个角色"
+            )
         elif res is not None:
-            log.warn(f"【MTeamUserInfo】 获取馒头系统角色失败，错误码：{res.status_code}")
+            log.warn(
+                f"【MTeamUserInfo】 获取馒头系统角色失败，错误码：{res.status_code}"
+            )
         else:
             log.warn(f"【MTeamUserInfo】 获取馒头系统角色失败，无法连接 {site_url}")
 
@@ -104,26 +111,30 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
         proxies = Config().get_proxies() if self._proxy else None
         res = RequestUtils(
             headers={
-                'x-api-key': self._apikey,
+                "x-api-key": self._apikey,
                 "Content-Type": "application/json",
                 "User-Agent": self._ua,
-                "Accept": "application/json"
+                "Accept": "application/json",
             },
             proxies=proxies,
-            timeout=30
+            timeout=30,
         ).post_res(url=site_url)
         if res and res.status_code == 200:
-            msg = res.json().get('message')
+            msg = res.json().get("message")
             if msg != "SUCCESS":
                 log.warn(f"【MTeamUserInfo】 获取馒头用户属性失败：{msg}")
                 return None
-            result = res.json().get('data', {})
+            result = res.json().get("data", {})
             self.userid = result.get("id", "0")
             self.username = result.get("username")
-            log.info(f"【MTeamUserInfo】 获取馒头用户属性成功: uid:{self.userid} username:{self.username}")
+            log.info(
+                f"【MTeamUserInfo】 获取馒头用户属性成功: uid:{self.userid} username:{self.username}"
+            )
             return result
         elif res is not None:
-            log.warn(f"【MTeamUserInfo】 获取馒头用户属性失败，错误码：{res.status_code}")
+            log.warn(
+                f"【MTeamUserInfo】 获取馒头用户属性失败，错误码：{res.status_code}"
+            )
         else:
             log.warn(f"【MTeamUserInfo】 获取馒头用户属性失败，无法连接 {site_url}")
         return None
@@ -156,9 +167,9 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
         # 积分
         self.bonus = memberCount.get("bonus", 0)
         # 上传
-        self.upload = int(memberCount.get("uploaded", 0))
+        self.upload = toint(memberCount.get("uploaded", 0))
         # 下载
-        self.download = int(memberCount.get("downloaded", 0))
+        self.download = toint(memberCount.get("downloaded", 0))
         # 拉取做种信息
         self._mt_get_seeding_info()
         # 拉取下载信息
@@ -181,82 +192,91 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
             self.err_msg = "未设置站点Api-Key"
             log.warn(f"【MTeamUserInfo】 获取做种信息失败, 未设置站点Api-Key")
             return
-        site_url = "%s/api/member/getUserTorrentList" % MTeamApi.parse_api_domain(self._base_url)
+        site_url = "%s/api/member/getUserTorrentList" % MTeamApi.parse_api_domain(
+            self._base_url
+        )
         params = {
-            "userid":self.userid,
-            "type":"SEEDING",
-            "pageNumber":page_num,
-            "pageSize":page_size
+            "userid": self.userid,
+            "type": "SEEDING",
+            "pageNumber": page_num,
+            "pageSize": page_size,
         }
         proxies = Config().get_proxies() if self._proxy else None
         res = RequestUtils(
             headers={
-                'x-api-key': self._apikey,
+                "x-api-key": self._apikey,
                 "Content-Type": "application/json",
                 "User-Agent": self._ua,
-                "Accept": "application/json"
+                "Accept": "application/json",
             },
             proxies=proxies,
-            timeout=30
+            timeout=30,
         ).post_res(url=site_url, json=params)
         if res and res.status_code == 200:
-            msg = res.json().get('message')
+            msg = res.json().get("message")
             if msg != "SUCCESS":
                 log.warn(f"【MTeamUserInfo】 获取做种信息失败：{msg}")
                 return
-            res_data = res.json().get('data', {})
-            total = int(res_data.get("total"))
-            total_pages = int(res_data.get("totalPages"))
+            res_data = res.json().get("data", {})
+            total = toint(res_data.get("total"))
+            total_pages = toint(res_data.get("totalPages"))
             # 做种数量
             self.seeding = total
 
-            results = res_data.get('data', [])
+            results = res_data.get("data", [])
             for result in results:
                 peer_info = result.get("peer")
                 torrent_info = result.get("torrent")
                 torrent_status = torrent_info.get("status")
                 # 做种大小
-                self.seeding_size += int(torrent_info.get("size"))
+                self.seeding_size += toint(torrent_info.get("size"))
                 # 做种人数, 种子大小
-                self.seeding_info.append([int(torrent_status.get("seeders")), int(torrent_info.get("size"))])
+                self.seeding_info.append(
+                    [
+                        toint(torrent_status.get("seeders")),
+                        toint(torrent_info.get("size")),
+                    ]
+                )
             if total_pages > page_num:
-                return self._mt_get_seeding_info(page_num+1, page_size)
+                return self._mt_get_seeding_info(page_num + 1, page_size)
         elif res is not None:
             log.warn(f"【MTeamUserInfo】 获取做种信息失败，错误码：{res.status_code}")
         else:
             log.warn(f"【MTeamUserInfo】 获取做种信息失败，无法连接 {site_url}")
 
-       # 翻页获取下载信息
+    # 翻页获取下载信息
     def _mt_get_leeching_info(self, page_num=1, page_size=100):
         if not self._apikey:
             self.err_msg = "未设置站点Api-Key"
             log.warn(f"【MTeamUserInfo】 获取下载信息失败, 未设置站点Api-Key")
             return
-        site_url = "%s/api/member/getUserTorrentList" % MTeamApi.parse_api_domain(self._base_url)
+        site_url = "%s/api/member/getUserTorrentList" % MTeamApi.parse_api_domain(
+            self._base_url
+        )
         params = {
-            "userid":self.userid,
-            "type":"LEECHING",
-            "pageNumber":page_num,
-            "pageSize":page_size
+            "userid": self.userid,
+            "type": "LEECHING",
+            "pageNumber": page_num,
+            "pageSize": page_size,
         }
         proxies = Config().get_proxies() if self._proxy else None
         res = RequestUtils(
             headers={
-                'x-api-key': self._apikey,
+                "x-api-key": self._apikey,
                 "Content-Type": "application/json",
                 "User-Agent": self._ua,
-                "Accept": "application/json"
+                "Accept": "application/json",
             },
             proxies=proxies,
-            timeout=30
+            timeout=30,
         ).post_res(url=site_url, json=params)
         if res and res.status_code == 200:
-            msg = res.json().get('message')
+            msg = res.json().get("message")
             if msg != "SUCCESS":
                 log.warn(f"【MTeamUserInfo】 获取下载信息失败：{msg}")
                 return
-            res_data = res.json().get('data', {})
-            total = int(res_data.get("total"))
+            res_data = res.json().get("data", {})
+            total = toint(res_data.get("total"))
             # 下载数量
             self.leeching = total
         elif res is not None:
@@ -280,3 +300,7 @@ class MTeamTorrentUserInfo(_ISiteUserInfo):
 
     def _parse_message_content(self, html_text):
         return None, None, None
+
+
+def toint(v):
+    return int(float(v))
